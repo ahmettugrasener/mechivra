@@ -7,10 +7,17 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+
+    "validate:content": "tsx scripts/validate-content.ts",
+
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "validate:content": "tsx scripts/validate-content.ts"
+
+    "test:e2e": "playwright test",
+
+    "verify": "pnpm validate:content && pnpm test && pnpm exec tsc --noEmit && pnpm lint && pnpm build",
+    "verify:full": "pnpm verify && pnpm test:e2e"
   },
   "dependencies": {
     "next": "16.3.8",
