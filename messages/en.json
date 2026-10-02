@@ -1,0 +1,137 @@
+{
+  "Common": {
+    "brand": "Mechivra",
+    "tagline": "Interactive Mechanical Engineering",
+    "startLearning": "Start Learning",
+    "exploreCourses": "Explore Courses",
+    "support": "Support",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "course": "Course",
+    "module": "Module",
+    "notStarted": "Not started",
+    "openModule": "Open Module",
+    "openModuleArrow": "Open module →",
+    "backToCourses": "← Back to courses",
+    "languageSwitcher": "Language selection",
+    "turkish": "Türkçe",
+    "english": "English"
+  },
+
+  "Navigation": {
+    "courses": "Courses",
+    "howItWorks": "How It Works",
+    "forInstructors": "For Instructors",
+    "about": "About",
+    "progress": "Progress",
+    "settings": "Settings"
+  },
+
+  "Home": {
+    "eyebrow": "INTERACTIVE MECHANICAL ENGINEERING",
+    "sloganLine1": "Don't just learn engineering.",
+    "sloganLine2": "Do engineering.",
+    "description": "Learn mechanical engineering through connected concepts, interactive experiments, worked examples, engineering problems, and evidence-based feedback.",
+    "mvp": "MVP: Statics · Mechanics of Materials · Thermodynamics",
+
+    "workspace": "Learning workspace",
+    "interactive": "Interactive",
+    "previewNote": "Interface preview — engineering interaction will be implemented in the module development phase.",
+
+    "learningModel": "Learning model",
+    "learningModelHeading": "From concept to engineering reasoning.",
+
+    "learnTitle": "Learn",
+    "learnDescription": "Build the concept and understand the engineering assumptions.",
+
+    "experimentTitle": "Experiment",
+    "experimentDescription": "Change meaningful parameters and observe physical relationships.",
+
+    "solveTitle": "Solve",
+    "solveDescription": "Apply the model to new engineering problems and receive explanatory feedback."
+  },
+
+  "Courses": {
+    "pageTitle": "Courses",
+    "pageDescription": "Mechivra MVP contains three complete learning modules.",
+    "availableLearningModule": "Available learning module",
+
+    "statics": "Statics",
+    "mechanicsOfMaterials": "Mechanics of Materials",
+    "thermodynamics": "Thermodynamics",
+
+    "simplySupportedBeam": "Simply Supported Beam",
+    "bending": "Bending",
+    "idealOttoCycle": "Ideal Otto Cycle"
+  },
+
+  "Dashboard": {
+    "eyebrow": "Learning dashboard",
+    "heading": "Continue learning.",
+    "description": "Work through connected concepts, interactions, worked examples, and engineering problems.",
+    "sectionTitle": "MVP learning modules",
+    "sectionDescription": "Three complete learning modules will form the first release.",
+    "moduleNumber": "Module {number}"
+  },
+
+  "LearningWorkspace": {
+    "title": "Module",
+    "introduction": "Introduction",
+    "concept": "Concept",
+    "predict": "Predict",
+    "explore": "Explore",
+    "solve": "Solve",
+    "summary": "Summary"
+  },
+
+  "LearningPage": {
+    "eyebrow": "Learning activity",
+    "heading": "Module content will be connected here.",
+    "description": "This workspace will host concept explanations, predictions, interactive engineering activities, worked examples, problems, feedback, and summaries.",
+    "placeholderTitle": "Activity renderer placeholder",
+    "placeholderDescription": "Real LearningActivity data will be connected in a later development phase.",
+    "continue": "Continue →"
+  },
+
+  "Progress": {
+    "title": "Progress",
+    "description": "Learning progress will appear here once the local progress repository is implemented."
+  },
+
+  "Settings": {
+    "title": "Settings",
+    "description": "Language, unit display, accessibility, and local data controls will be configured here."
+  },
+
+  "Help": {
+    "title": "Help",
+    "description": "Guidance for learning activities, engineering models, and progress storage will appear here."
+  },
+
+  "InfoPages": {
+    "howItWorksTitle": "How It Works",
+    "howItWorksDescription": "Mechivra connects learning, experimentation, problem solving, design, and evaluation through structured learning activities.",
+
+    "forInstructorsTitle": "For Instructors",
+    "forInstructorsDescription": "Mechivra is being designed for interactive classroom demonstrations, guided learning activities, and future assignment workflows.",
+
+    "aboutTitle": "About Mechivra",
+    "aboutDescription": "Mechivra is a web-based interactive mechanical engineering learning platform.",
+
+    "supportTitle": "Support",
+    "supportDescription": "Support information will be finalized before the MVP release.",
+
+    "privacyTitle": "Privacy",
+    "privacyDescription": "The MVP will use a data-minimizing, local-first progress model. The final privacy notice will reflect the actual released implementation.",
+
+    "termsTitle": "Terms",
+    "termsDescription": "Terms of use will be finalized against the actual MVP product before public release."
+  },
+
+  "NotFound": {
+    "code": "404",
+    "title": "Page not found",
+    "description": "The requested Mechivra page does not exist.",
+    "returnHome": "Return home"
+  }
+}

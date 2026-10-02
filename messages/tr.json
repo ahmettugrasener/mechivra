@@ -1,0 +1,137 @@
+{
+  "Common": {
+    "brand": "Mechivra",
+    "tagline": "Interactive Mechanical Engineering",
+    "startLearning": "Öğrenmeye Başla",
+    "exploreCourses": "Dersleri İncele",
+    "support": "Destek",
+    "privacy": "Gizlilik",
+    "terms": "Kullanım Koşulları",
+    "course": "Ders",
+    "module": "Modül",
+    "notStarted": "Başlanmadı",
+    "openModule": "Modülü Aç",
+    "openModuleArrow": "Modülü aç →",
+    "backToCourses": "← Derslere dön",
+    "languageSwitcher": "Dil seçimi",
+    "turkish": "Türkçe",
+    "english": "English"
+  },
+
+  "Navigation": {
+    "courses": "Dersler",
+    "howItWorks": "Nasıl Çalışır",
+    "forInstructors": "Öğretim Üyeleri İçin",
+    "about": "Hakkında",
+    "progress": "İlerleme",
+    "settings": "Ayarlar"
+  },
+
+  "Home": {
+    "eyebrow": "INTERACTIVE MECHANICAL ENGINEERING",
+    "sloganLine1": "Mühendislik öğrenme.",
+    "sloganLine2": "Mühendislik yap.",
+    "description": "Makine mühendisliğini bağlantılı kavramlar, etkileşimli deneyler, çözülmüş örnekler, mühendislik problemleri ve kanıta dayalı geri bildirimle öğren.",
+    "mvp": "MVP: Statik · Mukavemet · Termodinamik",
+
+    "workspace": "Öğrenme çalışma alanı",
+    "interactive": "Etkileşimli",
+    "previewNote": "Arayüz ön izlemesi — gerçek mühendislik etkileşimi modül geliştirme aşamasında uygulanacaktır.",
+
+    "learningModel": "Öğrenme modeli",
+    "learningModelHeading": "Kavramdan mühendislik muhakemesine.",
+
+    "learnTitle": "Öğren",
+    "learnDescription": "Kavramı oluştur ve mühendislik modelinin varsayımlarını anla.",
+
+    "experimentTitle": "Deneyimle",
+    "experimentDescription": "Anlamlı parametreleri değiştir ve fiziksel ilişkilerin nasıl değiştiğini gözlemle.",
+
+    "solveTitle": "Çöz",
+    "solveDescription": "Modeli yeni mühendislik problemlerine uygula ve açıklayıcı geri bildirim al."
+  },
+
+  "Courses": {
+    "pageTitle": "Dersler",
+    "pageDescription": "Mechivra MVP üç tamamlanmış öğrenme modülü içerir.",
+    "availableLearningModule": "Kullanılabilir öğrenme modülü",
+
+    "statics": "Statik",
+    "mechanicsOfMaterials": "Mukavemet",
+    "thermodynamics": "Termodinamik",
+
+    "simplySupportedBeam": "Basit Mesnetli Kiriş",
+    "bending": "Eğilme",
+    "idealOttoCycle": "İdeal Otto Çevrimi"
+  },
+
+  "Dashboard": {
+    "eyebrow": "Öğrenme paneli",
+    "heading": "Öğrenmeye devam et.",
+    "description": "Bağlantılı kavramlar, etkileşimler, çözülmüş örnekler ve mühendislik problemleri üzerinde çalış.",
+    "sectionTitle": "MVP öğrenme modülleri",
+    "sectionDescription": "İlk sürümü üç tamamlanmış öğrenme modülü oluşturacaktır.",
+    "moduleNumber": "Modül {number}"
+  },
+
+  "LearningWorkspace": {
+    "title": "Modül",
+    "introduction": "Giriş",
+    "concept": "Kavram",
+    "predict": "Tahmin Et",
+    "explore": "Deneyimle",
+    "solve": "Çöz",
+    "summary": "Özet"
+  },
+
+  "LearningPage": {
+    "eyebrow": "Öğrenme etkinliği",
+    "heading": "Modül içeriği buraya bağlanacak.",
+    "description": "Bu çalışma alanı kavram açıklamalarını, tahminleri, etkileşimli mühendislik etkinliklerini, çözülmüş örnekleri, problemleri, geri bildirimi ve özetleri barındıracaktır.",
+    "placeholderTitle": "Etkinlik gösterici alanı",
+    "placeholderDescription": "Gerçek LearningActivity verileri sonraki geliştirme aşamasında bağlanacaktır.",
+    "continue": "Devam →"
+  },
+
+  "Progress": {
+    "title": "İlerleme",
+    "description": "Yerel ilerleme sistemi uygulandığında öğrenme ilerlemeniz burada gösterilecektir."
+  },
+
+  "Settings": {
+    "title": "Ayarlar",
+    "description": "Dil, birim gösterimi, erişilebilirlik ve yerel veri kontrolleri burada yönetilecektir."
+  },
+
+  "Help": {
+    "title": "Yardım",
+    "description": "Öğrenme etkinlikleri, mühendislik modelleri ve ilerleme kaydıyla ilgili kullanım bilgileri burada yer alacaktır."
+  },
+
+  "InfoPages": {
+    "howItWorksTitle": "Nasıl Çalışır?",
+    "howItWorksDescription": "Mechivra; öğrenme, deneyimleme, problem çözme, tasarım ve değerlendirme süreçlerini bağlantılı öğrenme etkinliklerinde bir araya getirir.",
+
+    "forInstructorsTitle": "Öğretim Üyeleri İçin",
+    "forInstructorsDescription": "Mechivra; etkileşimli sınıf gösterimleri, yönlendirilmiş öğrenme etkinlikleri ve ileride eklenecek görev atama iş akışları için geliştirilmektedir.",
+
+    "aboutTitle": "Mechivra Hakkında",
+    "aboutDescription": "Mechivra, web tabanlı interaktif bir makine mühendisliği eğitim platformudur.",
+
+    "supportTitle": "Destek",
+    "supportDescription": "Destek bilgileri MVP yayınından önce kesinleştirilecektir.",
+
+    "privacyTitle": "Gizlilik",
+    "privacyDescription": "MVP, veri minimizasyonunu temel alan local-first bir ilerleme sistemi kullanacaktır. Nihai gizlilik metni yayımlanan gerçek uygulamaya göre hazırlanacaktır.",
+
+    "termsTitle": "Kullanım Koşulları",
+    "termsDescription": "Kullanım koşulları, genel yayından önce gerçek MVP ürününün işleyişine göre kesinleştirilecektir."
+  },
+
+  "NotFound": {
+    "code": "404",
+    "title": "Sayfa bulunamadı",
+    "description": "İstenen Mechivra sayfası mevcut değil.",
+    "returnHome": "Ana sayfaya dön"
+  }
+}
