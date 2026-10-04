@@ -10,13 +10,25 @@ export interface LearningWorkspaceActivity {
 interface LearningWorkspaceShellProps {
   readonly courseTitle: string;
   readonly moduleTitle: string;
-  readonly activities: readonly LearningWorkspaceActivity[];
-  readonly children: React.ReactNode;
+
+  readonly courseSlug: string;
+  readonly moduleSlug: string;
+
+  readonly currentActivityId: string;
+
+  readonly activities:
+    readonly LearningWorkspaceActivity[];
+
+  readonly children:
+    React.ReactNode;
 }
 
 export function LearningWorkspaceShell({
   courseTitle,
   moduleTitle,
+  courseSlug,
+  moduleSlug,
+  currentActivityId,
   activities,
   children,
 }: LearningWorkspaceShellProps) {
@@ -27,6 +39,27 @@ export function LearningWorkspaceShell({
     useTranslations(
       "LearningWorkspace",
     );
+
+  const currentIndex =
+    activities.findIndex(
+      (activity) =>
+        activity.id ===
+        currentActivityId,
+    );
+
+  const currentPosition =
+    currentIndex >= 0
+      ? currentIndex + 1
+      : 0;
+
+  const progressPercent =
+    activities.length > 0
+      ? (
+          currentPosition /
+          activities.length
+        ) *
+        100
+      : 0;
 
   return (
     <div>
@@ -56,11 +89,14 @@ export function LearningWorkspaceShell({
           <div className="rounded-2xl border border-border bg-surface p-4">
             <div className="flex items-center justify-between gap-3">
               <p className="text-sm font-semibold">
-                {workspaceT("title")}
+                {workspaceT(
+                  "title",
+                )}
               </p>
 
               <span className="text-xs text-muted">
-                0 / {activities.length}
+                {currentPosition} /{" "}
+                {activities.length}
               </span>
             </div>
 
@@ -68,7 +104,13 @@ export function LearningWorkspaceShell({
               aria-hidden="true"
               className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-strong"
             >
-              <div className="h-full w-0 bg-brand" />
+              <div
+                className="h-full bg-brand transition-[width] duration-200"
+                style={{
+                  width:
+                    `${progressPercent}%`,
+                }}
+              />
             </div>
 
             <nav
@@ -79,25 +121,43 @@ export function LearningWorkspaceShell({
                 (
                   activity,
                   index,
-                ) => (
-                  <div
-                    key={activity.id}
-                    className={[
-                      "flex min-h-11 items-start gap-3 rounded-lg px-3 py-2.5 text-sm",
-                      index === 0
-                        ? "bg-brand-soft font-semibold text-brand"
-                        : "text-muted-strong",
-                    ].join(" ")}
-                  >
-                    <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border border-current text-xs">
-                      {index + 1}
-                    </span>
+                ) => {
+                  const isCurrent =
+                    activity.id ===
+                    currentActivityId;
 
-                    <span className="leading-5">
-                      {activity.title}
-                    </span>
-                  </div>
-                ),
+                  return (
+                    <Link
+                      key={
+                        activity.id
+                      }
+                      href={`/app/learn/${courseSlug}/${moduleSlug}/${activity.id}`}
+                      aria-current={
+                        isCurrent
+                          ? "step"
+                          : undefined
+                      }
+                      className={[
+                        "flex min-h-11 items-start gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
+                        isCurrent
+                          ? "bg-brand-soft font-semibold text-brand"
+                          : "text-muted-strong hover:bg-surface-subtle hover:text-foreground",
+                      ].join(
+                        " ",
+                      )}
+                    >
+                      <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border border-current text-xs">
+                        {index + 1}
+                      </span>
+
+                      <span className="leading-5">
+                        {
+                          activity.title
+                        }
+                      </span>
+                    </Link>
+                  );
+                },
               )}
             </nav>
           </div>

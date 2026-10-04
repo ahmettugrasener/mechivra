@@ -995,7 +995,7 @@ export const rawConcepts = [
 export const rawLearningActivities = [
   {
     id: "activity-ssb-01",
-    version: "1.0.0",
+    version: "1.1.0",
     moduleId:
       "module-simply-supported-beam",
 
@@ -1020,7 +1020,87 @@ export const rawLearningActivities = [
       "source-mit-beam-displacements",
     ],
 
-    contentBlocks: [],
+    contentBlocks: [
+      {
+        id: "block-ssb-01-heading-model",
+        type: "heading",
+        level: 2,
+
+        text: {
+          tr: "Önce sistemi idealize et",
+          en: "First, idealize the system",
+        },
+      },
+
+      {
+        id: "block-ssb-01-paragraph-context",
+        type: "paragraph",
+
+        text: {
+          tr: "Bir kiriş dışarıdan uygulanan yükleri mesnetlerine aktarır. Statik analizde ilk adım, gerçek sistemi çözebileceğimiz bir mekanik modele dönüştürmektir. Bu modülde sol uçta mafsal, sağ uçta makara bulunan basit mesnetli bir kiriş ve iki mesnet arasında aşağı doğru etkiyen tek bir noktasal yük kullanacağız.",
+          en: "A beam transfers externally applied loads to its supports. The first step in a statics analysis is to idealize the real system as a solvable mechanical model. In this module, we use a simply supported beam with a pin at the left end, a roller at the right end, and one downward point load acting between the supports.",
+        },
+      },
+
+      {
+        id: "block-ssb-01-callout-fbd",
+        type: "callout",
+        tone: "engineering",
+
+        title: {
+          tr: "Serbest cisim diyagramını düşün",
+          en: "Think in terms of a free-body diagram",
+        },
+
+        body: {
+          tr: "Kirişi çevresinden ayırdığında dış etkiler; uygulanan yük P ile mesnetlerin kirişe uyguladığı tepkilerdir. Bu MVP probleminde yatay dış yük yoktur; bu nedenle yatay tepki denge açısından sıfırdır ve düşey tepkiler RA ile RB üzerinde odaklanırız.",
+          en: "When the beam is isolated from its surroundings, the external actions are the applied load P and the reactions exerted by the supports. In this MVP problem there is no external horizontal load, so the horizontal reaction is zero by equilibrium and we focus on the vertical reactions RA and RB.",
+        },
+      },
+
+      {
+        id: "block-ssb-01-heading-equilibrium",
+        type: "heading",
+        level: 3,
+
+        text: {
+          tr: "Denge neyi garanti eder?",
+          en: "What does equilibrium guarantee?",
+        },
+      },
+
+      {
+        id: "block-ssb-01-paragraph-equilibrium",
+        type: "paragraph",
+
+        text: {
+          tr: "Kiriş durgun ve dengedeyse net kuvvet ve net moment sıfır olmalıdır. Düşey kuvvet dengesi bize iki mesnet tepkisinin toplamının uygulanan yüke eşit olduğunu söyler; fakat yükün iki mesnet arasında nasıl paylaşıldığını belirlemek için moment dengesine de ihtiyaç vardır.",
+          en: "If the beam is stationary and in equilibrium, the net force and net moment must both be zero. Vertical force equilibrium tells us that the two support reactions must add up to the applied load, but moment equilibrium is also required to determine how that load is shared between the supports.",
+        },
+      },
+
+      {
+        id: "block-ssb-01-equation-force-balance",
+        type: "equation",
+        expression: "R_A + R_B = P",
+
+        description: {
+          tr: "Düşey kuvvet dengesinin bu problem için sadeleştirilmiş biçimi.",
+          en: "The simplified vertical force equilibrium relation for this problem.",
+        },
+      },
+
+      {
+        id: "block-ssb-01-callout-key-question",
+        type: "callout",
+        tone: "info",
+
+        body: {
+          tr: "Ana soru şudur: Aynı toplam yük korunurken, yükün kiriş üzerindeki konumu RA ile RB arasındaki paylaşımı nasıl değiştirir?",
+          en: "The key question is: while the same total load is preserved, how does the load position change the way that load is shared between RA and RB?",
+        },
+      },
+    ],
 
     completionRule: {
       type: "reached_end",
@@ -1031,7 +1111,7 @@ export const rawLearningActivities = [
 
   {
     id: "activity-ssb-02",
-    version: "1.0.0",
+    version: "1.1.0",
     moduleId:
       "module-simply-supported-beam",
 
@@ -1056,7 +1136,120 @@ export const rawLearningActivities = [
       "source-mit-beam-displacements",
     ],
 
-    contentBlocks: [],
+    contentBlocks: [
+      {
+        id: "block-ssb-02-heading-equations",
+        type: "heading",
+        level: 2,
+
+        text: {
+          tr: "İki denge denklemini birlikte kullan",
+          en: "Use the two equilibrium equations together",
+        },
+      },
+
+      {
+        id: "block-ssb-02-paragraph-sign",
+        type: "paragraph",
+
+        text: {
+          tr: "Kiriş açıklığını L, yük büyüklüğünü P ve yükün sol mesnet A'dan uzaklığını a ile gösterelim. Yukarı yönü pozitif kabul edelim. A noktasına göre moment alırsak RA moment denkleminden çıkar; böylece önce RB doğrudan bulunur.",
+          en: "Let the beam span be L, the load magnitude be P, and the distance of the load from the left support A be a. Take upward as positive. If moments are summed about A, RA drops out of the moment equation, allowing RB to be found directly.",
+        },
+      },
+
+      {
+        id: "block-ssb-02-equation-force",
+        type: "equation",
+        expression: "\\sum F_y = R_A + R_B - P = 0",
+
+        description: {
+          tr: "Düşey kuvvet dengesi.",
+          en: "Vertical force equilibrium.",
+        },
+      },
+
+      {
+        id: "block-ssb-02-equation-moment-a",
+        type: "equation",
+        expression: "\\sum M_A = R_B L - P a = 0",
+
+        description: {
+          tr: "A mesnedine göre moment dengesi.",
+          en: "Moment equilibrium about support A.",
+        },
+      },
+
+      {
+        id: "block-ssb-02-equation-rb",
+        type: "equation",
+        expression: "R_B = \\frac{P a}{L}",
+
+        description: {
+          tr: "Sağ mesnet tepkisi.",
+          en: "Right support reaction.",
+        },
+      },
+
+      {
+        id: "block-ssb-02-equation-ra",
+        type: "equation",
+        expression: "R_A = P - R_B = \\frac{P(L-a)}{L}",
+
+        description: {
+          tr: "Sol mesnet tepkisi.",
+          en: "Left support reaction.",
+        },
+      },
+
+      {
+        id: "block-ssb-02-callout-check",
+        type: "callout",
+        tone: "engineering",
+
+        title: {
+          tr: "Hızlı denge kontrolü",
+          en: "Quick equilibrium check",
+        },
+
+        body: {
+          tr: "Hesap sonunda RA + RB mutlaka P'ye eşit olmalıdır. Bu kontrol, tepki kuvvetlerinin büyüklüklerinde veya işaretlerinde yapılan birçok hatayı hemen yakalar.",
+          en: "At the end of the calculation, RA + RB must equal P. This check immediately catches many magnitude or sign errors in the support reactions.",
+        },
+      },
+
+      {
+        id: "block-ssb-02-heading-example",
+        type: "heading",
+        level: 3,
+
+        text: {
+          tr: "Kısa örnek",
+          en: "Short example",
+        },
+      },
+
+      {
+        id: "block-ssb-02-paragraph-example",
+        type: "paragraph",
+
+        text: {
+          tr: "L = 4 m olan bir kirişte P = 10 kN yük tam ortada, yani a = 2 m konumunda olsun. Geometri simetrik olduğu için iki tepkinin eşit çıkmasını bekleriz. Denge denklemleri de RA = 5 kN ve RB = 5 kN verir.",
+          en: "Consider a beam with L = 4 m and a P = 10 kN load at midspan, so a = 2 m. Because the geometry is symmetric, we expect equal reactions. The equilibrium equations give RA = 5 kN and RB = 5 kN.",
+        },
+      },
+
+      {
+        id: "block-ssb-02-callout-units",
+        type: "callout",
+        tone: "info",
+
+        body: {
+          tr: "Denklemlerde birimleri tutarlı kullan. Mechivra hesap çekirdeği değerleri kanonik SI birimlerine dönüştürür; ekranda kN ve kN·m gibi daha okunabilir birimler gösterilebilir.",
+          en: "Use consistent units in the equations. The Mechivra calculation core converts values to canonical SI units internally, while the interface may display more readable units such as kN and kN·m.",
+        },
+      },
+    ],
 
     completionRule: {
       type: "reached_end",
@@ -1067,7 +1260,7 @@ export const rawLearningActivities = [
 
   {
     id: "activity-ssb-03",
-    version: "1.0.0",
+    version: "1.1.0",
     moduleId:
       "module-simply-supported-beam",
 
@@ -1091,7 +1284,55 @@ export const rawLearningActivities = [
       "source-mit-beam-displacements",
     ],
 
-    contentBlocks: [],
+    contentBlocks: [
+      {
+        id: "block-ssb-03-heading-predict",
+        type: "heading",
+        level: 2,
+
+        text: {
+          tr: "Hesaplamadan önce tahmin et",
+          en: "Predict before calculating",
+        },
+      },
+
+      {
+        id: "block-ssb-03-paragraph-setup",
+        type: "paragraph",
+
+        text: {
+          tr: "Kiriş açıklığı L ve yük büyüklüğü P sabit kalsın. Yalnızca yükün sol mesnetten uzaklığı a artsın; yani yük sağ mesnete doğru hareket etsin. Sayısal hesap yapmadan önce RA ve RB'nin nasıl değişeceğine karar ver.",
+          en: "Keep the beam span L and load magnitude P fixed. Change only the distance a from the left support, so the load moves toward the right support. Before doing any numerical calculation, decide how RA and RB should change.",
+        },
+      },
+
+      {
+        id: "block-ssb-03-callout-clue",
+        type: "callout",
+        tone: "info",
+
+        title: {
+          tr: "İki ipucu",
+          en: "Two clues",
+        },
+
+        body: {
+          tr: "Birincisi, düşey denge nedeniyle RA + RB toplamı P olarak kalır. İkincisi, yükün her mesnete göre moment kolu konum değiştikçe değişir. Tahminini bu iki bilgiyi birlikte düşünerek yap.",
+          en: "First, vertical equilibrium keeps RA + RB equal to P. Second, the load's moment arm about each support changes as its position changes. Use both ideas when making your prediction.",
+        },
+      },
+
+      {
+        id: "block-ssb-03-callout-commit",
+        type: "callout",
+        tone: "engineering",
+
+        body: {
+          tr: "Seçimini yaptıktan sonra değiştiremezsin. Amaç ilk düşünceni kaydetmek ve ardından geri bildirimle fiziksel ilişkiyi karşılaştırmaktır; yanlış tahmin yapmak bu etkinliği geçersiz kılmaz.",
+          en: "Once submitted, your choice is locked. The purpose is to record your initial reasoning and then compare it with the physical relationship through feedback; an incorrect prediction does not invalidate the activity.",
+        },
+      },
+    ],
 
     completionRule: {
       type: "submitted_prediction",
@@ -1102,7 +1343,7 @@ export const rawLearningActivities = [
 
   {
     id: "activity-ssb-04",
-    version: "1.0.0",
+    version: "1.1.0",
     moduleId:
       "module-simply-supported-beam",
 
@@ -1130,7 +1371,65 @@ export const rawLearningActivities = [
       "source-mit-beam-displacements",
     ],
 
-    contentBlocks: [],
+    contentBlocks: [
+      {
+        id: "block-ssb-04-heading-explore",
+        type: "heading",
+        level: 2,
+
+        text: {
+          tr: "Bir değişkeni değiştir, sistemi izle",
+          en: "Change one variable and observe the system",
+        },
+      },
+
+      {
+        id: "block-ssb-04-paragraph-purpose",
+        type: "paragraph",
+
+        text: {
+          tr: "Aşağıdaki etkileşimli model, aynı basit mesnetli kiriş için doğrulanmış Statik hesap çekirdeğini kullanır. Yük büyüklüğünü veya yük konumunu değiştirdiğinde mesnet tepkileri ve maksimum eğilme momenti aynı fiziksel durumdan yeniden hesaplanır.",
+          en: "The interactive model below uses the verified Statics calculation core for the same simply supported beam. When you change the load magnitude or load position, the support reactions and maximum bending moment are recalculated from the same physical state.",
+        },
+      },
+
+      {
+        id: "block-ssb-04-callout-method",
+        type: "callout",
+        tone: "engineering",
+
+        title: {
+          tr: "Deney gibi düşün",
+          en: "Treat it like an experiment",
+        },
+
+        body: {
+          tr: "Önce yalnız yük konumunu değiştir ve RA ile RB'yi izle. Sonra konumu tekrar orta noktaya getirip yalnız yük büyüklüğünü değiştir. Tek seferde bir değişkeni değiştirmek, neden-sonuç ilişkisini daha açık görmeni sağlar.",
+          en: "First change only the load position and observe RA and RB. Then return the load to midspan and change only the load magnitude. Changing one variable at a time makes the cause-and-effect relationship easier to see.",
+        },
+      },
+
+      {
+        id: "block-ssb-04-heading-observe",
+        type: "heading",
+        level: 3,
+
+        text: {
+          tr: "Üç sonucu birlikte izle",
+          en: "Track three results together",
+        },
+      },
+
+      {
+        id: "block-ssb-04-paragraph-observe",
+        type: "paragraph",
+
+        text: {
+          tr: "RA ve RB yükün mesnetler arasında nasıl paylaşıldığını gösterir. Maksimum eğilme momenti ise kiriş içindeki eğilme etkisinin en büyük olduğu değeri temsil eder. Bu üç büyüklüğün yük konumu ve yük büyüklüğüyle birlikte nasıl değiştiğini karşılaştır.",
+          en: "RA and RB show how the applied load is shared between the supports. The maximum bending moment represents the largest bending action within the beam. Compare how all three quantities change with load position and load magnitude.",
+        },
+      },
+    ],
 
     completionRule: {
       type: "meaningful_interaction",
@@ -1141,7 +1440,7 @@ export const rawLearningActivities = [
 
   {
     id: "activity-ssb-05",
-    version: "1.0.0",
+    version: "1.1.0",
     moduleId:
       "module-simply-supported-beam",
 
@@ -1169,7 +1468,76 @@ export const rawLearningActivities = [
       "source-mit-beam-displacements",
     ],
 
-    contentBlocks: [],
+    contentBlocks: [
+      {
+        id: "block-ssb-05-heading-problem",
+        type: "heading",
+        level: 2,
+
+        text: {
+          tr: "Yeni durum: çözümü sen kur",
+          en: "New case: build the solution yourself",
+        },
+      },
+
+      {
+        id: "block-ssb-05-paragraph-problem",
+        type: "paragraph",
+
+        text: {
+          tr: "Basit mesnetli bir kirişin açıklığı L = 6 m'dir. Aşağı doğru P = 12 kN noktasal yük, sol mesnet A'dan a = 2 m uzaklıkta uygulanmaktadır. Kiriş öz ağırlığını ihmal et.",
+          en: "A simply supported beam has a span of L = 6 m. A downward point load P = 12 kN is applied at a = 2 m from the left support A. Neglect the beam self-weight.",
+        },
+      },
+
+      {
+        id: "block-ssb-05-heading-tasks",
+        type: "heading",
+        level: 3,
+
+        text: {
+          tr: "Bulman gerekenler",
+          en: "What you need to determine",
+        },
+      },
+
+      {
+        id: "block-ssb-05-paragraph-tasks",
+        type: "paragraph",
+
+        text: {
+          tr: "Önce RA ve RB mesnet tepkilerini hesapla. Ardından yükün solunda ve sağında kesme kuvvetinin sabit değerlerini belirle. Son olarak maksimum eğilme momentini ve bu maksimumun kiriş üzerindeki konumunu bul.",
+          en: "First calculate the support reactions RA and RB. Then determine the constant shear-force values to the left and right of the point load. Finally, find the maximum bending moment and its location along the beam.",
+        },
+      },
+
+      {
+        id: "block-ssb-05-callout-order",
+        type: "callout",
+        tone: "engineering",
+
+        title: {
+          tr: "Önerilen çözüm sırası",
+          en: "Recommended solution order",
+        },
+
+        body: {
+          tr: "1) Serbest cisim diyagramını düşün. 2) ΣM_A = 0 ile RB'yi bul. 3) ΣF_y = 0 ile RA'yı kontrol et. 4) Yük noktasındaki kesme sıçramasını değerlendir. 5) Momentin yük noktasında sürekli olduğunu kullanarak Mmax'ı belirle.",
+          en: "1) Think through the free-body diagram. 2) Use ΣM_A = 0 to find RB. 3) Use ΣF_y = 0 to determine and check RA. 4) Evaluate the shear jump at the point load. 5) Use the continuity of moment at the load position to determine Mmax.",
+        },
+      },
+
+      {
+        id: "block-ssb-05-callout-check",
+        type: "callout",
+        tone: "info",
+
+        body: {
+          tr: "Sonuçlarını göndermeden önce iki kontrol yap: RA + RB = 12 kN olmalı ve basit mesnetlerde eğilme momenti sıfır olmalıdır.",
+          en: "Before submitting your results, make two checks: RA + RB should equal 12 kN, and the bending moment should be zero at both simple supports.",
+        },
+      },
+    ],
 
     completionRule: {
       type: "submitted_attempt",
@@ -1180,7 +1548,7 @@ export const rawLearningActivities = [
 
   {
     id: "activity-ssb-06",
-    version: "1.0.0",
+    version: "1.1.0",
     moduleId:
       "module-simply-supported-beam",
 
@@ -1210,7 +1578,98 @@ export const rawLearningActivities = [
       "source-mit-beam-displacements",
     ],
 
-    contentBlocks: [],
+    contentBlocks: [
+      {
+        id: "block-ssb-06-heading-summary",
+        type: "heading",
+        level: 2,
+
+        text: {
+          tr: "Bu modelden çıkarman gereken ana ilişkiler",
+          en: "Key relationships to take from this model",
+        },
+      },
+
+      {
+        id: "block-ssb-06-paragraph-summary",
+        type: "paragraph",
+
+        text: {
+          tr: "Basit mesnetli bir kirişte mesnet tepkileri yalnız toplam yükten değil, yükün konumundan da etkilenir. Düşey kuvvet dengesi RA + RB = P koşulunu korurken moment dengesi bu toplamın iki mesnet arasında nasıl paylaşılacağını belirler.",
+          en: "For a simply supported beam, the support reactions depend not only on the total load but also on its position. Vertical force equilibrium preserves RA + RB = P, while moment equilibrium determines how that total is shared between the two supports.",
+        },
+      },
+
+      {
+        id: "block-ssb-06-equation-reactions",
+        type: "equation",
+        expression: "R_A = \\frac{P(L-a)}{L}, \\qquad R_B = \\frac{Pa}{L}",
+
+        description: {
+          tr: "Tek noktasal yüklü basit mesnetli kiriş için düşey mesnet tepkileri.",
+          en: "Vertical support reactions for the simply supported beam with one point load.",
+        },
+      },
+
+      {
+        id: "block-ssb-06-paragraph-shear-moment",
+        type: "paragraph",
+
+        text: {
+          tr: "Bu modelde kesme kuvveti yük bulunmayan bölgelerde sabittir ve noktasal yükte P kadar sıçrama yapar. Eğilme momenti ise yük noktasında süreklidir; her bölgede doğrusal değişir ve P > 0 için maksimum değeri yükün uygulandığı kesitte alır.",
+          en: "In this model, shear force is constant in regions without applied loads and changes by P across the point load. Bending moment remains continuous at the load position, varies linearly within each region, and for P > 0 reaches its maximum at the section where the load is applied.",
+        },
+      },
+
+      {
+        id: "block-ssb-06-equation-mmax",
+        type: "equation",
+        expression: "M_{\\max} = \\frac{P a(L-a)}{L}",
+
+        description: {
+          tr: "Maksimum eğilme momenti; P > 0 için x = a konumunda oluşur.",
+          en: "Maximum bending moment; for P > 0 it occurs at x = a.",
+        },
+      },
+
+      {
+        id: "block-ssb-06-heading-limits",
+        type: "heading",
+        level: 3,
+
+        text: {
+          tr: "Model sınırlarını unutma",
+          en: "Do not forget the model limits",
+        },
+      },
+
+      {
+        id: "block-ssb-06-callout-limits",
+        type: "callout",
+        tone: "warning",
+
+        title: {
+          tr: "Bu sonuçlar hangi problem için geçerli?",
+          en: "For which problem are these results valid?",
+        },
+
+        body: {
+          tr: "Bu MVP modeli iki boyutlu, sol ucu mafsallı ve sağ ucu makaralı, iki mesnet arasında tek bir statik düşey noktasal yük taşıyan kiriş içindir. Kiriş öz ağırlığı ihmal edilir. Yayılı yükler, birden fazla yük, uygulanan çift momentler, konsol veya çıkmalı geometriler, dinamik etkiler ve bu statik modelde tanımlanmayan diğer yükleme durumları kapsam dışıdır.",
+          en: "This MVP model applies to a two-dimensional beam with a pin at the left support, a roller at the right support, and one static downward point load located between the supports. Beam self-weight is neglected. Distributed loads, multiple loads, applied couples, cantilever or overhanging geometries, dynamic effects, and other loading cases not defined by this statics model are outside its scope.",
+        },
+      },
+
+      {
+        id: "block-ssb-06-callout-next",
+        type: "callout",
+        tone: "engineering",
+
+        body: {
+          tr: "Statik burada kuvvetleri ve iç tesirleri belirler; tek başına gerilme veya sehim hesabı yapmaz. Bir sonraki Eğilme modülünde aynı kiriş durumu, kesit geometrisi ve malzeme özellikleriyle birleştirilerek gerilme ve deformasyon davranışına geçilir.",
+          en: "Statics determines forces and internal actions here; by itself it does not calculate stress or deflection. In the following Bending module, the same beam state is combined with section geometry and material properties to study stress and deformation.",
+        },
+      },
+    ],
 
     completionRule: {
       type: "reached_end",

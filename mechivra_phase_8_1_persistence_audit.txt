@@ -1,0 +1,1476 @@
+﻿
+
+============================================================
+FILE: .\package.json
+============================================================
+{
+  "name": "mechivra",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+
+    "validate:content": "tsx scripts/validate-content.ts",
+
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+
+    "test:e2e": "playwright test",
+
+    "verify": "pnpm validate:content && pnpm test && pnpm exec tsc --noEmit && pnpm lint && pnpm build",
+    "verify:full": "pnpm verify && pnpm test:e2e"
+  },
+  "dependencies": {
+    "katex": "^0.19.0",
+    "next": "16.3.8",
+    "next-intl": "^4.14.8",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/katex": "^0.16.8",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^5.0.3",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.8",
+    "jsdom": "^30.1.1",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.0.3"
+  },
+  "packageManager": "pnpm@12.8.1"
+}
+
+============================================================
+FILE: .\tsconfig.json
+============================================================
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "**/*.mts"
+  ],
+  "exclude": ["node_modules"]
+}
+
+
+============================================================
+FILE: .\src\domain\learning\types.ts
+============================================================
+import type {
+  EntityId,
+  LocalizedText,
+  PublicationStatus,
+  VersionedEntity,
+} from "@/domain/shared/types";
+
+export type LearningActivityType =
+  | "problem_context"
+  | "concept"
+  | "prediction"
+  | "worked_example"
+  | "interactive"
+  | "interpretation"
+  | "problem"
+  | "quiz"
+  | "design_task"
+  | "lab"
+  | "reflection"
+  | "summary";
+
+export type CompletionRuleType =
+  | "opened"
+  | "reached_end"
+  | "submitted_prediction"
+  | "meaningful_interaction"
+  | "submitted_attempt"
+  | "explicit_completion";
+
+export interface CompletionRule {
+  readonly type: CompletionRuleType;
+}
+
+export type CalloutTone =
+  | "info"
+  | "engineering"
+  | "warning";
+
+export interface HeadingContentBlock {
+  readonly id: EntityId;
+  readonly type: "heading";
+  readonly level: 2 | 3;
+  readonly text: LocalizedText;
+}
+
+export interface ParagraphContentBlock {
+  readonly id: EntityId;
+  readonly type: "paragraph";
+  readonly text: LocalizedText;
+}
+
+export interface EquationContentBlock {
+  readonly id: EntityId;
+  readonly type: "equation";
+  readonly expression: string;
+  readonly description?: LocalizedText;
+}
+
+export interface CalloutContentBlock {
+  readonly id: EntityId;
+  readonly type: "callout";
+  readonly tone: CalloutTone;
+  readonly title?: LocalizedText;
+  readonly body: LocalizedText;
+}
+
+export interface FigureContentBlock {
+  readonly id: EntityId;
+  readonly type: "figure";
+  readonly assetId: EntityId;
+  readonly alt: LocalizedText;
+  readonly caption?: LocalizedText;
+}
+
+export type LearningContentBlock =
+  | HeadingContentBlock
+  | ParagraphContentBlock
+  | EquationContentBlock
+  | CalloutContentBlock
+  | FigureContentBlock;
+
+export interface LearningActivity extends VersionedEntity {
+  readonly moduleId: EntityId;
+
+  readonly type: LearningActivityType;
+  readonly order: number;
+
+  readonly title: LocalizedText;
+
+  readonly learningOutcomeIds: readonly EntityId[];
+  readonly conceptIds: readonly EntityId[];
+  readonly sourceIds: readonly EntityId[];
+
+  readonly contentBlocks: readonly LearningContentBlock[];
+
+  readonly completionRule: CompletionRule;
+  readonly status: PublicationStatus;
+}
+
+============================================================
+FILE: .\src\domain\learning\completion.ts
+============================================================
+import type {
+  CompletionRule,
+  CompletionRuleType,
+  LearningActivityType,
+} from "@/domain/learning/types";
+
+export type LearningCompletionEvent =
+  | "opened"
+  | "reached_end"
+  | "prediction_submitted"
+  | "meaningful_interaction"
+  | "attempt_submitted"
+  | "explicit_completion";
+
+export interface LearningCompletionEvidence {
+  readonly opened:
+    boolean;
+
+  readonly reachedEnd:
+    boolean;
+
+  readonly predictionSubmissions:
+    number;
+
+  readonly meaningfulInteractions:
+    number;
+
+  readonly attemptsSubmitted:
+    number;
+
+  readonly explicitCompletions:
+    number;
+}
+
+export interface LearningCompletionEvaluation {
+  readonly rule:
+    CompletionRuleType;
+
+  readonly completed:
+    boolean;
+}
+
+export function createEmptyLearningCompletionEvidence():
+  LearningCompletionEvidence {
+  return {
+    opened: false,
+    reachedEnd: false,
+
+    predictionSubmissions: 0,
+    meaningfulInteractions: 0,
+    attemptsSubmitted: 0,
+    explicitCompletions: 0,
+  };
+}
+
+export function recordLearningCompletionEvent(
+  current:
+    LearningCompletionEvidence,
+
+  event:
+    LearningCompletionEvent,
+): LearningCompletionEvidence {
+  switch (event) {
+    case "opened":
+      return {
+        ...current,
+        opened: true,
+      };
+
+    case "reached_end":
+      return {
+        ...current,
+        opened: true,
+        reachedEnd: true,
+      };
+
+    case "prediction_submitted":
+      return {
+        ...current,
+        opened: true,
+
+        predictionSubmissions:
+          current.predictionSubmissions +
+          1,
+      };
+
+    case "meaningful_interaction":
+      return {
+        ...current,
+        opened: true,
+
+        meaningfulInteractions:
+          current.meaningfulInteractions +
+          1,
+      };
+
+    case "attempt_submitted":
+      return {
+        ...current,
+        opened: true,
+
+        attemptsSubmitted:
+          current.attemptsSubmitted +
+          1,
+      };
+
+    case "explicit_completion":
+      return {
+        ...current,
+        opened: true,
+
+        explicitCompletions:
+          current.explicitCompletions +
+          1,
+      };
+
+    default:
+      return assertNever(
+        event,
+      );
+  }
+}
+
+export function evaluateLearningCompletion(
+  rule:
+    CompletionRule,
+
+  evidence:
+    LearningCompletionEvidence,
+): LearningCompletionEvaluation {
+  switch (rule.type) {
+    case "opened":
+      return {
+        rule:
+          rule.type,
+
+        completed:
+          evidence.opened,
+      };
+
+    case "reached_end":
+      return {
+        rule:
+          rule.type,
+
+        completed:
+          evidence.reachedEnd,
+      };
+
+    case "submitted_prediction":
+      return {
+        rule:
+          rule.type,
+
+        completed:
+          evidence.predictionSubmissions >
+          0,
+      };
+
+    case "meaningful_interaction":
+      return {
+        rule:
+          rule.type,
+
+        completed:
+          evidence.meaningfulInteractions >
+          0,
+      };
+
+    case "submitted_attempt":
+      return {
+        rule:
+          rule.type,
+
+        completed:
+          evidence.attemptsSubmitted >
+          0,
+      };
+
+    case "explicit_completion":
+      return {
+        rule:
+          rule.type,
+
+        completed:
+          evidence.explicitCompletions >
+          0,
+      };
+
+    default:
+      return assertNever(
+        rule.type,
+      );
+  }
+}
+
+export function isCompletionRuleCompatibleWithActivityType(
+  activityType:
+    LearningActivityType,
+
+  completionRule:
+    CompletionRuleType,
+): boolean {
+  switch (activityType) {
+    case "problem_context":
+    case "concept":
+    case "worked_example":
+    case "interpretation":
+    case "reflection":
+    case "summary":
+      return (
+        completionRule ===
+          "opened" ||
+        completionRule ===
+          "reached_end" ||
+        completionRule ===
+          "explicit_completion"
+      );
+
+    case "prediction":
+      return (
+        completionRule ===
+        "submitted_prediction"
+      );
+
+    case "interactive":
+    case "lab":
+      return (
+        completionRule ===
+        "meaningful_interaction"
+      );
+
+    case "problem":
+    case "quiz":
+      return (
+        completionRule ===
+        "submitted_attempt"
+      );
+
+    case "design_task":
+      return (
+        completionRule ===
+          "submitted_attempt" ||
+        completionRule ===
+          "explicit_completion"
+      );
+
+    default:
+      return assertNever(
+        activityType,
+      );
+  }
+}
+
+function assertNever(
+  value: never,
+): never {
+  throw new Error(
+    `Unsupported learning completion value: ${String(
+      value,
+    )}`,
+  );
+}
+
+============================================================
+FILE: .\src\domain\assessment\attempt.ts
+============================================================
+import type {
+  AssessmentResult,
+} from "@/domain/assessment/result";
+
+export const ASSESSMENT_ATTEMPT_VERSION =
+  "1.0.0" as const;
+
+export type AssessmentAttemptStatus =
+  | "draft"
+  | "submitted"
+  | "evaluated";
+
+export interface AssessmentAttemptIdentity {
+  readonly attemptId:
+    string;
+
+  readonly activityId:
+    string;
+
+  readonly activityVersion:
+    string;
+
+  readonly assessmentId:
+    string;
+
+  readonly assessmentVersion:
+    string;
+}
+
+export interface AssessmentAttempt<TResponse> {
+  readonly version:
+    typeof ASSESSMENT_ATTEMPT_VERSION;
+
+  readonly identity:
+    AssessmentAttemptIdentity;
+
+  readonly attemptNumber:
+    number;
+
+  readonly status:
+    AssessmentAttemptStatus;
+
+  readonly response:
+    TResponse | null;
+
+  readonly result:
+    AssessmentResult | null;
+}
+
+export interface CreateAssessmentAttemptInput {
+  readonly attemptId:
+    string;
+
+  readonly activityId:
+    string;
+
+  readonly activityVersion:
+    string;
+
+  readonly assessmentId:
+    string;
+
+  readonly assessmentVersion:
+    string;
+
+  readonly attemptNumber:
+    number;
+}
+
+export class AssessmentAttemptError extends Error {
+  constructor(
+    message: string,
+  ) {
+    super(message);
+
+    this.name =
+      "AssessmentAttemptError";
+  }
+}
+
+function assertNonEmpty(
+  value:
+    string,
+
+  name:
+    string,
+): void {
+  if (
+    value.trim().length ===
+    0
+  ) {
+    throw new AssessmentAttemptError(
+      `${name} must not be empty.`,
+    );
+  }
+}
+
+export function createAssessmentAttempt<TResponse>(
+  input:
+    CreateAssessmentAttemptInput,
+): AssessmentAttempt<TResponse> {
+  assertNonEmpty(
+    input.attemptId,
+    "Attempt ID",
+  );
+
+  assertNonEmpty(
+    input.activityId,
+    "Activity ID",
+  );
+
+  assertNonEmpty(
+    input.activityVersion,
+    "Activity version",
+  );
+
+  assertNonEmpty(
+    input.assessmentId,
+    "Assessment ID",
+  );
+
+  assertNonEmpty(
+    input.assessmentVersion,
+    "Assessment version",
+  );
+
+  if (
+    !Number.isInteger(
+      input.attemptNumber,
+    ) ||
+    input.attemptNumber <
+      1
+  ) {
+    throw new AssessmentAttemptError(
+      "Attempt number must be a positive integer.",
+    );
+  }
+
+  return {
+    version:
+      ASSESSMENT_ATTEMPT_VERSION,
+
+    identity: {
+      attemptId:
+        input.attemptId,
+
+      activityId:
+        input.activityId,
+
+      activityVersion:
+        input.activityVersion,
+
+      assessmentId:
+        input.assessmentId,
+
+      assessmentVersion:
+        input.assessmentVersion,
+    },
+
+    attemptNumber:
+      input.attemptNumber,
+
+    status:
+      "draft",
+
+    response:
+      null,
+
+    result:
+      null,
+  };
+}
+
+export function submitAssessmentAttempt<TResponse>(
+  attempt:
+    AssessmentAttempt<TResponse>,
+
+  response:
+    TResponse,
+): AssessmentAttempt<TResponse> {
+  if (
+    attempt.status !==
+    "draft"
+  ) {
+    throw new AssessmentAttemptError(
+      "Only a draft assessment attempt can be submitted.",
+    );
+  }
+
+  return {
+    ...attempt,
+
+    status:
+      "submitted",
+
+    response,
+
+    result:
+      null,
+  };
+}
+
+export function evaluateAssessmentAttempt<TResponse>(
+  attempt:
+    AssessmentAttempt<TResponse>,
+
+  result:
+    AssessmentResult,
+): AssessmentAttempt<TResponse> {
+  if (
+    attempt.status !==
+    "submitted"
+  ) {
+    throw new AssessmentAttemptError(
+      "Only a submitted assessment attempt can be evaluated.",
+    );
+  }
+
+  if (
+    attempt.response ===
+    null
+  ) {
+    throw new AssessmentAttemptError(
+      "Submitted assessment attempt must contain a response.",
+    );
+  }
+
+  return {
+    ...attempt,
+
+    status:
+      "evaluated",
+
+    result,
+  };
+}
+
+============================================================
+FILE: .\src\domain\assessment\attempt-history.ts
+============================================================
+import type {
+  AssessmentAttempt,
+} from "@/domain/assessment/attempt";
+
+export const ASSESSMENT_ATTEMPT_HISTORY_VERSION =
+  "1.0.0" as const;
+
+export interface AssessmentAttemptHistory<TResponse> {
+  readonly version:
+    typeof ASSESSMENT_ATTEMPT_HISTORY_VERSION;
+
+  readonly activityId:
+    string;
+
+  readonly activityVersion:
+    string;
+
+  readonly assessmentId:
+    string;
+
+  readonly assessmentVersion:
+    string;
+
+  readonly attempts:
+    readonly AssessmentAttempt<TResponse>[];
+}
+
+export class AssessmentAttemptHistoryError extends Error {
+  constructor(
+    message:
+      string,
+  ) {
+    super(
+      message,
+    );
+
+    this.name =
+      "AssessmentAttemptHistoryError";
+  }
+}
+
+function assertSameAssessmentIdentity<TResponse>(
+  history:
+    AssessmentAttemptHistory<TResponse>,
+
+  attempt:
+    AssessmentAttempt<TResponse>,
+): void {
+  if (
+    attempt.identity
+      .activityId !==
+      history.activityId ||
+    attempt.identity
+      .activityVersion !==
+      history.activityVersion ||
+    attempt.identity
+      .assessmentId !==
+      history.assessmentId ||
+    attempt.identity
+      .assessmentVersion !==
+      history.assessmentVersion
+  ) {
+    throw new AssessmentAttemptHistoryError(
+      "All attempts in one history must belong to the same activity and assessment versions.",
+    );
+  }
+}
+
+export function createAssessmentAttemptHistory<TResponse>(
+  initialAttempt:
+    AssessmentAttempt<TResponse>,
+): AssessmentAttemptHistory<TResponse> {
+  if (
+    initialAttempt.attemptNumber !==
+    1
+  ) {
+    throw new AssessmentAttemptHistoryError(
+      "Initial assessment attempt must have attempt number 1.",
+    );
+  }
+
+  return {
+    version:
+      ASSESSMENT_ATTEMPT_HISTORY_VERSION,
+
+    activityId:
+      initialAttempt
+        .identity
+        .activityId,
+
+    activityVersion:
+      initialAttempt
+        .identity
+        .activityVersion,
+
+    assessmentId:
+      initialAttempt
+        .identity
+        .assessmentId,
+
+    assessmentVersion:
+      initialAttempt
+        .identity
+        .assessmentVersion,
+
+    attempts: [
+      initialAttempt,
+    ],
+  };
+}
+
+export function appendAssessmentAttempt<TResponse>(
+  history:
+    AssessmentAttemptHistory<TResponse>,
+
+  attempt:
+    AssessmentAttempt<TResponse>,
+): AssessmentAttemptHistory<TResponse> {
+  assertSameAssessmentIdentity(
+    history,
+    attempt,
+  );
+
+  const previousAttempt =
+    history.attempts[
+      history.attempts.length -
+        1
+    ];
+
+  if (
+    !previousAttempt
+  ) {
+    throw new AssessmentAttemptHistoryError(
+      "Assessment attempt history must contain a previous attempt.",
+    );
+  }
+
+  const expectedAttemptNumber =
+    previousAttempt.attemptNumber +
+    1;
+
+  if (
+    attempt.attemptNumber !==
+    expectedAttemptNumber
+  ) {
+    throw new AssessmentAttemptHistoryError(
+      `Expected attempt number ${expectedAttemptNumber}, received ${attempt.attemptNumber}.`,
+    );
+  }
+
+  if (
+    history.attempts.some(
+      (
+        existing,
+      ) =>
+        existing.identity
+          .attemptId ===
+        attempt.identity
+          .attemptId,
+    )
+  ) {
+    throw new AssessmentAttemptHistoryError(
+      "Assessment attempt IDs must be unique within a history.",
+    );
+  }
+
+  return {
+    ...history,
+
+    attempts: [
+      ...history.attempts,
+      attempt,
+    ],
+  };
+}
+
+export function replaceLatestAssessmentAttempt<TResponse>(
+  history:
+    AssessmentAttemptHistory<TResponse>,
+
+  attempt:
+    AssessmentAttempt<TResponse>,
+): AssessmentAttemptHistory<TResponse> {
+  assertSameAssessmentIdentity(
+    history,
+    attempt,
+  );
+
+  const latest =
+    history.attempts[
+      history.attempts.length -
+        1
+    ];
+
+  if (
+    !latest
+  ) {
+    throw new AssessmentAttemptHistoryError(
+      "Assessment attempt history must contain an attempt.",
+    );
+  }
+
+  if (
+    latest.identity
+      .attemptId !==
+      attempt.identity
+        .attemptId ||
+    latest.attemptNumber !==
+      attempt.attemptNumber
+  ) {
+    throw new AssessmentAttemptHistoryError(
+      "Only the latest attempt with the same attempt identity can advance through its lifecycle.",
+    );
+  }
+
+  return {
+    ...history,
+
+    attempts: [
+      ...history.attempts.slice(
+        0,
+        -1,
+      ),
+      attempt,
+    ],
+  };
+}
+
+export function getLatestAssessmentAttempt<TResponse>(
+  history:
+    AssessmentAttemptHistory<TResponse>,
+): AssessmentAttempt<TResponse> {
+  const latest =
+    history.attempts[
+      history.attempts.length -
+        1
+    ];
+
+  if (
+    !latest
+  ) {
+    throw new AssessmentAttemptHistoryError(
+      "Assessment attempt history contains no attempts.",
+    );
+  }
+
+  return latest;
+}
+
+============================================================
+FILE: .\src\domain\assessment\attempt-history-summary.ts
+============================================================
+import type {
+  AssessmentAttemptHistory,
+} from "@/domain/assessment/attempt-history";
+
+export interface AssessmentAttemptHistorySummary {
+  readonly attemptCount:
+    number;
+
+  readonly evaluatedAttemptCount:
+    number;
+
+  readonly firstAttemptCorrect:
+    boolean | null;
+
+  readonly latestAttemptCorrect:
+    boolean | null;
+
+  readonly hasCorrectAttempt:
+    boolean;
+
+  readonly highestNormalizedScore:
+    number | null;
+}
+
+export function summarizeAssessmentAttemptHistory<TResponse>(
+  history:
+    AssessmentAttemptHistory<TResponse>,
+): AssessmentAttemptHistorySummary {
+  const evaluatedAttempts =
+    history.attempts.filter(
+      (
+        attempt,
+      ) =>
+        attempt.status ===
+          "evaluated" &&
+        attempt.result !==
+          null,
+    );
+
+  const first =
+    evaluatedAttempts[0];
+
+  const latest =
+    evaluatedAttempts[
+      evaluatedAttempts.length -
+        1
+    ];
+
+  const scores =
+    evaluatedAttempts.flatMap(
+      (
+        attempt,
+      ) =>
+        attempt.result
+          ?.normalizedScore ===
+        null ||
+        attempt.result
+          ?.normalizedScore ===
+          undefined
+          ? []
+          : [
+              attempt.result
+                .normalizedScore,
+            ],
+    );
+
+  return {
+    attemptCount:
+      history.attempts.length,
+
+    evaluatedAttemptCount:
+      evaluatedAttempts.length,
+
+    firstAttemptCorrect:
+      first?.result
+        ?.correct ??
+      null,
+
+    latestAttemptCorrect:
+      latest?.result
+        ?.correct ??
+      null,
+
+    hasCorrectAttempt:
+      evaluatedAttempts.some(
+        (
+          attempt,
+        ) =>
+          attempt.result
+            ?.correct ===
+          true,
+      ),
+
+    highestNormalizedScore:
+      scores.length >
+      0
+        ? Math.max(
+            ...scores,
+          )
+        : null,
+  };
+}
+
+============================================================
+FILE: .\src\domain\assessment\completion.ts
+============================================================
+import type {
+  AssessmentAttempt,
+} from "@/domain/assessment/attempt";
+
+export interface AssessmentCompletionSnapshot {
+  readonly submitted:
+    boolean;
+
+  readonly evaluated:
+    boolean;
+
+  readonly correct:
+    boolean | null;
+}
+
+export function getAssessmentCompletionSnapshot<TResponse>(
+  attempt:
+    AssessmentAttempt<TResponse>,
+): AssessmentCompletionSnapshot {
+  return {
+    submitted:
+      attempt.status ===
+        "submitted" ||
+      attempt.status ===
+        "evaluated",
+
+    evaluated:
+      attempt.status ===
+      "evaluated",
+
+    correct:
+      attempt.status ===
+        "evaluated"
+        ? attempt.result
+            ?.correct ??
+          null
+        : null,
+  };
+}
+
+============================================================
+FILE: .\src\features\learning\assessment\use-assessment-session.ts
+============================================================
+"use client";
+
+import {
+  useMemo,
+  useState,
+} from "react";
+
+import {
+  appendAssessmentAttempt,
+  createAssessmentAttempt,
+  createAssessmentAttemptHistory,
+  createAssessmentRevision,
+  evaluateAssessmentAttempt,
+  getLatestAssessmentAttempt,
+  replaceLatestAssessmentAttempt,
+  submitAssessmentAttempt,
+  summarizeAssessmentAttemptHistory,
+} from "@/domain/assessment";
+
+import type {
+  AssessmentAttemptHistory,
+  AssessmentAttemptHistorySummary,
+  AssessmentResult,
+} from "@/domain/assessment";
+
+export interface AssessmentSessionConfig<TResponse> {
+  readonly activityId:
+    string;
+
+  readonly activityVersion:
+    string;
+
+  readonly assessmentId:
+    string;
+
+  readonly assessmentVersion:
+    string;
+
+  readonly evaluate:
+    (
+      response:
+        TResponse,
+    ) =>
+      AssessmentResult;
+
+  readonly createAttemptId?:
+    (
+      attemptNumber:
+        number,
+    ) =>
+      string;
+}
+
+export interface AssessmentSessionState<TResponse> {
+  readonly history:
+    AssessmentAttemptHistory<TResponse>;
+
+  readonly summary:
+    AssessmentAttemptHistorySummary;
+
+  readonly latestAttempt:
+    AssessmentAttemptHistory<TResponse>[
+      "attempts"
+    ][number];
+
+  readonly canSubmit:
+    boolean;
+
+  readonly canRevise:
+    boolean;
+
+  readonly submit:
+    (
+      response:
+        TResponse,
+    ) =>
+      void;
+
+  readonly revise:
+    () =>
+      void;
+}
+
+function defaultAttemptId(
+  assessmentId:
+    string,
+
+  attemptNumber:
+    number,
+): string {
+  return `${assessmentId}-attempt-${attemptNumber}`;
+}
+
+export function useAssessmentSession<TResponse>(
+  config:
+    AssessmentSessionConfig<TResponse>,
+): AssessmentSessionState<TResponse> {
+  const createAttemptId =
+    config.createAttemptId ??
+    (
+      (
+        attemptNumber:
+          number,
+      ) =>
+        defaultAttemptId(
+          config.assessmentId,
+          attemptNumber,
+        )
+    );
+
+  const [
+    history,
+    setHistory,
+  ] =
+    useState<
+      AssessmentAttemptHistory<TResponse>
+    >(
+      () => {
+        const firstAttempt =
+          createAssessmentAttempt<TResponse>(
+            {
+              attemptId:
+                createAttemptId(
+                  1,
+                ),
+
+              activityId:
+                config.activityId,
+
+              activityVersion:
+                config.activityVersion,
+
+              assessmentId:
+                config.assessmentId,
+
+              assessmentVersion:
+                config.assessmentVersion,
+
+              attemptNumber:
+                1,
+            },
+          );
+
+        return createAssessmentAttemptHistory(
+          firstAttempt,
+        );
+      },
+    );
+
+  const latestAttempt =
+    getLatestAssessmentAttempt(
+      history,
+    );
+
+  const summary =
+    useMemo(
+      () =>
+        summarizeAssessmentAttemptHistory(
+          history,
+        ),
+      [
+        history,
+      ],
+    );
+
+  function submit(
+    response:
+      TResponse,
+  ): void {
+    setHistory(
+      (
+        currentHistory,
+      ) => {
+        const currentAttempt =
+          getLatestAssessmentAttempt(
+            currentHistory,
+          );
+
+        if (
+          currentAttempt.status !==
+          "draft"
+        ) {
+          return currentHistory;
+        }
+
+        const submitted =
+          submitAssessmentAttempt(
+            currentAttempt,
+            response,
+          );
+
+        const submittedHistory =
+          replaceLatestAssessmentAttempt(
+            currentHistory,
+            submitted,
+          );
+
+        const result =
+          config.evaluate(
+            response,
+          );
+
+        const evaluated =
+          evaluateAssessmentAttempt(
+            submitted,
+            result,
+          );
+
+        return replaceLatestAssessmentAttempt(
+          submittedHistory,
+          evaluated,
+        );
+      },
+    );
+  }
+
+  function revise(): void {
+    setHistory(
+      (
+        currentHistory,
+      ) => {
+        const currentAttempt =
+          getLatestAssessmentAttempt(
+            currentHistory,
+          );
+
+        if (
+          currentAttempt.status !==
+          "evaluated"
+        ) {
+          return currentHistory;
+        }
+
+        const nextAttemptNumber =
+          currentAttempt
+            .attemptNumber +
+          1;
+
+        const revision =
+          createAssessmentRevision(
+            currentAttempt,
+            {
+              attemptId:
+                createAttemptId(
+                  nextAttemptNumber,
+                ),
+            },
+          );
+
+        return appendAssessmentAttempt(
+          currentHistory,
+          revision,
+        );
+      },
+    );
+  }
+
+  return {
+    history,
+
+    summary,
+
+    latestAttempt,
+
+    canSubmit:
+      latestAttempt.status ===
+      "draft",
+
+    canRevise:
+      latestAttempt.status ===
+      "evaluated",
+
+    submit,
+
+    revise,
+  };
+}
+
+============================================================
+FILE: .\src\app\[locale]\app\progress\page.tsx
+============================================================
+import { useTranslations } from "next-intl";
+
+export default function ProgressPage() {
+  const t =
+    useTranslations("Progress");
+
+  return (
+    <div>
+      <h1 className="text-3xl font-semibold">
+        {t("title")}
+      </h1>
+
+      <p className="mt-3">
+        {t("description")}
+      </p>
+    </div>
+  );
+}
+
+============================================================
+FILE: .\src\app\[locale]\app\settings\page.tsx
+============================================================
+import { useTranslations } from "next-intl";
+
+export default function SettingsPage() {
+  const t =
+    useTranslations("Settings");
+
+  return (
+    <div>
+      <h1 className="text-3xl font-semibold">
+        {t("title")}
+      </h1>
+
+      <p className="mt-3">
+        {t("description")}
+      </p>
+    </div>
+  );
+}
+
+============================================================
+EXISTING STORAGE / PROGRESS FILES
+============================================================
+
+============================================================
+STORAGE SYMBOL SEARCH
+============================================================
+
+SEARCH: localStorage
+C:\dev\projects\mechivra\src\domain\engineering\architecture.test.ts:159: "localStorage",
+C:\dev\projects\mechivra\src\domain\engineering\beam\bending\architecture.test.ts:131: "localStorage",
+C:\dev\projects\mechivra\src\domain\engineering\thermodynamics\otto\architecture.test.ts:138: "localStorage",
+C:\dev\projects\mechivra\src\domain\learning\architecture.test.ts:161: "localStorage",
+
+SEARCH: sessionStorage
+C:\dev\projects\mechivra\src\domain\engineering\architecture.test.ts:160: "sessionStorage",
+C:\dev\projects\mechivra\src\domain\engineering\beam\bending\architecture.test.ts:132: "sessionStorage",
+C:\dev\projects\mechivra\src\domain\engineering\thermodynamics\otto\architecture.test.ts:139: "sessionStorage",
+C:\dev\projects\mechivra\src\domain\learning\architecture.test.ts:162: "sessionStorage",
+
+SEARCH: indexedDB
+C:\dev\projects\mechivra\src\domain\engineering\architecture.test.ts:161: "indexedDB",
+C:\dev\projects\mechivra\src\domain\engineering\thermodynamics\otto\architecture.test.ts:140: "indexedDB",
+C:\dev\projects\mechivra\src\domain\learning\architecture.test.ts:163: "indexedDB",
+
+SEARCH: Dexie
+
+SEARCH: ProgressRepository
+C:\dev\projects\mechivra\src\domain\progress\types.ts:28: export interface ProgressRepository {
+
+SEARCH: ActivityProgress
+C:\dev\projects\mechivra\src\domain\progress\types.ts:6: export type ActivityProgressStatus =
+C:\dev\projects\mechivra\src\domain\progress\types.ts:11: export interface ActivityProgress {
+C:\dev\projects\mechivra\src\domain\progress\types.ts:15: readonly status: ActivityProgressStatus;
+C:\dev\projects\mechivra\src\domain\progress\types.ts:25: readonly activityProgress: readonly ActivityProgress[];
+
+SEARCH: ModuleProgress
+C:\dev\projects\mechivra\src\domain\progress\types.ts:21: export interface ModuleProgress {
+C:\dev\projects\mechivra\src\domain\progress\types.ts:29: getModuleProgress(
+C:\dev\projects\mechivra\src\domain\progress\types.ts:31: ): Promise<ModuleProgress | null>;
+C:\dev\projects\mechivra\src\domain\progress\types.ts:33: saveModuleProgress(
+C:\dev\projects\mechivra\src\domain\progress\types.ts:34: progress: ModuleProgress,
+C:\dev\projects\mechivra\src\domain\progress\types.ts:37: resetModuleProgress(
+
+SEARCH: ProblemAttempt
+C:\dev\projects\mechivra\src\domain\assessment\types.ts:31: export interface ProblemAttempt {

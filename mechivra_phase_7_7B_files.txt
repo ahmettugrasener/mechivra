@@ -1,0 +1,3036 @@
+﻿
+
+============================================================
+FILE: .\src\content\predictions.ts
+============================================================
+import type {
+  EntityId,
+} from "@/domain/shared/types";
+
+import type {
+  PredictionDefinition,
+} from "@/domain/learning/prediction";
+
+const predictionDefinitions:
+  readonly PredictionDefinition[] =
+  [
+    {
+      activityId:
+        "activity-ssb-03",
+
+      prompt: {
+        tr:
+          "Noktasal yÃ¼kÃ¼n bÃ¼yÃ¼klÃ¼ÄŸÃ¼ ve kiriÅŸ aÃ§Ä±klÄ±ÄŸÄ± deÄŸiÅŸmeden, yÃ¼k saÄŸ mesnete doÄŸru hareket ederse mesnet tepkilerinin nasÄ±l deÄŸiÅŸeceÄŸini tahmin et.",
+
+        en:
+          "Keeping the point-load magnitude and beam span unchanged, predict how the support reactions change as the load moves toward the right support.",
+      },
+
+      options: [
+        {
+          id:
+            "prediction-ssb-reactions-a",
+
+          label: {
+            tr:
+              "Sol mesnet tepkisi artar, saÄŸ mesnet tepkisi azalÄ±r.",
+
+            en:
+              "The left reaction increases and the right reaction decreases.",
+          },
+
+          feedback: {
+            tr:
+              "YÃ¼k saÄŸa hareket ettikÃ§e saÄŸ mesnete gÃ¶re moment kolu kÃ¼Ã§Ã¼lÃ¼r. Bu nedenle sol mesnet tepkisi artmaz; azalÄ±r.",
+
+            en:
+              "As the load moves right, its moment arm about the right support becomes smaller. Therefore, the left reaction does not increase; it decreases.",
+          },
+        },
+
+        {
+          id:
+            "prediction-ssb-reactions-b",
+
+          label: {
+            tr:
+              "Sol mesnet tepkisi azalÄ±r, saÄŸ mesnet tepkisi artar.",
+
+            en:
+              "The left reaction decreases and the right reaction increases.",
+          },
+
+          feedback: {
+            tr:
+              "DoÄŸru iliÅŸki budur. YÃ¼k saÄŸa hareket ettikÃ§e RA azalÄ±r ve RB artar. ToplamlarÄ± yine uygulanan dÃ¼ÅŸey yÃ¼ke eÅŸittir.",
+
+            en:
+              "This is the correct relationship. As the load moves right, RA decreases and RB increases. Their sum still equals the applied vertical load.",
+          },
+        },
+
+        {
+          id:
+            "prediction-ssb-reactions-c",
+
+          label: {
+            tr:
+              "Ä°ki mesnet tepkisi de deÄŸiÅŸmez.",
+
+            en:
+              "Both support reactions remain unchanged.",
+          },
+
+          feedback: {
+            tr:
+              "Toplam dÃ¼ÅŸey tepki sabit kalÄ±r ancak yÃ¼kÃ¼n konumu moment dengesini deÄŸiÅŸtirir. Bu nedenle yÃ¼k saÄŸa hareket ederken iki mesnet tepkisi aynÄ± kalmaz.",
+
+            en:
+              "The total vertical reaction remains constant, but moving the load changes moment equilibrium. Therefore, the two support reactions do not remain unchanged.",
+          },
+        },
+      ],
+
+      correctOptionId:
+        "prediction-ssb-reactions-b",
+    },
+  ];
+
+function validatePredictionDefinitions(): void {
+  const activityIds =
+    new Set<string>();
+
+  for (
+    const definition
+    of predictionDefinitions
+  ) {
+    if (
+      activityIds.has(
+        definition.activityId,
+      )
+    ) {
+      throw new Error(
+        `Duplicate prediction activity ID: ${definition.activityId}`,
+      );
+    }
+
+    activityIds.add(
+      definition.activityId,
+    );
+
+    if (
+      definition.options.length <
+      2
+    ) {
+      throw new Error(
+        `Prediction "${definition.activityId}" must contain at least two options.`,
+      );
+    }
+
+    const optionIds =
+      new Set<string>();
+
+    for (
+      const option
+      of definition.options
+    ) {
+      if (
+        optionIds.has(
+          option.id,
+        )
+      ) {
+        throw new Error(
+          `Duplicate option "${option.id}" in prediction "${definition.activityId}".`,
+        );
+      }
+
+      optionIds.add(
+        option.id,
+      );
+    }
+
+    if (
+      !optionIds.has(
+        definition.correctOptionId,
+      )
+    ) {
+      throw new Error(
+        `Prediction "${definition.activityId}" references unknown correct option "${definition.correctOptionId}".`,
+      );
+    }
+  }
+}
+
+validatePredictionDefinitions();
+
+export function getPredictionDefinition(
+  activityId:
+    EntityId,
+): PredictionDefinition | undefined {
+  return predictionDefinitions.find(
+    (definition) =>
+      definition.activityId ===
+      activityId,
+  );
+}
+
+export function getPredictionDefinitions():
+  readonly PredictionDefinition[] {
+  return predictionDefinitions;
+}
+
+============================================================
+FILE: .\src\features\learning\prediction-activity.tsx
+============================================================
+"use client";
+
+import {
+  useState,
+} from "react";
+
+import {
+  evaluatePrediction,
+} from "@/domain/learning/prediction";
+
+import type {
+  PredictionDefinition,
+  PredictionEvaluation,
+} from "@/domain/learning/prediction";
+
+import type {
+  SupportedLocale,
+} from "@/domain/shared/types";
+
+interface PredictionActivityProps {
+  readonly definition:
+    PredictionDefinition;
+
+  readonly locale:
+    SupportedLocale;
+}
+
+export function PredictionActivity({
+  definition,
+  locale,
+}: PredictionActivityProps) {
+  const [
+    evaluation,
+    setEvaluation,
+  ] =
+    useState<
+      PredictionEvaluation | null
+    >(null);
+
+  function submitPrediction(
+    optionId: string,
+  ): void {
+    if (evaluation) {
+      return;
+    }
+
+    setEvaluation(
+      evaluatePrediction(
+        definition,
+        optionId,
+      ),
+    );
+  }
+
+  return (
+    <div
+      data-prediction-activity={
+        definition.activityId
+      }
+      data-prediction-submitted={
+        evaluation
+          ? "true"
+          : "false"
+      }
+      className="space-y-5"
+    >
+      <p className="max-w-3xl text-lg font-semibold leading-8 text-foreground">
+        {
+          definition.prompt[
+            locale
+          ]
+        }
+      </p>
+
+      <div
+        role="group"
+        aria-label={
+          definition.prompt[
+            locale
+          ]
+        }
+        className="grid gap-3"
+      >
+        {definition.options.map(
+          (
+            option,
+            index,
+          ) => {
+            const isSelected =
+              evaluation
+                ?.submittedOptionId ===
+              option.id;
+
+            return (
+              <button
+                key={
+                  option.id
+                }
+                type="button"
+                disabled={
+                  evaluation !==
+                  null
+                }
+                aria-pressed={
+                  isSelected
+                }
+                onClick={() =>
+                  submitPrediction(
+                    option.id,
+                  )
+                }
+                className={[
+                  "flex w-full items-start gap-4 rounded-xl border px-4 py-4 text-left transition-colors",
+                  isSelected
+                    ? "border-brand bg-brand-soft text-foreground"
+                    : "border-border-strong bg-surface hover:border-brand hover:bg-brand-soft",
+                  evaluation &&
+                  !isSelected
+                    ? "cursor-default opacity-60"
+                    : "",
+                ].join(
+                  " ",
+                )}
+              >
+                <span className="grid size-7 shrink-0 place-items-center rounded-full border border-current text-xs font-bold">
+                  {String.fromCharCode(
+                    65 + index,
+                  )}
+                </span>
+
+                <span className="leading-6">
+                  {
+                    option.label[
+                      locale
+                    ]
+                  }
+                </span>
+              </button>
+            );
+          },
+        )}
+      </div>
+
+      {evaluation ? (
+        <div
+          role="status"
+          data-prediction-correct={
+            evaluation.isCorrect
+              ? "true"
+              : "false"
+          }
+          className="rounded-xl border border-brand/30 bg-brand-soft px-5 py-4"
+        >
+          <p className="leading-7 text-muted-strong">
+            {
+              evaluation.feedback[
+                locale
+              ]
+            }
+          </p>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+============================================================
+FILE: .\src\features\learning\problems\beam-statics-problem-activity.tsx
+============================================================
+"use client";
+
+import {
+  useMemo,
+  useState,
+} from "react";
+
+import {
+  evaluateNumericProblemAttempt,
+} from "@/domain/assessment/numeric-problem";
+
+import type {
+  BeamStaticsNumericProblemDefinition,
+  NumericFieldEvaluationStatus,
+  NumericProblemEvaluation,
+} from "@/domain/assessment/numeric-problem";
+
+import type {
+  SupportedLocale,
+} from "@/domain/shared/types";
+
+import {
+  createBeamStaticsProblemAnswerKey,
+} from "@/features/learning/problems/beam-statics-problem-adapter";
+
+interface BeamStaticsProblemActivityProps {
+  readonly definition:
+    BeamStaticsNumericProblemDefinition;
+
+  readonly locale:
+    SupportedLocale;
+}
+
+function parseNumericInput(
+  value: string,
+): number | null {
+  const trimmed =
+    value.trim();
+
+  if (
+    trimmed.length ===
+    0
+  ) {
+    return null;
+  }
+
+  const normalized =
+    trimmed.replace(
+      ",",
+      ".",
+    );
+
+  const parsed =
+    Number(
+      normalized,
+    );
+
+  return Number.isFinite(
+    parsed,
+  )
+    ? parsed
+    : Number.NaN;
+}
+
+function getStatusClasses(
+  status:
+    NumericFieldEvaluationStatus | undefined,
+): string {
+  switch (status) {
+    case "correct":
+      return "border-success/50 bg-success/5";
+
+    case "incorrect":
+    case "missing":
+    case "invalid":
+      return "border-warning/50 bg-warning/5";
+
+    default:
+      return "border-border bg-background";
+  }
+}
+
+export function BeamStaticsProblemActivity({
+  definition,
+  locale,
+}: BeamStaticsProblemActivityProps) {
+  const initialInputs =
+    useMemo(
+      () =>
+        Object.fromEntries(
+          definition.fields.map(
+            (field) => [
+              field.id,
+              "",
+            ],
+          ),
+        ) as Record<
+          string,
+          string
+        >,
+      [definition.fields],
+    );
+
+  const [
+    inputs,
+    setInputs,
+  ] =
+    useState<
+      Record<
+        string,
+        string
+      >
+    >(initialInputs);
+
+  const [
+    evaluation,
+    setEvaluation,
+  ] =
+    useState<
+      NumericProblemEvaluation | null
+    >(null);
+
+  const [
+    attemptCount,
+    setAttemptCount,
+  ] = useState(0);
+
+  const [
+    hasSubmitted,
+    setHasSubmitted,
+  ] = useState(false);
+
+  const answerKey =
+    useMemo(
+      () =>
+        createBeamStaticsProblemAnswerKey(
+          definition,
+        ),
+      [definition],
+    );
+
+  const isSolved =
+    evaluation?.allCorrect ===
+    true;
+
+  function updateInput(
+    fieldId: string,
+    value: string,
+  ): void {
+    if (isSolved) {
+      return;
+    }
+
+    setInputs(
+      (
+        current,
+      ) => ({
+        ...current,
+        [fieldId]:
+          value,
+      }),
+    );
+
+    setEvaluation(
+      null,
+    );
+  }
+
+  function submitAttempt(
+    event:
+      React.FormEvent<HTMLFormElement>,
+  ): void {
+    event.preventDefault();
+
+    const submittedValues =
+      Object.fromEntries(
+        definition.fields.map(
+          (field) => [
+            field.id,
+            parseNumericInput(
+              inputs[
+                field.id
+              ] ?? "",
+            ),
+          ],
+        ),
+      );
+
+    const nextEvaluation =
+      evaluateNumericProblemAttempt(
+        definition.fields,
+        answerKey,
+        submittedValues,
+      );
+
+    setEvaluation(
+      nextEvaluation,
+    );
+
+    setHasSubmitted(
+      true,
+    );
+
+    setAttemptCount(
+      (
+        current,
+      ) =>
+        current + 1,
+    );
+  }
+
+  const evaluationByField =
+    new Map(
+      evaluation?.fields.map(
+        (field) => [
+          field.fieldId,
+          field,
+        ],
+      ) ?? [],
+    );
+
+  return (
+    <section
+      data-testid="beam-statics-problem-activity"
+      data-attempt-submitted={
+        hasSubmitted
+          ? "true"
+          : "false"
+      }
+      data-attempt-correct={
+        evaluation
+          ? evaluation.allCorrect
+            ? "true"
+            : "false"
+          : "unknown"
+      }
+      data-attempt-count={
+        attemptCount
+      }
+      className="mt-8 rounded-2xl border border-border bg-surface-subtle p-5 sm:p-6"
+    >
+      <header>
+        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand">
+          {locale === "tr"
+            ? "Problem Ã§alÄ±ÅŸma alanÄ±"
+            : "Problem workspace"}
+        </p>
+
+        <h3 className="mt-2 text-xl font-semibold text-foreground">
+          {
+            definition.title[
+              locale
+            ]
+          }
+        </h3>
+
+        <p className="mt-2 max-w-3xl leading-7 text-muted-strong">
+          {
+            definition.instructions[
+              locale
+            ]
+          }
+        </p>
+      </header>
+
+      <div className="mt-6 grid gap-3 sm:grid-cols-3">
+        <div className="rounded-lg border border-border bg-background p-4">
+          <p className="text-xs text-muted">
+            L
+          </p>
+
+          <p className="mt-1 font-mono text-lg font-semibold">
+            {
+              definition.input
+                .spanM
+            }{" "}
+            m
+          </p>
+        </div>
+
+        <div className="rounded-lg border border-border bg-background p-4">
+          <p className="text-xs text-muted">
+            P
+          </p>
+
+          <p className="mt-1 font-mono text-lg font-semibold">
+            {
+              definition.input
+                .pointLoadKN
+            }{" "}
+            kN
+          </p>
+        </div>
+
+        <div className="rounded-lg border border-border bg-background p-4">
+          <p className="text-xs text-muted">
+            a
+          </p>
+
+          <p className="mt-1 font-mono text-lg font-semibold">
+            {
+              definition.input
+                .loadPositionM
+            }{" "}
+            m
+          </p>
+        </div>
+      </div>
+
+      <form
+        onSubmit={
+          submitAttempt
+        }
+        className="mt-7"
+      >
+        <h4 className="font-semibold text-foreground">
+          {
+            definition.ui
+              .answersHeading[
+              locale
+            ]
+          }
+        </h4>
+
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          {definition.fields.map(
+            (field) => {
+              const fieldEvaluation =
+                evaluationByField.get(
+                  field.id,
+                );
+
+              const status =
+                fieldEvaluation
+                  ?.status;
+
+              return (
+                <label
+                  key={
+                    field.id
+                  }
+                  className={[
+                    "rounded-xl border p-4 transition-colors",
+                    getStatusClasses(
+                      status,
+                    ),
+                  ].join(
+                    " ",
+                  )}
+                >
+                  <span className="text-sm font-medium text-foreground">
+                    {
+                      field.label[
+                        locale
+                      ]
+                    }
+                  </span>
+
+                  <div className="mt-2 flex items-center gap-2">
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      aria-label={
+                        field.label[
+                          locale
+                        ]
+                      }
+                      value={
+                        inputs[
+                          field.id
+                        ] ?? ""
+                      }
+                      disabled={
+                        isSolved
+                      }
+                      onChange={(
+                        event,
+                      ) =>
+                        updateInput(
+                          field.id,
+                          event.target
+                            .value,
+                        )
+                      }
+                      className="min-h-11 min-w-0 flex-1 rounded-lg border border-border-strong bg-surface px-3 font-mono text-foreground outline-none transition focus:border-brand focus:ring-2 focus:ring-focus/30 disabled:cursor-default disabled:opacity-70"
+                    />
+
+                    <span className="shrink-0 text-sm font-medium text-muted">
+                      {
+                        field.unitSymbol
+                      }
+                    </span>
+                  </div>
+
+                  {status ===
+                  "correct" ? (
+                    <p className="mt-2 text-sm font-medium text-success">
+                      {
+                        definition.ui
+                          .correctLabel[
+                          locale
+                        ]
+                      }
+                    </p>
+                  ) : null}
+
+                  {status ===
+                  "missing" ? (
+                    <p className="mt-2 text-sm text-warning">
+                      {
+                        definition.ui
+                          .missingLabel[
+                          locale
+                        ]
+                      }
+                    </p>
+                  ) : null}
+
+                  {status ===
+                  "invalid" ? (
+                    <p className="mt-2 text-sm text-warning">
+                      {
+                        definition.ui
+                          .invalidLabel[
+                          locale
+                        ]
+                      }
+                    </p>
+                  ) : null}
+
+                  {status ===
+                  "incorrect" ? (
+                    <p className="mt-2 text-sm leading-6 text-warning">
+                      {
+                        field.hint[
+                          locale
+                        ]
+                      }
+                    </p>
+                  ) : null}
+                </label>
+              );
+            },
+          )}
+        </div>
+
+        <div
+          aria-live="polite"
+          className="mt-5"
+        >
+          {evaluation ? (
+            evaluation.allCorrect ? (
+              <div
+                role="status"
+                className="rounded-xl border border-success/30 bg-success/5 px-4 py-3 text-sm leading-6 text-foreground"
+              >
+                {
+                  definition.ui
+                    .successMessage[
+                    locale
+                  ]
+                }
+              </div>
+            ) : (
+              <div
+                role="status"
+                className="rounded-xl border border-warning/30 bg-warning/5 px-4 py-3 text-sm leading-6 text-foreground"
+              >
+                {
+                  definition.ui
+                    .incorrectMessage[
+                    locale
+                  ]
+                }
+              </div>
+            )
+          ) : null}
+        </div>
+
+        {!isSolved ? (
+          <button
+            type="submit"
+            className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-hover"
+          >
+            {attemptCount > 0
+              ? definition.ui
+                  .retryLabel[
+                  locale
+                ]
+              : definition.ui
+                  .submitLabel[
+                  locale
+                ]}
+          </button>
+        ) : null}
+      </form>
+    </section>
+  );
+}
+
+============================================================
+FILE: .\src\features\learning\problems\beam-statics-problem-adapter.ts
+============================================================
+import {
+  beamStaticsModel,
+  createSimplySupportedBeamStateFromDisplayInput,
+  fromSI,
+} from "@/domain/engineering";
+
+import type {
+  BeamStaticsNumericProblemDefinition,
+  NumericProblemAnswerKey,
+} from "@/domain/assessment/numeric-problem";
+
+export function createBeamStaticsProblemAnswerKey(
+  definition:
+    BeamStaticsNumericProblemDefinition,
+): NumericProblemAnswerKey {
+  const stateResult =
+    createSimplySupportedBeamStateFromDisplayInput(
+      {
+        span: {
+          value:
+            definition.input
+              .spanM,
+
+          unit: "m",
+        },
+
+        pointLoad: {
+          value:
+            definition.input
+              .pointLoadKN,
+
+          unit: "kN",
+        },
+
+        loadPosition: {
+          value:
+            definition.input
+              .loadPositionM,
+
+          unit: "m",
+        },
+      },
+    );
+
+  if (!stateResult.state) {
+    throw new Error(
+      `Problem "${definition.id}" contains an invalid beam state.`,
+    );
+  }
+
+  const result =
+    beamStaticsModel.evaluate(
+      stateResult.state,
+    );
+
+  if (!result.values) {
+    throw new Error(
+      `Problem "${definition.id}" did not produce valid Engineering Core values.`,
+    );
+  }
+
+  const values =
+    result.values;
+
+  const maximumMomentLocation =
+    values.moment.maximum
+      .location;
+
+  if (
+    maximumMomentLocation.type !==
+    "point"
+  ) {
+    throw new Error(
+      `Problem "${definition.id}" requires a unique maximum-moment location.`,
+    );
+  }
+
+  return definition.fields.map(
+    (field) => {
+      switch (
+        field.answerRole
+      ) {
+        case "left_reaction":
+          return {
+            fieldId:
+              field.id,
+
+            expectedValue:
+              fromSI(
+                "force",
+                values.leftReactionN,
+                "kN",
+              ),
+          };
+
+        case "right_reaction":
+          return {
+            fieldId:
+              field.id,
+
+            expectedValue:
+              fromSI(
+                "force",
+                values.rightReactionN,
+                "kN",
+              ),
+          };
+
+        case "left_shear":
+          return {
+            fieldId:
+              field.id,
+
+            expectedValue:
+              fromSI(
+                "force",
+                values.shear
+                  .leftOfLoadN,
+                "kN",
+              ),
+          };
+
+        case "right_shear":
+          return {
+            fieldId:
+              field.id,
+
+            expectedValue:
+              fromSI(
+                "force",
+                values.shear
+                  .rightOfLoadN,
+                "kN",
+              ),
+          };
+
+        case "maximum_moment":
+          return {
+            fieldId:
+              field.id,
+
+            expectedValue:
+              fromSI(
+                "moment",
+                values.moment
+                  .maximum
+                  .valueNm,
+                "kN_m",
+              ),
+          };
+
+        case "maximum_moment_position":
+          return {
+            fieldId:
+              field.id,
+
+            expectedValue:
+              maximumMomentLocation
+                .xM,
+          };
+
+        default:
+          return assertNever(
+            field.answerRole,
+          );
+      }
+    },
+  );
+}
+
+function assertNever(
+  value: never,
+): never {
+  throw new Error(
+    `Unsupported beam Statics answer role: ${String(
+      value,
+    )}`,
+  );
+}
+
+============================================================
+FILE: .\src\features\learning\bending\bending-height-prediction.tsx
+============================================================
+"use client";
+
+import {
+  useState,
+} from "react";
+
+import type {
+  SupportedLocale,
+} from "@/domain/shared/types";
+
+interface BendingHeightPredictionProps {
+  readonly locale:
+    SupportedLocale;
+}
+
+type PredictionOptionId =
+  | "option-a"
+  | "option-b"
+  | "option-c";
+
+interface PredictionOption {
+  readonly id:
+    PredictionOptionId;
+
+  readonly text: {
+    readonly tr:
+      string;
+
+    readonly en:
+      string;
+  };
+
+  readonly isCorrect:
+    boolean;
+
+  readonly feedback: {
+    readonly tr:
+      string;
+
+    readonly en:
+      string;
+  };
+}
+
+const options:
+  readonly PredictionOption[] =
+  [
+    {
+      id:
+        "option-a",
+
+      text: {
+        tr:
+          "I iki katÄ±na Ã§Ä±kar; maksimum gerilme yarÄ±ya, maksimum sehim dÃ¶rtte bire iner.",
+
+        en:
+          "I doubles; maximum stress halves and maximum deflection becomes one quarter.",
+      },
+
+      isCorrect:
+        false,
+
+      feedback: {
+        tr:
+          "Kesit yÃ¼ksekliÄŸi I baÄŸÄ±ntÄ±sÄ±nda birinci kuvvette deÄŸil, Ã¼Ã§Ã¼ncÃ¼ kuvvette yer alÄ±r. h'nin I Ã¼zerindeki etkisini tekrar dÃ¼ÅŸÃ¼n.",
+
+        en:
+          "Section height does not appear to the first power in I; it appears to the third power. Reconsider the effect of h on I.",
+      },
+    },
+
+    {
+      id:
+        "option-b",
+
+      text: {
+        tr:
+          "I sekiz katÄ±na Ã§Ä±kar; maksimum gerilme dÃ¶rtte bire, maksimum sehim sekizde bire iner.",
+
+        en:
+          "I increases by a factor of eight; maximum stress becomes one quarter and maximum deflection becomes one eighth.",
+      },
+
+      isCorrect:
+        true,
+
+      feedback: {
+        tr:
+          "DoÄŸru. h iki katÄ±na Ã§Ä±ktÄ±ÄŸÄ±nda I âˆ hÂ³ nedeniyle I sekiz katÄ±na Ã§Ä±kar. DÄ±ÅŸ lif uzaklÄ±ÄŸÄ± da iki katÄ±na Ã§Ä±ktÄ±ÄŸÄ± iÃ§in |Ïƒ|max dÃ¶rtte bire; sehim ise EI ile ters orantÄ±lÄ± olduÄŸundan sekizde bire iner.",
+
+        en:
+          "Correct. Doubling h increases I by a factor of eight because I âˆ hÂ³. Since the extreme-fiber distance also doubles, |Ïƒ|max becomes one quarter, while deflection becomes one eighth because it is inversely proportional to EI.",
+      },
+    },
+
+    {
+      id:
+        "option-c",
+
+      text: {
+        tr:
+          "I sekiz katÄ±na Ã§Ä±kar; maksimum gerilme deÄŸiÅŸmez, maksimum sehim sekizde bire iner.",
+
+        en:
+          "I increases by a factor of eight; maximum stress remains unchanged and maximum deflection becomes one eighth.",
+      },
+
+      isCorrect:
+        false,
+
+      feedback: {
+        tr:
+          "I iÃ§in yÃ¶n doÄŸru; ancak kesit yÃ¼ksekliÄŸi eÄŸilme gerilmesini de deÄŸiÅŸtirir. |Ïƒ|max = |M|(h/2)/I baÄŸÄ±ntÄ±sÄ±nda hem h/2 hem de I deÄŸiÅŸmektedir.",
+
+        en:
+          "The change in I is correct, but section height also changes bending stress. In |Ïƒ|max = |M|(h/2)/I, both h/2 and I change.",
+      },
+    },
+  ];
+
+export function BendingHeightPrediction({
+  locale,
+}: BendingHeightPredictionProps) {
+  const [
+    selectedOptionId,
+    setSelectedOptionId,
+  ] =
+    useState<
+      PredictionOptionId |
+      null
+    >(
+      null,
+    );
+
+  const selectedOption =
+    options.find(
+      (option) =>
+        option.id ===
+        selectedOptionId,
+    );
+
+  const hasSubmitted =
+    selectedOption !==
+    undefined;
+
+  return (
+    <section
+      data-testid="bending-height-prediction"
+      data-prediction-submitted={
+        hasSubmitted
+      }
+      data-prediction-correct={
+        hasSubmitted
+          ? selectedOption.isCorrect
+          : false
+      }
+      className="mt-8 space-y-5"
+    >
+      <div>
+        <h3 className="text-xl font-semibold tracking-[-0.02em] text-foreground">
+          {locale === "tr"
+            ? "Tahminini seÃ§"
+            : "Choose your prediction"}
+        </h3>
+
+        <p className="mt-2 max-w-3xl leading-7 text-muted-strong">
+          {locale === "tr"
+            ? "b, E, yÃ¼k ve aÃ§Ä±klÄ±k aynÄ± kalÄ±rken yalnÄ±z h iki katÄ±na Ã§Ä±karÄ±lÄ±yor. I, maksimum eÄŸilme gerilmesi ve maksimum sehim nasÄ±l deÄŸiÅŸir?"
+            : "Keep b, E, load, and span unchanged while doubling only h. How do I, maximum bending stress, and maximum deflection change?"}
+        </p>
+      </div>
+
+      <div className="grid gap-3">
+        {options.map(
+          (
+            option,
+            index,
+          ) => {
+            const isSelected =
+              selectedOptionId ===
+              option.id;
+
+            return (
+              <button
+                key={
+                  option.id
+                }
+                type="button"
+                disabled={
+                  hasSubmitted
+                }
+                onClick={() => {
+                  setSelectedOptionId(
+                    option.id,
+                  );
+                }}
+                className={[
+                  "min-h-12 rounded-xl border px-4 py-3 text-left transition-colors",
+                  isSelected
+                    ? "border-brand bg-brand-soft"
+                    : "border-border bg-background hover:bg-surface-subtle",
+                  hasSubmitted
+                    ? "cursor-default"
+                    : "",
+                ].join(
+                  " ",
+                )}
+              >
+                <span className="flex gap-3">
+                  <span className="font-semibold text-brand">
+                    {String.fromCharCode(
+                      65 +
+                      index,
+                    )}
+                  </span>
+
+                  <span className="text-sm leading-6 text-muted-strong">
+                    {
+                      option.text[
+                        locale
+                      ]
+                    }
+                  </span>
+                </span>
+              </button>
+            );
+          },
+        )}
+      </div>
+
+      {selectedOption ? (
+        <div
+          role="status"
+          className={[
+            "rounded-xl border p-4 text-sm leading-6",
+            selectedOption.isCorrect
+              ? "border-success/30 bg-success/5 text-muted-strong"
+              : "border-warning/30 bg-warning/5 text-muted-strong",
+          ].join(
+            " ",
+          )}
+        >
+          <p className="font-semibold text-foreground">
+            {selectedOption.isCorrect
+              ? locale ===
+                "tr"
+                ? "Tahmin doÄŸru"
+                : "Prediction correct"
+              : locale ===
+                  "tr"
+                ? "Tahmini yeniden dÃ¼ÅŸÃ¼n"
+                : "Reconsider the prediction"}
+          </p>
+
+          <p className="mt-1">
+            {
+              selectedOption
+                .feedback[
+                locale
+              ]
+            }
+          </p>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+============================================================
+FILE: .\src\features\learning\bending\bending-problem-activity.tsx
+============================================================
+"use client";
+
+import {
+  useMemo,
+  useState,
+} from "react";
+
+import type {
+  BendingProblemCriterionAnswer,
+  BendingProblemDecisionFieldId,
+  BendingProblemNumericFieldId,
+  BendingProblemSubmission,
+} from "@/domain/assessment/bending-problem";
+
+import {
+  evaluateBendingProblemSubmission,
+} from "@/domain/assessment/bending-problem";
+
+import type {
+  SupportedLocale,
+} from "@/domain/shared/types";
+
+import { createBendingProblemAnswerKey } from "@/features/learning/bending/bending-problem-adapter";
+
+interface BendingProblemActivityProps {
+  readonly locale:
+    SupportedLocale;
+}
+
+const numericFields = [
+  {
+    id:
+      "second_moment_area" as const,
+
+    tr:
+      "Alan atalet momenti I",
+
+    en:
+      "Second moment of area I",
+
+    unit:
+      "cmâ´",
+
+    hintTr:
+      "DikdÃ¶rtgen kesitte I = bhÂ³/12. mm deÄŸerlerini tutarlÄ± biÃ§imde dÃ¶nÃ¼ÅŸtÃ¼rmeyi unutma.",
+
+    hintEn:
+      "For a rectangular section, I = bhÂ³/12. Remember to convert the mm dimensions consistently.",
+  },
+
+  {
+    id:
+      "maximum_moment" as const,
+
+    tr:
+      "Maksimum eÄŸilme momenti",
+
+    en:
+      "Maximum bending moment",
+
+    unit:
+      "kNÂ·m",
+
+    hintTr:
+      "Bu kiriÅŸte yÃ¼k orta noktada. Ã–nce Statik sonucunu dÃ¼ÅŸÃ¼n.",
+
+    hintEn:
+      "The load is at midspan. Start from the Statics result.",
+  },
+
+  {
+    id:
+      "maximum_stress" as const,
+
+    tr:
+      "Maksimum eÄŸilme gerilmesi",
+
+    en:
+      "Maximum bending stress",
+
+    unit:
+      "MPa",
+
+    hintTr:
+      "|Ïƒ|max = |M|(h/2)/I baÄŸÄ±ntÄ±sÄ±nÄ± kullan.",
+
+    hintEn:
+      "Use |Ïƒ|max = |M|(h/2)/I.",
+  },
+
+  {
+    id:
+      "maximum_deflection" as const,
+
+    tr:
+      "Maksimum sehim",
+
+    en:
+      "Maximum deflection",
+
+    unit:
+      "mm",
+
+    hintTr:
+      "YÃ¼k orta noktada olduÄŸu iÃ§in bu Ã¶zel durumda PLÂ³/(48EI) kullanÄ±labilir.",
+
+    hintEn:
+      "Because the load is at midspan, PLÂ³/(48EI) applies in this special case.",
+  },
+] as const;
+
+function parseNumericInput(
+  value:
+    string,
+):
+  | number
+  | undefined {
+  const trimmed =
+    value.trim();
+
+  if (
+    trimmed.length ===
+    0
+  ) {
+    return undefined;
+  }
+
+  const parsed =
+    Number(
+      trimmed.replace(
+        ",",
+        ".",
+      ),
+    );
+
+  return Number.isFinite(
+    parsed,
+  )
+    ? parsed
+    : undefined;
+}
+
+export function BendingProblemActivity({
+  locale,
+}: BendingProblemActivityProps) {
+  const answerKey =
+    useMemo(
+      () =>
+        createBendingProblemAnswerKey(),
+      [],
+    );
+
+  const [
+    numericValues,
+    setNumericValues,
+  ] =
+    useState<
+      Record<
+        BendingProblemNumericFieldId,
+        string
+      >
+    >({
+      second_moment_area:
+        "",
+
+      maximum_moment:
+        "",
+
+      maximum_stress:
+        "",
+
+      maximum_deflection:
+        "",
+    });
+
+  const [
+    decisionValues,
+    setDecisionValues,
+  ] =
+    useState<
+      Partial<
+        Record<
+          BendingProblemDecisionFieldId,
+          BendingProblemCriterionAnswer
+        >
+      >
+    >(
+      {},
+    );
+
+  const [
+    evaluation,
+    setEvaluation,
+  ] =
+    useState<
+      ReturnType<
+        typeof evaluateBendingProblemSubmission
+      > |
+      null
+    >(
+      null,
+    );
+
+  const [
+    attemptCount,
+    setAttemptCount,
+  ] =
+    useState(
+      0,
+    );
+
+  const solved =
+    evaluation?.allCorrect ===
+    true;
+
+  function submit() {
+    const numeric:
+      BendingProblemSubmission["numeric"] =
+      Object.fromEntries(
+        numericFields.flatMap(
+          (
+            field,
+          ) => {
+            const parsed =
+              parseNumericInput(
+                numericValues[
+                  field.id
+                ],
+              );
+
+            return parsed ===
+              undefined
+              ? []
+              : [
+                  [
+                    field.id,
+                    parsed,
+                  ],
+                ];
+          },
+        ),
+      );
+
+    const submission:
+      BendingProblemSubmission =
+      {
+        numeric,
+
+        decisions:
+          decisionValues,
+      };
+
+    setEvaluation(
+      evaluateBendingProblemSubmission(
+        answerKey,
+        submission,
+      ),
+    );
+
+    setAttemptCount(
+      (
+        current,
+      ) =>
+        current +
+        1,
+    );
+  }
+
+  return (
+    <section
+      data-testid="bending-problem-activity"
+      data-attempt-submitted={
+        evaluation !==
+        null
+      }
+      data-attempt-correct={
+        solved
+      }
+      data-attempt-count={
+        attemptCount
+      }
+      className="mt-8 space-y-6"
+    >
+      <div className="grid gap-3 sm:grid-cols-3">
+        {[
+          "L = 3 m",
+          "P = 8 kN",
+          "a = 1.5 m",
+          "b = 80 mm",
+          "h = 160 mm",
+          "E = 70 GPa",
+        ].map(
+          (
+            value,
+          ) => (
+            <div
+              key={
+                value
+              }
+              className="rounded-xl border border-border bg-surface-subtle p-3 text-center font-mono text-sm font-semibold text-foreground"
+            >
+              {
+                value
+              }
+            </div>
+          ),
+        )}
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        {numericFields.map(
+          (
+            field,
+          ) => {
+            const correct =
+              evaluation?.numeric[
+                field.id
+              ];
+
+            return (
+              <label
+                key={
+                  field.id
+                }
+                className="rounded-xl border border-border bg-background p-4"
+              >
+                <span className="text-sm font-semibold text-foreground">
+                  {locale ===
+                  "tr"
+                    ? field.tr
+                    : field.en}
+                </span>
+
+                <div className="mt-3 flex items-center gap-2">
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    disabled={
+                      solved
+                    }
+                    aria-label={
+                      locale ===
+                      "tr"
+                        ? field.tr
+                        : field.en
+                    }
+                    value={
+                      numericValues[
+                        field.id
+                      ]
+                    }
+                    onChange={(
+                      event,
+                    ) => {
+                      const nextValue =
+                        event
+                          .currentTarget
+                          .value;
+
+                      setNumericValues(
+                        (
+                          current,
+                        ) => ({
+                          ...current,
+
+                          [field.id]:
+                            nextValue,
+                        }),
+                      );
+
+                      setEvaluation(
+                        null,
+                      );
+                    }}
+                    className="min-h-11 w-full rounded-lg border border-border bg-background px-3 font-mono text-foreground"
+                  />
+
+                  <span className="text-sm text-muted">
+                    {
+                      field.unit
+                    }
+                  </span>
+                </div>
+
+                {evaluation &&
+                !correct ? (
+                  <p className="mt-2 text-xs leading-5 text-warning">
+                    {locale ===
+                    "tr"
+                      ? field.hintTr
+                      : field.hintEn}
+                  </p>
+                ) : null}
+              </label>
+            );
+          },
+        )}
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        {[
+          {
+            id:
+              "stress_criterion" as const,
+
+            tr:
+              "20 MPa gerilme Ã¶lÃ§Ã¼tÃ¼",
+
+            en:
+              "20 MPa stress criterion",
+          },
+
+          {
+            id:
+              "deflection_criterion" as const,
+
+            tr:
+              "2 mm sehim Ã¶lÃ§Ã¼tÃ¼",
+
+            en:
+              "2 mm deflection criterion",
+          },
+        ].map(
+          (
+            field,
+          ) => (
+            <fieldset
+              key={
+                field.id
+              }
+              className="rounded-xl border border-border bg-background p-4"
+            >
+              <legend className="px-1 text-sm font-semibold text-foreground">
+                {locale ===
+                "tr"
+                  ? field.tr
+                  : field.en}
+              </legend>
+
+              <div className="mt-3 flex flex-wrap gap-3">
+                {[
+                  {
+                    value:
+                      "satisfied" as const,
+
+                    tr:
+                      "SaÄŸlandÄ±",
+
+                    en:
+                      "Satisfied",
+                  },
+
+                  {
+                    value:
+                      "not_satisfied" as const,
+
+                    tr:
+                      "SaÄŸlanmadÄ±",
+
+                    en:
+                      "Not satisfied",
+                  },
+                ].map(
+                  (
+                    option,
+                  ) => (
+                    <label
+                      key={
+                        option.value
+                      }
+                      className="flex min-h-11 items-center gap-2 rounded-lg border border-border px-3"
+                    >
+                      <input
+                        type="radio"
+                        disabled={
+                          solved
+                        }
+                        name={
+                          field.id
+                        }
+                        value={
+                          option.value
+                        }
+                        checked={
+                          decisionValues[
+                            field.id
+                          ] ===
+                          option.value
+                        }
+                        onChange={() => {
+                          setDecisionValues(
+                            (
+                              current,
+                            ) => ({
+                              ...current,
+
+                              [field.id]:
+                                option.value,
+                            }),
+                          );
+
+                          setEvaluation(
+                            null,
+                          );
+                        }}
+                      />
+
+                      <span className="text-sm text-muted-strong">
+                        {locale ===
+                        "tr"
+                          ? option.tr
+                          : option.en}
+                      </span>
+                    </label>
+                  ),
+                )}
+              </div>
+
+              {evaluation &&
+              !evaluation
+                .decisions[
+                field.id
+              ] ? (
+                <p className="mt-2 text-xs leading-5 text-warning">
+                  {locale ===
+                  "tr"
+                    ? "Bu Ã¶lÃ§Ã¼tÃ¼ sayÄ±sal sonuÃ§la ayrÄ± olarak karÅŸÄ±laÅŸtÄ±r."
+                    : "Compare this criterion separately with its numerical result."}
+                </p>
+              ) : null}
+            </fieldset>
+          ),
+        )}
+      </div>
+
+      {evaluation ? (
+        <div
+          role="status"
+          className={[
+            "rounded-xl border p-4 text-sm leading-6",
+            evaluation.allCorrect
+              ? "border-success/30 bg-success/5"
+              : "border-warning/30 bg-warning/5",
+          ].join(
+            " ",
+          )}
+        >
+          {evaluation.allCorrect
+            ? locale ===
+              "tr"
+              ? "TÃ¼m hesaplar ve iki kriter doÄŸru. Gerilme Ã¶lÃ§Ã¼tÃ¼ saÄŸlanÄ±rken sehim Ã¶lÃ§Ã¼tÃ¼nÃ¼n saÄŸlanmadÄ±ÄŸÄ±nÄ± doÄŸru ayÄ±rdÄ±n."
+              : "All calculations and both criteria are correct. You correctly distinguished that the stress criterion is satisfied while the deflection criterion is not."
+            : locale ===
+                "tr"
+              ? "BazÄ± sonuÃ§lar henÃ¼z doÄŸru deÄŸil. Ä°puÃ§larÄ±nÄ± kullanÄ±p yalnÄ±z gerekli alanlarÄ± yeniden deÄŸerlendir."
+              : "Some results are not yet correct. Use the hints and reassess the required fields."}
+        </div>
+      ) : null}
+
+      {!solved ? (
+        <button
+          type="button"
+          onClick={
+            submit
+          }
+          className="min-h-11 rounded-lg border border-brand bg-brand px-5 py-2.5 font-semibold text-white hover:bg-brand-hover"
+        >
+          {attemptCount ===
+          0
+            ? locale ===
+              "tr"
+              ? "CevaplarÄ± kontrol et"
+              : "Check answers"
+            : locale ===
+                "tr"
+              ? "Tekrar kontrol et"
+              : "Check again"}
+        </button>
+      ) : null}
+    </section>
+  );
+}
+
+============================================================
+FILE: .\src\features\learning\bending\bending-problem-adapter.ts
+============================================================
+import {
+  createSimplySupportedBeamStateFromDisplayInput,
+  fromSI,
+} from "@/domain/engineering";
+
+import {
+  createBeamBendingConfiguration,
+  evaluateBeamBending,
+} from "@/domain/engineering/beam/bending";
+
+import type {
+  BendingProblemAnswerKey,
+} from "@/domain/assessment/bending-problem";
+
+export function createBendingProblemAnswerKey():
+  BendingProblemAnswerKey {
+  const beamStateResult =
+    createSimplySupportedBeamStateFromDisplayInput(
+      {
+        span: {
+          value:
+            3,
+
+          unit:
+            "m",
+        },
+
+        pointLoad: {
+          value:
+            8,
+
+          unit:
+            "kN",
+        },
+
+        loadPosition: {
+          value:
+            1.5,
+
+          unit:
+            "m",
+        },
+      },
+    );
+
+  if (
+    !beamStateResult.state
+  ) {
+    throw new Error(
+      "Bending problem beam state is invalid.",
+    );
+  }
+
+  const configurationResult =
+    createBeamBendingConfiguration(
+      {
+        sectionWidthM:
+          0.08,
+
+        sectionHeightM:
+          0.16,
+
+        elasticModulusPa:
+          70e9,
+
+        allowableBendingStressPa:
+          20e6,
+
+        allowableDeflectionM:
+          0.002,
+      },
+    );
+
+  if (
+    !configurationResult.configuration
+  ) {
+    throw new Error(
+      "Bending problem configuration is invalid.",
+    );
+  }
+
+  const result =
+    evaluateBeamBending(
+      beamStateResult.state,
+      configurationResult.configuration,
+    );
+
+  if (
+    !result.values
+  ) {
+    throw new Error(
+      "Bending problem Engineering Core result is invalid.",
+    );
+  }
+
+  const stressStatus =
+    result.values
+      .criteria
+      .bendingStress
+      .status;
+
+  const deflectionStatus =
+    result.values
+      .criteria
+      .deflection
+      .status;
+
+  if (
+    stressStatus ===
+      "undetermined" ||
+    deflectionStatus ===
+      "undetermined"
+  ) {
+    throw new Error(
+      "Bending problem requires determinate engineering criteria.",
+    );
+  }
+
+  return {
+    numeric: {
+      second_moment_area:
+        fromSI(
+          "second_moment_area",
+          result.values
+            .section
+            .secondMomentAreaM4,
+          "cm4",
+        ),
+
+      maximum_moment:
+        fromSI(
+          "moment",
+          result.values
+            .maximumMomentNm,
+          "kN_m",
+        ),
+
+      maximum_stress:
+        fromSI(
+          "stress",
+          result.values
+            .stress
+            .maximumAbsoluteStressPa,
+          "MPa",
+        ),
+
+      maximum_deflection:
+        fromSI(
+          "length",
+          result.values
+            .deflection
+            .maximumAbsoluteDeflectionM,
+          "mm",
+        ),
+    },
+
+    decisions: {
+      stress_criterion:
+        stressStatus,
+
+      deflection_criterion:
+        deflectionStatus,
+    },
+  };
+}
+
+============================================================
+FILE: .\src\features\learning\otto\otto-compression-ratio-prediction.tsx
+============================================================
+"use client";
+
+import {
+  useState,
+} from "react";
+
+import type {
+  SupportedLocale,
+} from "@/domain/shared/types";
+
+interface OttoCompressionRatioPredictionProps {
+  readonly locale:
+    SupportedLocale;
+}
+
+type PredictionOptionId =
+  | "a"
+  | "b"
+  | "c";
+
+interface PredictionOption {
+  readonly id:
+    PredictionOptionId;
+
+  readonly tr:
+    string;
+
+  readonly en:
+    string;
+}
+
+const CORRECT_OPTION_ID:
+  PredictionOptionId =
+  "b";
+
+const options:
+  readonly PredictionOption[] =
+  [
+    {
+      id:
+        "a",
+
+      tr:
+        "Ä°deal verim azalÄ±r; Tâ‚‚ ve pâ‚‚ azalÄ±r, vâ‚‚ artar.",
+
+      en:
+        "Ideal efficiency decreases; Tâ‚‚ and pâ‚‚ decrease, while vâ‚‚ increases.",
+    },
+
+    {
+      id:
+        "b",
+
+      tr:
+        "Ä°deal verim artar; Tâ‚‚ ve pâ‚‚ artar, vâ‚‚ azalÄ±r.",
+
+      en:
+        "Ideal efficiency increases; Tâ‚‚ and pâ‚‚ increase, while vâ‚‚ decreases.",
+    },
+
+    {
+      id:
+        "c",
+
+      tr:
+        "Ä°deal verim deÄŸiÅŸmez; yalnÄ±z Tâ‚‚ ve pâ‚‚ deÄŸiÅŸir.",
+
+      en:
+        "Ideal efficiency remains unchanged; only Tâ‚‚ and pâ‚‚ change.",
+    },
+  ];
+
+export function OttoCompressionRatioPrediction({
+  locale,
+}: OttoCompressionRatioPredictionProps) {
+  const [
+    selectedOptionId,
+    setSelectedOptionId,
+  ] =
+    useState<
+      PredictionOptionId |
+      null
+    >(
+      null,
+    );
+
+  const [
+    submitted,
+    setSubmitted,
+  ] =
+    useState(
+      false,
+    );
+
+  const isCorrect =
+    submitted &&
+    selectedOptionId ===
+      CORRECT_OPTION_ID;
+
+  function handleSubmit() {
+    if (
+      selectedOptionId ===
+        null ||
+      submitted
+    ) {
+      return;
+    }
+
+    setSubmitted(
+      true,
+    );
+  }
+
+  return (
+    <section
+      data-testid="otto-compression-ratio-prediction"
+      data-prediction-submitted={
+        submitted
+          ? "true"
+          : "false"
+      }
+      data-prediction-correct={
+        isCorrect
+          ? "true"
+          : "false"
+      }
+      className="mt-8 space-y-5"
+    >
+      <div>
+        <h3 className="text-xl font-semibold tracking-[-0.02em] text-foreground">
+          {locale === "tr"
+            ? "Tahminini seÃ§"
+            : "Choose your prediction"}
+        </h3>
+
+        <p className="mt-2 max-w-3xl leading-7 text-muted-strong">
+          {locale === "tr"
+            ? "Tâ‚ = 300 K, pâ‚ = 100 kPa, qin = 800 kJ/kg ve Î³ = 1,4 sabit kalsÄ±n. YalnÄ±z sÄ±kÄ±ÅŸtÄ±rma oranÄ±nÄ± r = 8'den r = 10'a Ã§Ä±karÄ±rsak ideal Ã§evrimde ne beklersin?"
+            : "Keep Tâ‚ = 300 K, pâ‚ = 100 kPa, qin = 800 kJ/kg, and Î³ = 1.4 fixed. If only the compression ratio increases from r = 8 to r = 10, what do you expect in the ideal cycle?"}
+        </p>
+      </div>
+
+      <div className="grid gap-3">
+        {options.map(
+          (
+            option,
+            index,
+          ) => {
+            const selected =
+              selectedOptionId ===
+              option.id;
+
+            return (
+              <button
+                key={
+                  option.id
+                }
+                type="button"
+                disabled={
+                  submitted
+                }
+                aria-pressed={
+                  selected
+                }
+                onClick={
+                  () =>
+                    setSelectedOptionId(
+                      option.id,
+                    )
+                }
+                className={[
+                  "min-h-12 rounded-xl border px-4 py-3 text-left transition-colors",
+                  selected
+                    ? "border-brand bg-brand-soft"
+                    : "border-border bg-background hover:bg-surface-subtle",
+                  submitted
+                    ? "cursor-default"
+                    : "",
+                ].join(
+                  " ",
+                )}
+              >
+                <span className="flex gap-3">
+                  <span className="font-semibold text-brand">
+                    {String.fromCharCode(
+                      65 +
+                        index,
+                    )}
+                  </span>
+
+                  <span className="text-sm leading-6 text-muted-strong">
+                    {
+                      option[
+                        locale
+                      ]
+                    }
+                  </span>
+                </span>
+              </button>
+            );
+          },
+        )}
+      </div>
+
+      <button
+        type="button"
+        disabled={
+          selectedOptionId ===
+            null ||
+          submitted
+        }
+        onClick={
+          handleSubmit
+        }
+        className="min-h-11 rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {locale === "tr"
+          ? "Tahmini gÃ¶nder"
+          : "Submit prediction"}
+      </button>
+
+      {submitted ? (
+        <div
+          role="status"
+          className={[
+            "rounded-xl border p-4 text-sm leading-6",
+            isCorrect
+              ? "border-success/30 bg-success/5 text-muted-strong"
+              : "border-warning/30 bg-warning/5 text-muted-strong",
+          ].join(
+            " ",
+          )}
+        >
+          {isCorrect
+            ? locale === "tr"
+              ? "Tahmin doÄŸru. Sabit Î³ kullanÄ±lan ideal Otto modelinde r arttÄ±kÃ§a ideal Ä±sÄ±l verim artar. AynÄ± baÅŸlangÄ±Ã§ durumunda sÄ±kÄ±ÅŸtÄ±rma sonu sÄ±caklÄ±ÄŸÄ± ve basÄ±ncÄ± yÃ¼kselirken Ã¶zgÃ¼l hacim azalÄ±r."
+              : "Prediction correct. In the constant-Î³ ideal Otto model, ideal thermal efficiency increases as r increases. For the same initial state, end-of-compression temperature and pressure rise while specific volume decreases."
+            : locale === "tr"
+              ? "Bu tahmin model baÄŸÄ±ntÄ±larÄ±yla uyuÅŸmuyor. Ä°zentropik sÄ±kÄ±ÅŸtÄ±rmada Tâ‚‚ = Tâ‚r^(Î³âˆ’1), pâ‚‚ = pâ‚r^Î³ ve vâ‚‚ = vâ‚/r iliÅŸkilerini birlikte dÃ¼ÅŸÃ¼n."
+              : "This prediction does not match the model relations. Consider Tâ‚‚ = Tâ‚r^(Î³âˆ’1), pâ‚‚ = pâ‚r^Î³, and vâ‚‚ = vâ‚/r together for isentropic compression."}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+============================================================
+FILE: .\src\features\learning\otto\otto-problem-activity.tsx
+============================================================
+"use client";
+
+import {
+  useState,
+} from "react";
+
+import type {
+  FormEvent,
+} from "react";
+
+import {
+  gradeOttoProblem,
+} from "@/domain/assessment/otto-problem";
+
+import type {
+  OttoProblemAnswer,
+} from "@/domain/assessment/otto-problem";
+
+import type {
+  SupportedLocale,
+} from "@/domain/shared/types";
+
+import {
+  createOttoProblemDefinition,
+} from "@/features/learning/otto/otto-problem-adapter";
+
+interface OttoProblemActivityProps {
+  readonly locale:
+    SupportedLocale;
+}
+
+interface RawAnswers {
+  readonly state2TemperatureK:
+    string;
+
+  readonly state2PressureKPa:
+    string;
+
+  readonly state2SpecificVolumeM3PerKg:
+    string;
+
+  readonly state3TemperatureK:
+    string;
+
+  readonly state3PressureKPa:
+    string;
+
+  readonly state4TemperatureK:
+    string;
+
+  readonly state4PressureKPa:
+    string;
+
+  readonly heatRejectedKJPerKg:
+    string;
+
+  readonly netWorkKJPerKg:
+    string;
+
+  readonly thermalEfficiencyPercent:
+    string;
+}
+
+const EMPTY_ANSWERS:
+  RawAnswers =
+  {
+    state2TemperatureK:
+      "",
+
+    state2PressureKPa:
+      "",
+
+    state2SpecificVolumeM3PerKg:
+      "",
+
+    state3TemperatureK:
+      "",
+
+    state3PressureKPa:
+      "",
+
+    state4TemperatureK:
+      "",
+
+    state4PressureKPa:
+      "",
+
+    heatRejectedKJPerKg:
+      "",
+
+    netWorkKJPerKg:
+      "",
+
+    thermalEfficiencyPercent:
+      "",
+  };
+
+function parseLocalizedNumber(
+  raw:
+    string,
+): number {
+  const normalized =
+    raw
+      .trim()
+      .replace(
+        /\s/g,
+        "",
+      )
+      .replace(
+        ",",
+        ".",
+      );
+
+  if (
+    normalized.length ===
+    0
+  ) {
+    return Number.NaN;
+  }
+
+  return Number(
+    normalized,
+  );
+}
+
+function parseAnswers(
+  answers:
+    RawAnswers,
+): OttoProblemAnswer {
+  return {
+    state2TemperatureK:
+      parseLocalizedNumber(
+        answers
+          .state2TemperatureK,
+      ),
+
+    state2PressureKPa:
+      parseLocalizedNumber(
+        answers
+          .state2PressureKPa,
+      ),
+
+    state2SpecificVolumeM3PerKg:
+      parseLocalizedNumber(
+        answers
+          .state2SpecificVolumeM3PerKg,
+      ),
+
+    state3TemperatureK:
+      parseLocalizedNumber(
+        answers
+          .state3TemperatureK,
+      ),
+
+    state3PressureKPa:
+      parseLocalizedNumber(
+        answers
+          .state3PressureKPa,
+      ),
+
+    state4TemperatureK:
+      parseLocalizedNumber(
+        answers
+          .state4TemperatureK,
+      ),
+
+    state4PressureKPa:
+      parseLocalizedNumber(
+        answers
+          .state4PressureKPa,
+      ),
+
+    heatRejectedKJPerKg:
+      parseLocalizedNumber(
+        answers
+          .heatRejectedKJPerKg,
+      ),
+
+    netWorkKJPerKg:
+      parseLocalizedNumber(
+        answers
+          .netWorkKJPerKg,
+      ),
+
+    thermalEfficiencyPercent:
+      parseLocalizedNumber(
+        answers
+          .thermalEfficiencyPercent,
+      ),
+  };
+}
+
+export function OttoProblemActivity({
+  locale,
+}: OttoProblemActivityProps) {
+  const problem =
+    createOttoProblemDefinition();
+
+  const [
+    answers,
+    setAnswers,
+  ] =
+    useState<RawAnswers>(
+      EMPTY_ANSWERS,
+    );
+
+  const [
+    submitted,
+    setSubmitted,
+  ] =
+    useState(
+      false,
+    );
+
+  const [
+    correct,
+    setCorrect,
+  ] =
+    useState(
+      false,
+    );
+
+  function updateAnswer(
+    key:
+      keyof RawAnswers,
+
+    value:
+      string,
+  ) {
+    setAnswers(
+      (
+        previous,
+      ) => ({
+        ...previous,
+
+        [key]:
+          value,
+      }),
+    );
+
+    if (
+      submitted
+    ) {
+      setSubmitted(
+        false,
+      );
+
+      setCorrect(
+        false,
+      );
+    }
+  }
+
+  function handleSubmit(
+    event:
+      FormEvent<HTMLFormElement>,
+  ) {
+    event.preventDefault();
+
+    const grading =
+      gradeOttoProblem(
+        parseAnswers(
+          answers,
+        ),
+
+        problem.expected,
+      );
+
+    setSubmitted(
+      true,
+    );
+
+    setCorrect(
+      grading.correct,
+    );
+  }
+
+  const fields = [
+    {
+      key:
+        "state2TemperatureK",
+
+      tr:
+        "Durum 2 sÄ±caklÄ±ÄŸÄ± Tâ‚‚",
+
+      en:
+        "State-2 temperature Tâ‚‚",
+
+      unit:
+        "K",
+    },
+
+    {
+      key:
+        "state2PressureKPa",
+
+      tr:
+        "Durum 2 basÄ±ncÄ± pâ‚‚",
+
+      en:
+        "State-2 pressure pâ‚‚",
+
+      unit:
+        "kPa",
+    },
+
+    {
+      key:
+        "state2SpecificVolumeM3PerKg",
+
+      tr:
+        "Durum 2 Ã¶zgÃ¼l hacmi vâ‚‚",
+
+      en:
+        "State-2 specific volume vâ‚‚",
+
+      unit:
+        "mÂ³/kg",
+    },
+
+    {
+      key:
+        "state3TemperatureK",
+
+      tr:
+        "Durum 3 sÄ±caklÄ±ÄŸÄ± Tâ‚ƒ",
+
+      en:
+        "State-3 temperature Tâ‚ƒ",
+
+      unit:
+        "K",
+    },
+
+    {
+      key:
+        "state3PressureKPa",
+
+      tr:
+        "Durum 3 basÄ±ncÄ± pâ‚ƒ",
+
+      en:
+        "State-3 pressure pâ‚ƒ",
+
+      unit:
+        "kPa",
+    },
+
+    {
+      key:
+        "state4TemperatureK",
+
+      tr:
+        "Durum 4 sÄ±caklÄ±ÄŸÄ± Tâ‚„",
+
+      en:
+        "State-4 temperature Tâ‚„",
+
+      unit:
+        "K",
+    },
+
+    {
+      key:
+        "state4PressureKPa",
+
+      tr:
+        "Durum 4 basÄ±ncÄ± pâ‚„",
+
+      en:
+        "State-4 pressure pâ‚„",
+
+      unit:
+        "kPa",
+    },
+
+    {
+      key:
+        "heatRejectedKJPerKg",
+
+      tr:
+        "Ã–zgÃ¼l Ä±sÄ± atÄ±mÄ± qout",
+
+      en:
+        "Specific heat rejected qout",
+
+      unit:
+        "kJ/kg",
+    },
+
+    {
+      key:
+        "netWorkKJPerKg",
+
+      tr:
+        "Net Ã¶zgÃ¼l iÅŸ wnet",
+
+      en:
+        "Net specific work wnet",
+
+      unit:
+        "kJ/kg",
+    },
+
+    {
+      key:
+        "thermalEfficiencyPercent",
+
+      tr:
+        "Ä°deal Ä±sÄ±l verim Î·",
+
+      en:
+        "Ideal thermal efficiency Î·",
+
+      unit:
+        "%",
+    },
+  ] as const;
+
+  return (
+    <section
+      data-testid="otto-problem-activity"
+      data-attempt-submitted={
+        submitted
+          ? "true"
+          : "false"
+      }
+      data-attempt-correct={
+        correct
+          ? "true"
+          : "false"
+      }
+      className="mt-8 space-y-6"
+    >
+      <div className="rounded-xl border border-border bg-surface-subtle p-4">
+        <h3 className="font-semibold text-foreground">
+          {locale === "tr"
+            ? "Verilenler"
+            : "Given"}
+        </h3>
+
+        <p className="mt-2 font-mono text-sm leading-7 text-muted-strong">
+          r = 6
+          {" Â· "}
+          Tâ‚ = 320 K
+          {" Â· "}
+          pâ‚ = 120 kPa
+          {" Â· "}
+          qin = 600 kJ/kg
+          {" Â· "}
+          R = 287 J/(kgÂ·K)
+          {" Â· "}
+          Î³ = 1,4
+        </p>
+      </div>
+
+      <form
+        onSubmit={
+          handleSubmit
+        }
+        className="space-y-5"
+      >
+        <div className="grid gap-4 md:grid-cols-2">
+          {fields.map(
+            (
+              field,
+            ) => (
+              <label
+                key={
+                  field.key
+                }
+                className="block rounded-xl border border-border bg-background p-4"
+              >
+                <span className="text-sm font-semibold text-foreground">
+                  {
+                    field[
+                      locale
+                    ]
+                  }
+                </span>
+
+                <span className="mt-3 flex items-center gap-3">
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={
+                      answers[
+                        field.key
+                      ]
+                    }
+                    onChange={
+                      (
+                        event,
+                      ) => {
+                        const nextValue =
+                          event
+                            .currentTarget
+                            .value;
+
+                        updateAnswer(
+                          field.key,
+                          nextValue,
+                        );
+                      }
+                    }
+                    aria-label={
+                      field[
+                        locale
+                      ]
+                    }
+                    className="min-h-11 w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-foreground"
+                  />
+
+                  <span className="whitespace-nowrap text-sm text-muted">
+                    {
+                      field.unit
+                    }
+                  </span>
+                </span>
+              </label>
+            ),
+          )}
+        </div>
+
+        <button
+          type="submit"
+          className="min-h-11 rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white"
+        >
+          {locale === "tr"
+            ? "CevaplarÄ± kontrol et"
+            : "Check answers"}
+        </button>
+      </form>
+
+      {submitted ? (
+        <div
+          role="status"
+          className={[
+            "rounded-xl border p-4 text-sm leading-6",
+            correct
+              ? "border-success/30 bg-success/5 text-muted-strong"
+              : "border-warning/30 bg-warning/5 text-muted-strong",
+          ].join(
+            " ",
+          )}
+        >
+          {correct
+            ? locale === "tr"
+              ? "TÃ¼m sonuÃ§lar tolerans iÃ§inde doÄŸru. Enerji dengesi ve verim iliÅŸkilerini de son kez kontrol et: qin âˆ’ qout = wnet ve Î· = wnet/qin."
+              : "All results are correct within tolerance. Finish by checking the energy and efficiency relations: qin âˆ’ qout = wnet and Î· = wnet/qin."
+            : locale === "tr"
+              ? "En az bir sonuÃ§ tolerans dÄ±ÅŸÄ±nda. SÃ¼reÃ§leri sÄ±rayla Ã§Ã¶z; sabit hacim adÄ±mlarÄ±nda Ã¶zgÃ¼l hacmin deÄŸiÅŸmediÄŸini ve enerji terimlerinin aynÄ± kJ/kg temelinde olduÄŸunu kontrol et."
+              : "At least one result is outside tolerance. Solve the processes in sequence; check that specific volume remains constant on the constant-volume legs and that all energy terms use the same kJ/kg basis."}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+============================================================
+FILE: .\src\features\learning\otto\otto-problem-adapter.ts
+============================================================
+import type {
+  OttoProblemAnswer,
+} from "@/domain/assessment/otto-problem";
+
+import {
+  createIdealOttoInputState,
+  evaluateIdealOttoCycle,
+} from "@/domain/engineering/thermodynamics/otto";
+
+export interface OttoProblemDefinition {
+  readonly compressionRatio:
+    number;
+
+  readonly initialTemperatureK:
+    number;
+
+  readonly initialPressureKPa:
+    number;
+
+  readonly heatInputKJPerKg:
+    number;
+
+  readonly gasConstantJPerKgK:
+    number;
+
+  readonly gamma:
+    number;
+
+  readonly expected:
+    OttoProblemAnswer;
+}
+
+export function createOttoProblemDefinition():
+  OttoProblemDefinition {
+  const inputResult =
+    createIdealOttoInputState(
+      {
+        compressionRatio:
+          6,
+
+        initialTemperatureK:
+          320,
+
+        initialPressurePa:
+          120_000,
+
+        heatInputJPerKg:
+          600_000,
+      },
+    );
+
+  if (
+    !inputResult.state
+  ) {
+    throw new Error(
+      "Expected valid Otto problem input.",
+    );
+  }
+
+  const result =
+    evaluateIdealOttoCycle(
+      inputResult.state,
+    );
+
+  if (
+    !result.values
+  ) {
+    throw new Error(
+      "Expected valid Otto problem analysis.",
+    );
+  }
+
+  const values =
+    result.values;
+
+  return {
+    compressionRatio:
+      inputResult.state
+        .compressionRatio,
+
+    initialTemperatureK:
+      inputResult.state
+        .initialTemperatureK,
+
+    initialPressureKPa:
+      inputResult.state
+        .initialPressurePa /
+      1000,
+
+    heatInputKJPerKg:
+      inputResult.state
+        .heatInputJPerKg /
+      1000,
+
+    gasConstantJPerKgK:
+      values
+        .gasProperties
+        .gasConstantJPerKgK,
+
+    gamma:
+      values
+        .gasProperties
+        .gamma,
+
+    expected: {
+      state2TemperatureK:
+        values.states
+          .state2
+          .temperatureK,
+
+      state2PressureKPa:
+        values.states
+          .state2
+          .pressurePa /
+        1000,
+
+      state2SpecificVolumeM3PerKg:
+        values.states
+          .state2
+          .specificVolumeM3PerKg,
+
+      state3TemperatureK:
+        values.states
+          .state3
+          .temperatureK,
+
+      state3PressureKPa:
+        values.states
+          .state3
+          .pressurePa /
+        1000,
+
+      state4TemperatureK:
+        values.states
+          .state4
+          .temperatureK,
+
+      state4PressureKPa:
+        values.states
+          .state4
+          .pressurePa /
+        1000,
+
+      heatRejectedKJPerKg:
+        values.energy
+          .heatRejectedJPerKg /
+        1000,
+
+      netWorkKJPerKg:
+        values.energy
+          .netWorkJPerKg /
+        1000,
+
+      thermalEfficiencyPercent:
+        values.energy
+          .thermalEfficiencyFromEnergyBalance *
+        100,
+    },
+  };
+}

@@ -1,0 +1,6785 @@
+﻿
+
+============================================================
+FILE: .\src\content\predictions.ts
+============================================================
+import type {
+  EntityId,
+} from "@/domain/shared/types";
+
+import type {
+  PredictionDefinition,
+} from "@/domain/learning/prediction";
+
+const predictionDefinitions:
+  readonly PredictionDefinition[] =
+  [
+    {
+      activityId:
+        "activity-ssb-03",
+
+      prompt: {
+        tr:
+          "Noktasal yÃ¼kÃ¼n bÃ¼yÃ¼klÃ¼ÄŸÃ¼ ve kiriÅŸ aÃ§Ä±klÄ±ÄŸÄ± deÄŸiÅŸmeden, yÃ¼k saÄŸ mesnete doÄŸru hareket ederse mesnet tepkilerinin nasÄ±l deÄŸiÅŸeceÄŸini tahmin et.",
+
+        en:
+          "Keeping the point-load magnitude and beam span unchanged, predict how the support reactions change as the load moves toward the right support.",
+      },
+
+      options: [
+        {
+          id:
+            "prediction-ssb-reactions-a",
+
+          label: {
+            tr:
+              "Sol mesnet tepkisi artar, saÄŸ mesnet tepkisi azalÄ±r.",
+
+            en:
+              "The left reaction increases and the right reaction decreases.",
+          },
+
+          feedback: {
+            tr:
+              "YÃ¼k saÄŸa hareket ettikÃ§e saÄŸ mesnete gÃ¶re moment kolu kÃ¼Ã§Ã¼lÃ¼r. Bu nedenle sol mesnet tepkisi artmaz; azalÄ±r.",
+
+            en:
+              "As the load moves right, its moment arm about the right support becomes smaller. Therefore, the left reaction does not increase; it decreases.",
+          },
+        },
+
+        {
+          id:
+            "prediction-ssb-reactions-b",
+
+          label: {
+            tr:
+              "Sol mesnet tepkisi azalÄ±r, saÄŸ mesnet tepkisi artar.",
+
+            en:
+              "The left reaction decreases and the right reaction increases.",
+          },
+
+          feedback: {
+            tr:
+              "DoÄŸru iliÅŸki budur. YÃ¼k saÄŸa hareket ettikÃ§e RA azalÄ±r ve RB artar. ToplamlarÄ± yine uygulanan dÃ¼ÅŸey yÃ¼ke eÅŸittir.",
+
+            en:
+              "This is the correct relationship. As the load moves right, RA decreases and RB increases. Their sum still equals the applied vertical load.",
+          },
+        },
+
+        {
+          id:
+            "prediction-ssb-reactions-c",
+
+          label: {
+            tr:
+              "Ä°ki mesnet tepkisi de deÄŸiÅŸmez.",
+
+            en:
+              "Both support reactions remain unchanged.",
+          },
+
+          feedback: {
+            tr:
+              "Toplam dÃ¼ÅŸey tepki sabit kalÄ±r ancak yÃ¼kÃ¼n konumu moment dengesini deÄŸiÅŸtirir. Bu nedenle yÃ¼k saÄŸa hareket ederken iki mesnet tepkisi aynÄ± kalmaz.",
+
+            en:
+              "The total vertical reaction remains constant, but moving the load changes moment equilibrium. Therefore, the two support reactions do not remain unchanged.",
+          },
+        },
+      ],
+
+      correctOptionId:
+        "prediction-ssb-reactions-b",
+    },
+
+    {
+      activityId:
+        "activity-bending-03",
+
+      prompt: {
+        tr:
+          "b, E, yÃ¼k ve aÃ§Ä±klÄ±k aynÄ± kalÄ±rken yalnÄ±z h iki katÄ±na Ã§Ä±karÄ±lÄ±yor. I, maksimum eÄŸilme gerilmesi ve maksimum sehim nasÄ±l deÄŸiÅŸir?",
+
+        en:
+          "Keep b, E, load, and span unchanged while doubling only h. How do I, maximum bending stress, and maximum deflection change?",
+      },
+
+      options: [
+        {
+          id:
+            "option-a",
+
+          label: {
+            tr:
+              "I iki katÄ±na Ã§Ä±kar; maksimum gerilme yarÄ±ya, maksimum sehim dÃ¶rtte bire iner.",
+
+            en:
+              "I doubles; maximum stress halves and maximum deflection becomes one quarter.",
+          },
+
+          feedback: {
+            tr:
+              "Kesit yÃ¼ksekliÄŸi I baÄŸÄ±ntÄ±sÄ±nda birinci kuvvette deÄŸil, Ã¼Ã§Ã¼ncÃ¼ kuvvette yer alÄ±r. h'nin I Ã¼zerindeki etkisini tekrar dÃ¼ÅŸÃ¼n.",
+
+            en:
+              "Section height does not appear to the first power in I; it appears to the third power. Reconsider the effect of h on I.",
+          },
+        },
+
+        {
+          id:
+            "option-b",
+
+          label: {
+            tr:
+              "I sekiz katÄ±na Ã§Ä±kar; maksimum gerilme dÃ¶rtte bire, maksimum sehim sekizde bire iner.",
+
+            en:
+              "I increases by a factor of eight; maximum stress becomes one quarter and maximum deflection becomes one eighth.",
+          },
+
+          feedback: {
+            tr:
+              "DoÄŸru. h iki katÄ±na Ã§Ä±ktÄ±ÄŸÄ±nda I âˆ hÂ³ nedeniyle I sekiz katÄ±na Ã§Ä±kar. DÄ±ÅŸ lif uzaklÄ±ÄŸÄ± da iki katÄ±na Ã§Ä±ktÄ±ÄŸÄ± iÃ§in |Ïƒ|max dÃ¶rtte bire; sehim ise EI ile ters orantÄ±lÄ± olduÄŸundan sekizde bire iner.",
+
+            en:
+              "Correct. Doubling h increases I by a factor of eight because I âˆ hÂ³. Since the extreme-fiber distance also doubles, |Ïƒ|max becomes one quarter, while deflection becomes one eighth because it is inversely proportional to EI.",
+          },
+        },
+
+        {
+          id:
+            "option-c",
+
+          label: {
+            tr:
+              "I sekiz katÄ±na Ã§Ä±kar; maksimum gerilme deÄŸiÅŸmez, maksimum sehim sekizde bire iner.",
+
+            en:
+              "I increases by a factor of eight; maximum stress remains unchanged and maximum deflection becomes one eighth.",
+          },
+
+          feedback: {
+            tr:
+              "I iÃ§in yÃ¶n doÄŸru; ancak kesit yÃ¼ksekliÄŸi eÄŸilme gerilmesini de deÄŸiÅŸtirir. |Ïƒ|max = |M|(h/2)/I baÄŸÄ±ntÄ±sÄ±nda hem h/2 hem de I deÄŸiÅŸmektedir.",
+
+            en:
+              "The change in I is correct, but section height also changes bending stress. In |Ïƒ|max = |M|(h/2)/I, both h/2 and I change.",
+          },
+        },
+      ],
+
+      correctOptionId:
+        "option-b",
+    },
+
+    {
+      activityId:
+        "activity-otto-03",
+
+      prompt: {
+        tr:
+          "Tâ‚ = 300 K, pâ‚ = 100 kPa, qin = 800 kJ/kg ve Î³ = 1,4 sabit kalsÄ±n. YalnÄ±z sÄ±kÄ±ÅŸtÄ±rma oranÄ±nÄ± r = 8'den r = 10'a Ã§Ä±karÄ±rsak ideal Ã§evrimde ne beklersin?",
+
+        en:
+          "Keep Tâ‚ = 300 K, pâ‚ = 100 kPa, qin = 800 kJ/kg, and Î³ = 1.4 fixed. If only the compression ratio increases from r = 8 to r = 10, what do you expect in the ideal cycle?",
+      },
+
+      options: [
+        {
+          id:
+            "a",
+
+          label: {
+            tr:
+              "Ä°deal verim azalÄ±r; Tâ‚‚ ve pâ‚‚ azalÄ±r, vâ‚‚ artar.",
+
+            en:
+              "Ideal efficiency decreases; Tâ‚‚ and pâ‚‚ decrease, while vâ‚‚ increases.",
+          },
+
+          feedback: {
+            tr:
+              "Bu tahmin model baÄŸÄ±ntÄ±larÄ±yla uyuÅŸmuyor. Ä°zentropik sÄ±kÄ±ÅŸtÄ±rmada Tâ‚‚ = Tâ‚r^(Î³âˆ’1), pâ‚‚ = pâ‚r^Î³ ve vâ‚‚ = vâ‚/r iliÅŸkilerini birlikte dÃ¼ÅŸÃ¼n.",
+
+            en:
+              "This prediction does not match the model relations. Consider Tâ‚‚ = Tâ‚r^(Î³âˆ’1), pâ‚‚ = pâ‚r^Î³, and vâ‚‚ = vâ‚/r together for isentropic compression.",
+          },
+        },
+
+        {
+          id:
+            "b",
+
+          label: {
+            tr:
+              "Ä°deal verim artar; Tâ‚‚ ve pâ‚‚ artar, vâ‚‚ azalÄ±r.",
+
+            en:
+              "Ideal efficiency increases; Tâ‚‚ and pâ‚‚ increase, while vâ‚‚ decreases.",
+          },
+
+          feedback: {
+            tr:
+              "DoÄŸru. Sabit Î³ kullanÄ±lan ideal Otto modelinde r arttÄ±kÃ§a ideal Ä±sÄ±l verim artar. AynÄ± baÅŸlangÄ±Ã§ durumunda sÄ±kÄ±ÅŸtÄ±rma sonu sÄ±caklÄ±ÄŸÄ± ve basÄ±ncÄ± yÃ¼kselirken Ã¶zgÃ¼l hacim azalÄ±r.",
+
+            en:
+              "Correct. In the constant-Î³ ideal Otto model, ideal thermal efficiency increases as r increases. For the same initial state, end-of-compression temperature and pressure rise while specific volume decreases.",
+          },
+        },
+
+        {
+          id:
+            "c",
+
+          label: {
+            tr:
+              "Ä°deal verim deÄŸiÅŸmez; yalnÄ±z Tâ‚‚ ve pâ‚‚ deÄŸiÅŸir.",
+
+            en:
+              "Ideal efficiency remains unchanged; only Tâ‚‚ and pâ‚‚ change.",
+          },
+
+          feedback: {
+            tr:
+              "Bu tahmin model baÄŸÄ±ntÄ±larÄ±yla uyuÅŸmuyor. Ä°zentropik sÄ±kÄ±ÅŸtÄ±rmada Tâ‚‚ = Tâ‚r^(Î³âˆ’1), pâ‚‚ = pâ‚r^Î³ ve vâ‚‚ = vâ‚/r iliÅŸkilerini birlikte dÃ¼ÅŸÃ¼n.",
+
+            en:
+              "This prediction does not match the model relations. Consider Tâ‚‚ = Tâ‚r^(Î³âˆ’1), pâ‚‚ = pâ‚r^Î³, and vâ‚‚ = vâ‚/r together for isentropic compression.",
+          },
+        },
+      ],
+
+      correctOptionId:
+        "b",
+    },
+  ];
+
+function validatePredictionDefinitions(): void {
+  const activityIds =
+    new Set<string>();
+
+  for (
+    const definition
+    of predictionDefinitions
+  ) {
+    if (
+      activityIds.has(
+        definition.activityId,
+      )
+    ) {
+      throw new Error(
+        `Duplicate prediction activity ID: ${definition.activityId}`,
+      );
+    }
+
+    activityIds.add(
+      definition.activityId,
+    );
+
+    if (
+      definition.options.length <
+      2
+    ) {
+      throw new Error(
+        `Prediction "${definition.activityId}" must contain at least two options.`,
+      );
+    }
+
+    const optionIds =
+      new Set<string>();
+
+    for (
+      const option
+      of definition.options
+    ) {
+      if (
+        optionIds.has(
+          option.id,
+        )
+      ) {
+        throw new Error(
+          `Duplicate option "${option.id}" in prediction "${definition.activityId}".`,
+        );
+      }
+
+      optionIds.add(
+        option.id,
+      );
+    }
+
+    if (
+      !optionIds.has(
+        definition.correctOptionId,
+      )
+    ) {
+      throw new Error(
+        `Prediction "${definition.activityId}" references unknown correct option "${definition.correctOptionId}".`,
+      );
+    }
+  }
+}
+
+validatePredictionDefinitions();
+
+export function getPredictionDefinition(
+  activityId:
+    EntityId,
+): PredictionDefinition | undefined {
+  return predictionDefinitions.find(
+    (definition) =>
+      definition.activityId ===
+      activityId,
+  );
+}
+
+export function getPredictionDefinitions():
+  readonly PredictionDefinition[] {
+  return predictionDefinitions;
+}
+
+============================================================
+FILE: .\src\content\statics-problems.ts
+============================================================
+import type {
+  NumericProblemDefinition,
+} from "@/domain/assessment/numeric-problem";
+
+import type {
+  EntityId,
+} from "@/domain/shared/types";
+
+const problemDefinitions:
+  readonly NumericProblemDefinition[] =
+  [
+    {
+      id:
+        "problem-ssb-independent-case",
+
+      activityId:
+        "activity-ssb-05",
+
+      kind:
+        "beam_statics_numeric_problem",
+
+      title: {
+        tr:
+          "SonuÃ§larÄ±nÄ± kontrol et",
+
+        en:
+          "Check your results",
+      },
+
+      instructions: {
+        tr:
+          "HesapladÄ±ÄŸÄ±n altÄ± deÄŸeri gir. KÃ¼Ã§Ã¼k yuvarlama farklarÄ± kabul edilir. YanlÄ±ÅŸ bir sonuÃ§ta doÄŸrudan cevap yerine hangi fiziksel iliÅŸkiyi yeniden kontrol etmen gerektiÄŸini gÃ¶receksin.",
+
+        en:
+          "Enter the six values you calculated. Small rounding differences are accepted. If a result is incorrect, you will receive a targeted hint about the physical relationship to revisit rather than the answer itself.",
+      },
+
+      input: {
+        spanM: 6,
+        pointLoadKN: 12,
+        loadPositionM: 2,
+      },
+
+      fields: [
+        {
+          id:
+            "problem-ssb-ra",
+
+          answerRole:
+            "left_reaction",
+
+          label: {
+            tr:
+              "Sol mesnet tepkisi RA",
+
+            en:
+              "Left support reaction RA",
+          },
+
+          unitSymbol:
+            "kN",
+
+          tolerance: {
+            absolute: 0.02,
+            relative: 0.002,
+          },
+
+          hint: {
+            tr:
+              "Ã–nce A noktasÄ±na gÃ¶re moment dengesiyle RB'yi bul; ardÄ±ndan RA + RB = P dÃ¼ÅŸey kuvvet dengesini kullan.",
+
+            en:
+              "First find RB from moment equilibrium about A, then use the vertical-force balance RA + RB = P.",
+          },
+        },
+
+        {
+          id:
+            "problem-ssb-rb",
+
+          answerRole:
+            "right_reaction",
+
+          label: {
+            tr:
+              "SaÄŸ mesnet tepkisi RB",
+
+            en:
+              "Right support reaction RB",
+          },
+
+          unitSymbol:
+            "kN",
+
+          tolerance: {
+            absolute: 0.02,
+            relative: 0.002,
+          },
+
+          hint: {
+            tr:
+              "A noktasÄ±na gÃ¶re moment al. Bu seÃ§im RA'yÄ± denklemden Ã§Ä±karÄ±r: RBÂ·L ile PÂ·a momentlerini dengele.",
+
+            en:
+              "Take moments about A. This eliminates RA from the equation: balance the moments RBÂ·L and PÂ·a.",
+          },
+        },
+
+        {
+          id:
+            "problem-ssb-v-left",
+
+          answerRole:
+            "left_shear",
+
+          label: {
+            tr:
+              "YÃ¼kÃ¼n solundaki kesme kuvveti",
+
+            en:
+              "Shear force to the left of the load",
+          },
+
+          unitSymbol:
+            "kN",
+
+          tolerance: {
+            absolute: 0.02,
+            relative: 0.002,
+          },
+
+          hint: {
+            tr:
+              "A mesnedinden hemen saÄŸdaki kesitte hangi dÃ¼ÅŸey kuvvetin etkili olduÄŸunu dÃ¼ÅŸÃ¼n. YÃ¼k noktasÄ±na ulaÅŸmadan Ã¶nce baÅŸka dÃ¼ÅŸey kuvvet yoktur.",
+
+            en:
+              "Consider which vertical force acts immediately to the right of support A. There is no other vertical force before reaching the point load.",
+          },
+        },
+
+        {
+          id:
+            "problem-ssb-v-right",
+
+          answerRole:
+            "right_shear",
+
+          label: {
+            tr:
+              "YÃ¼kÃ¼n saÄŸÄ±ndaki kesme kuvveti",
+
+            en:
+              "Shear force to the right of the load",
+          },
+
+          unitSymbol:
+            "kN",
+
+          tolerance: {
+            absolute: 0.02,
+            relative: 0.002,
+          },
+
+          hint: {
+            tr:
+              "Noktasal yÃ¼kte kesme diyagramÄ± P kadar aÅŸaÄŸÄ± sÄ±Ã§rar. Ä°ÅŸaret kuralÄ±nÄ± koruyarak VsaÄŸ = Vsol âˆ’ P iliÅŸkisini kontrol et.",
+
+            en:
+              "At the point load, the shear diagram jumps downward by P. Keeping the sign convention consistent, check Vright = Vleft âˆ’ P.",
+          },
+        },
+
+        {
+          id:
+            "problem-ssb-mmax",
+
+          answerRole:
+            "maximum_moment",
+
+          label: {
+            tr:
+              "Maksimum eÄŸilme momenti",
+
+            en:
+              "Maximum bending moment",
+          },
+
+          unitSymbol:
+            "kNÂ·m",
+
+          tolerance: {
+            absolute: 0.05,
+            relative: 0.002,
+          },
+
+          hint: {
+            tr:
+              "Kesme kuvvetinin iÅŸaret deÄŸiÅŸtirdiÄŸi noktayÄ± belirle. Bu tek noktasal yÃ¼k modelinde maksimum momenti o konumda M(x) baÄŸÄ±ntÄ±sÄ±ndan hesapla.",
+
+            en:
+              "Identify where the shear force changes sign. For this single-point-load model, evaluate M(x) at that location to obtain the maximum moment.",
+          },
+        },
+
+        {
+          id:
+            "problem-ssb-x-mmax",
+
+          answerRole:
+            "maximum_moment_position",
+
+          label: {
+            tr:
+              "Maksimum momentin konumu",
+
+            en:
+              "Location of maximum moment",
+          },
+
+          unitSymbol:
+            "m",
+
+          tolerance: {
+            absolute: 0.01,
+            relative: 0.001,
+          },
+
+          hint: {
+            tr:
+              "V(x)'in pozitiften negatife geÃ§tiÄŸi konumu bul. Bu modelde momentin tepe noktasÄ± kesme kuvvetinin iÅŸaret deÄŸiÅŸtirdiÄŸi yerdedir.",
+
+            en:
+              "Find the position where V(x) changes from positive to negative. In this model, the moment reaches its peak where the shear force changes sign.",
+          },
+        },
+      ],
+
+      ui: {
+        answersHeading: {
+          tr:
+            "HesapladÄ±ÄŸÄ±n deÄŸerler",
+
+          en:
+            "Your calculated values",
+        },
+
+        submitLabel: {
+          tr:
+            "SonuÃ§larÄ± kontrol et",
+
+          en:
+            "Check answers",
+        },
+
+        retryLabel: {
+          tr:
+            "Tekrar kontrol et",
+
+          en:
+            "Check again",
+        },
+
+        correctLabel: {
+          tr:
+            "DoÄŸru",
+
+          en:
+            "Correct",
+        },
+
+        missingLabel: {
+          tr:
+            "Bir deÄŸer gir.",
+
+          en:
+            "Enter a value.",
+        },
+
+        invalidLabel: {
+          tr:
+            "GeÃ§erli bir sayÄ± gir.",
+
+          en:
+            "Enter a valid number.",
+        },
+
+        successMessage: {
+          tr:
+            "AltÄ± sonuÃ§ da Engineering Core tarafÄ±ndan hesaplanan fiziksel durumla uyumlu. Reaksiyon, kesme ve moment sonuÃ§larÄ±n birbirleriyle tutarlÄ±.",
+
+          en:
+            "All six results agree with the physical state calculated by the Engineering Core. Your reaction, shear, and moment results are mutually consistent.",
+        },
+
+        incorrectMessage: {
+          tr:
+            "BazÄ± sonuÃ§lar henÃ¼z uyuÅŸmuyor. DoÄŸrudan cevabÄ± vermeden, yeniden kontrol etmen gereken iliÅŸkiyi her alanÄ±n altÄ±nda gÃ¶sterdim.",
+
+          en:
+            "Some results do not yet agree. Rather than revealing the answer, each field below shows the relationship you should revisit.",
+        },
+      },
+    },
+  ];
+
+export function getNumericProblemDefinition(
+  activityId:
+    EntityId,
+):
+  | NumericProblemDefinition
+  | undefined {
+  return problemDefinitions.find(
+    (definition) =>
+      definition.activityId ===
+      activityId,
+  );
+}
+
+export function getNumericProblemDefinitions():
+  readonly NumericProblemDefinition[] {
+  return problemDefinitions;
+}
+
+============================================================
+FILE: .\src\content\assessment-feedback.ts
+============================================================
+import type {
+  AssessmentFeedbackDescriptor,
+  AssessmentFeedbackReason,
+  AssessmentFeedbackTone,
+} from "@/domain/assessment/feedback";
+
+import type {
+  SupportedLocale,
+} from "@/domain/shared/types";
+
+export interface LocalizedAssessmentFeedbackText {
+  readonly title:
+    string;
+
+  readonly message:
+    string;
+}
+
+export interface AssessmentFeedbackCatalogEntry
+  extends AssessmentFeedbackDescriptor {
+  readonly text: {
+    readonly tr:
+      LocalizedAssessmentFeedbackText;
+
+    readonly en:
+      LocalizedAssessmentFeedbackText;
+  };
+}
+
+function entry(
+  code:
+    string,
+
+  reason:
+    AssessmentFeedbackReason,
+
+  tone:
+    AssessmentFeedbackTone,
+
+  retryable:
+    boolean,
+
+  trTitle:
+    string,
+
+  trMessage:
+    string,
+
+  enTitle:
+    string,
+
+  enMessage:
+    string,
+): AssessmentFeedbackCatalogEntry {
+  return {
+    code,
+    reason,
+    tone,
+    retryable,
+
+    text: {
+      tr: {
+        title:
+          trTitle,
+
+        message:
+          trMessage,
+      },
+
+      en: {
+        title:
+          enTitle,
+
+        message:
+          enMessage,
+      },
+    },
+  };
+}
+
+export const ASSESSMENT_FEEDBACK_CATALOG:
+  readonly AssessmentFeedbackCatalogEntry[] =
+  [
+    entry(
+      "assessment.result.correct",
+      "correct",
+      "success",
+      false,
+      "DoÄŸru",
+      "DeÄŸerlendirilen bÃ¼tÃ¼n yanÄ±tlar doÄŸru.",
+      "Correct",
+      "All evaluated responses are correct.",
+    ),
+
+    entry(
+      "assessment.result.partially-correct",
+      "partial",
+      "guidance",
+      true,
+      "KÄ±smen doÄŸru",
+      "YanÄ±tÄ±n bazÄ± bÃ¶lÃ¼mleri doÄŸru. HatalÄ± veya eksik kalan alanlarÄ± ayrÄ± ayrÄ± kontrol et.",
+      "Partially correct",
+      "Some parts of your response are correct. Review the incorrect or incomplete items separately.",
+    ),
+
+    entry(
+      "assessment.result.incorrect",
+      "incorrect",
+      "guidance",
+      true,
+      "Tekrar kontrol et",
+      "DeÄŸerlendirilen yanÄ±t doÄŸru deÄŸil. Girdileri, yÃ¶ntemi ve ilgili fiziksel iliÅŸkiyi yeniden kontrol et.",
+      "Check again",
+      "The evaluated response is not correct. Review the inputs, method, and relevant physical relationship.",
+    ),
+
+    entry(
+      "assessment.result.invalid",
+      "invalid_input",
+      "warning",
+      true,
+      "YanÄ±t deÄŸerlendirilemedi",
+      "En az bir yanÄ±t eksik veya geÃ§ersiz olduÄŸu iÃ§in deÄŸerlendirme tamamlanamadÄ±.",
+      "Response could not be evaluated",
+      "At least one response is missing or invalid, so the evaluation could not be completed.",
+    ),
+
+    entry(
+      "assessment.result.not-evaluated",
+      "not_evaluated",
+      "info",
+      false,
+      "HenÃ¼z deÄŸerlendirilmedi",
+      "Bu yanÄ±t henÃ¼z deÄŸerlendirilmedi.",
+      "Not evaluated yet",
+      "This response has not been evaluated yet.",
+    ),
+
+    entry(
+      "assessment.item.correct",
+      "correct",
+      "success",
+      false,
+      "DoÄŸru",
+      "Bu yanÄ±t doÄŸru.",
+      "Correct",
+      "This response is correct.",
+    ),
+
+    entry(
+      "assessment.item.incorrect",
+      "incorrect",
+      "guidance",
+      true,
+      "YanÄ±tÄ± yeniden kontrol et",
+      "Bu yanÄ±t doÄŸru deÄŸil. Ä°lgili hesap veya kavramsal iliÅŸkiyi yeniden kontrol et.",
+      "Review this response",
+      "This response is not correct. Review the relevant calculation or conceptual relationship.",
+    ),
+
+    entry(
+      "assessment.item.invalid",
+      "invalid_input",
+      "warning",
+      true,
+      "GeÃ§ersiz yanÄ±t",
+      "Bu alan deÄŸerlendirilebilir bir yanÄ±t iÃ§ermiyor.",
+      "Invalid response",
+      "This field does not contain an evaluable response.",
+    ),
+
+    entry(
+      "assessment.numeric.missing",
+      "missing_input",
+      "warning",
+      true,
+      "Eksik sayÄ±sal yanÄ±t",
+      "Bu alanÄ± doldurmadan sayÄ±sal deÄŸerlendirme tamamlanamaz.",
+      "Missing numerical response",
+      "The numerical evaluation cannot be completed until this field is filled in.",
+    ),
+
+    entry(
+      "assessment.numeric.invalid",
+      "invalid_input",
+      "warning",
+      true,
+      "SayÄ±sal giriÅŸ geÃ§ersiz",
+      "Bu giriÅŸ geÃ§erli ve sonlu bir sayÄ± olarak yorumlanamadÄ±.",
+      "Invalid numerical input",
+      "This input could not be interpreted as a valid finite number.",
+    ),
+
+    entry(
+      "assessment.numeric.outside-tolerance",
+      "outside_tolerance",
+      "guidance",
+      true,
+      "SayÄ±sal sonucu kontrol et",
+      "SonuÃ§ kabul edilen tolerans aralÄ±ÄŸÄ±nda deÄŸil. Birimi, iÅŸareti, kullanÄ±lan baÄŸÄ±ntÄ±yÄ± ve ara hesabÄ± kontrol et.",
+      "Check the numerical result",
+      "The result is outside the accepted tolerance. Check the unit, sign, equation, and intermediate calculation.",
+    ),
+
+    entry(
+      "assessment.choice.missing",
+      "missing_input",
+      "warning",
+      true,
+      "Bir seÃ§enek seÃ§",
+      "DeÄŸerlendirmeden Ã¶nce bir yanÄ±t seÃ§melisin.",
+      "Choose an option",
+      "Select a response before submitting the assessment.",
+    ),
+
+    entry(
+      "assessment.choice.wrong-concept",
+      "wrong_concept",
+      "guidance",
+      true,
+      "Kavramsal iliÅŸkiyi yeniden dÃ¼ÅŸÃ¼n",
+      "SeÃ§imin hedeflenen fiziksel veya kavramsal iliÅŸkiyle uyuÅŸmuyor. Ä°lgili deÄŸiÅŸkenlerin nasÄ±l baÄŸlÄ± olduÄŸunu yeniden incele.",
+      "Reconsider the conceptual relationship",
+      "Your choice does not match the targeted physical or conceptual relationship. Review how the relevant variables are connected.",
+    ),
+
+    entry(
+      "assessment.criterion.wrong",
+      "wrong_criterion",
+      "guidance",
+      true,
+      "Ã–lÃ§Ã¼t kararÄ±nÄ± yeniden kontrol et",
+      "Hesaplanan sonuÃ§tan Ã¶lÃ§Ã¼t kararÄ±na geÃ§iÅŸi yeniden kontrol et. SaÄŸlandÄ±, saÄŸlanmadÄ±, belirlenemedi ve deÄŸerlendirilmedi durumlarÄ±nÄ± birbirine karÄ±ÅŸtÄ±rma.",
+      "Review the criterion decision",
+      "Review how the calculated result maps to the criterion. Keep satisfied, not satisfied, undetermined, and not evaluated distinct.",
+    ),
+
+    entry(
+      "assessment.unit.mismatch",
+      "unit_mismatch",
+      "guidance",
+      true,
+      "Birimi kontrol et",
+      "SayÄ±sal deÄŸer uygun gÃ¶rÃ¼nse bile kullanÄ±lan veya girilen birim beklenen nicelikle uyuÅŸmuyor.",
+      "Check the unit",
+      "Even if the numerical value appears plausible, the supplied unit does not match the expected quantity.",
+    ),
+
+    entry(
+      "assessment.model.limit",
+      "model_limit",
+      "info",
+      false,
+      "Model sÄ±nÄ±rÄ±",
+      "Bu deÄŸerlendirme mevcut mÃ¼hendislik modelinin tanÄ±mlÄ± kapsamÄ±nÄ±n dÄ±ÅŸÄ±nda. Sistem desteklemediÄŸi bir sonucu doÄŸruymuÅŸ gibi Ã¼retmemelidir.",
+      "Model limit",
+      "This assessment is outside the defined scope of the current engineering model. The system must not invent an unsupported result.",
+    ),
+  ];
+
+export function getAssessmentFeedbackEntry(
+  code:
+    string,
+): AssessmentFeedbackCatalogEntry |
+  undefined {
+  return ASSESSMENT_FEEDBACK_CATALOG.find(
+    (
+      candidate,
+    ) =>
+      candidate.code ===
+      code,
+  );
+}
+
+export function getAssessmentFeedbackText(
+  code:
+    string,
+
+  locale:
+    SupportedLocale,
+): LocalizedAssessmentFeedbackText |
+  undefined {
+  return getAssessmentFeedbackEntry(
+    code,
+  )?.text[
+    locale
+  ];
+}
+
+============================================================
+FILE: .\src\domain\assessment\numeric-input.ts
+============================================================
+export type NumericInputLocale =
+  | "tr"
+  | "en";
+
+export interface NumericInputParseResult {
+  readonly raw:
+    string;
+
+  readonly value:
+    number | null;
+
+  readonly valid:
+    boolean;
+}
+
+export function parseNumericAssessmentInput(
+  raw:
+    string,
+
+  locale:
+    NumericInputLocale,
+): NumericInputParseResult {
+  const trimmed =
+    raw.trim();
+
+  if (
+    trimmed.length ===
+    0
+  ) {
+    return {
+      raw,
+
+      value:
+        null,
+
+      valid:
+        false,
+    };
+  }
+
+  /*
+   * MVP input policy:
+   *
+   * TR:
+   *   1234,56
+   *   1234.56 is also accepted as a machine-style decimal.
+   *
+   * EN:
+   *   1234.56
+   *
+   * Thousands separators are deliberately not interpreted
+   * here because strings such as 1.234 are ambiguous across
+   * locales. Display formatting and numeric input are kept
+   * separate.
+   */
+  const normalized =
+    locale ===
+    "tr"
+      ? trimmed.replace(
+          ",",
+          ".",
+        )
+      : trimmed;
+
+  /*
+   * Reject multiple separators or non-numeric tokens rather
+   * than letting Number() interpret surprising formats.
+   */
+  const pattern =
+    /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
+
+  if (
+    !pattern.test(
+      normalized,
+    )
+  ) {
+    return {
+      raw,
+
+      value:
+        null,
+
+      valid:
+        false,
+    };
+  }
+
+  const value =
+    Number(
+      normalized,
+    );
+
+  if (
+    !Number.isFinite(
+      value,
+    )
+  ) {
+    return {
+      raw,
+
+      value:
+        null,
+
+      valid:
+        false,
+    };
+  }
+
+  return {
+    raw,
+
+    value,
+
+    valid:
+      true,
+  };
+}
+
+============================================================
+FILE: .\src\domain\assessment\numeric-input.test.ts
+============================================================
+import {
+  describe,
+  expect,
+  it,
+} from "vitest";
+
+import {
+  parseNumericAssessmentInput,
+} from "@/domain/assessment/numeric-input";
+
+describe(
+  "Numeric assessment input parser",
+  () => {
+    it(
+      "parses Turkish decimal comma",
+      () => {
+        expect(
+          parseNumericAssessmentInput(
+            "51,164",
+            "tr",
+          ),
+        ).toEqual({
+          raw:
+            "51,164",
+
+          value:
+            51.164,
+
+          valid:
+            true,
+        });
+      },
+    );
+
+    it(
+      "parses English decimal point",
+      () => {
+        expect(
+          parseNumericAssessmentInput(
+            "51.164",
+            "en",
+          ),
+        ).toEqual({
+          raw:
+            "51.164",
+
+          value:
+            51.164,
+
+          valid:
+            true,
+        });
+      },
+    );
+
+    it(
+      "accepts machine-style decimal point in Turkish input",
+      () => {
+        const result =
+          parseNumericAssessmentInput(
+            "0.127556",
+            "tr",
+          );
+
+        expect(
+          result.valid,
+        ).toBe(true);
+
+        expect(
+          result.value,
+        ).toBeCloseTo(
+          0.127556,
+          12,
+        );
+      },
+    );
+
+    it(
+      "supports signs and scientific notation",
+      () => {
+        expect(
+          parseNumericAssessmentInput(
+            "-1.5e3",
+            "en",
+          ).value,
+        ).toBe(
+          -1500,
+        );
+
+        expect(
+          parseNumericAssessmentInput(
+            "1,5e3",
+            "tr",
+          ).value,
+        ).toBe(
+          1500,
+        );
+      },
+    );
+
+    it(
+      "rejects empty input",
+      () => {
+        expect(
+          parseNumericAssessmentInput(
+            "   ",
+            "tr",
+          ),
+        ).toEqual({
+          raw:
+            "   ",
+
+          value:
+            null,
+
+          valid:
+            false,
+        });
+      },
+    );
+
+    it(
+      "rejects ambiguous thousands-separated values",
+      () => {
+        expect(
+          parseNumericAssessmentInput(
+            "1.234,56",
+            "tr",
+          ).valid,
+        ).toBe(false);
+
+        expect(
+          parseNumericAssessmentInput(
+            "1,234.56",
+            "en",
+          ).valid,
+        ).toBe(false);
+      },
+    );
+
+    it(
+      "rejects non-numeric and non-finite values",
+      () => {
+        for (
+          const raw
+          of [
+            "abc",
+            "Infinity",
+            "NaN",
+            "12 N",
+            "--4",
+          ]
+        ) {
+          expect(
+            parseNumericAssessmentInput(
+              raw,
+              "en",
+            ).valid,
+          ).toBe(false);
+        }
+      },
+    );
+  },
+);
+
+============================================================
+FILE: .\src\domain\assessment\feedback.ts
+============================================================
+import type {
+  AssessmentEvaluationStatus,
+  AssessmentItemStatus,
+  AssessmentResult,
+} from "@/domain/assessment/result";
+
+export const ASSESSMENT_FEEDBACK_VERSION =
+  "1.0.0" as const;
+
+export type AssessmentFeedbackReason =
+  | "correct"
+  | "partial"
+  | "incorrect"
+  | "missing_input"
+  | "invalid_input"
+  | "outside_tolerance"
+  | "wrong_concept"
+  | "wrong_criterion"
+  | "unit_mismatch"
+  | "model_limit"
+  | "not_evaluated";
+
+export type AssessmentFeedbackTone =
+  | "success"
+  | "guidance"
+  | "warning"
+  | "info";
+
+export interface AssessmentFeedbackDescriptor {
+  readonly code:
+    string;
+
+  readonly reason:
+    AssessmentFeedbackReason;
+
+  readonly tone:
+    AssessmentFeedbackTone;
+
+  readonly retryable:
+    boolean;
+}
+
+export interface AssessmentItemFeedbackReference {
+  readonly itemId:
+    string;
+
+  readonly feedback:
+    AssessmentFeedbackDescriptor;
+}
+
+export interface AssessmentFeedbackPlan {
+  readonly version:
+    typeof ASSESSMENT_FEEDBACK_VERSION;
+
+  readonly summary:
+    AssessmentFeedbackDescriptor;
+
+  readonly items:
+    readonly AssessmentItemFeedbackReference[];
+}
+
+export type AssessmentFeedbackLookup =
+  (
+    code:
+      string,
+  ) =>
+    AssessmentFeedbackDescriptor |
+    undefined;
+
+export class AssessmentFeedbackError extends Error {
+  constructor(
+    message:
+      string,
+  ) {
+    super(
+      message,
+    );
+
+    this.name =
+      "AssessmentFeedbackError";
+  }
+}
+
+const SUMMARY_FEEDBACK_CODES:
+  Readonly<
+    Record<
+      AssessmentEvaluationStatus,
+      string
+    >
+  > =
+  {
+    not_evaluated:
+      "assessment.result.not-evaluated",
+
+    correct:
+      "assessment.result.correct",
+
+    partially_correct:
+      "assessment.result.partially-correct",
+
+    incorrect:
+      "assessment.result.incorrect",
+
+    invalid:
+      "assessment.result.invalid",
+  };
+
+const ITEM_FALLBACK_FEEDBACK_CODES:
+  Readonly<
+    Record<
+      AssessmentItemStatus,
+      string
+    >
+  > =
+  {
+    correct:
+      "assessment.item.correct",
+
+    incorrect:
+      "assessment.item.incorrect",
+
+    invalid:
+      "assessment.item.invalid",
+  };
+
+function resolveFeedback(
+  code:
+    string,
+
+  lookup:
+    AssessmentFeedbackLookup,
+): AssessmentFeedbackDescriptor {
+  const feedback =
+    lookup(
+      code,
+    );
+
+  if (
+    !feedback
+  ) {
+    throw new AssessmentFeedbackError(
+      `Unknown assessment feedback code "${code}".`,
+    );
+  }
+
+  if (
+    feedback.code !==
+    code
+  ) {
+    throw new AssessmentFeedbackError(
+      `Assessment feedback lookup returned mismatched code "${feedback.code}" for "${code}".`,
+    );
+  }
+
+  if (
+    feedback.code.trim().length ===
+    0
+  ) {
+    throw new AssessmentFeedbackError(
+      "Assessment feedback code must not be empty.",
+    );
+  }
+
+  return feedback;
+}
+
+export function createAssessmentFeedbackPlan(
+  result:
+    AssessmentResult,
+
+  lookup:
+    AssessmentFeedbackLookup,
+): AssessmentFeedbackPlan {
+  const summaryCode =
+    SUMMARY_FEEDBACK_CODES[
+      result.status
+    ];
+
+  const summary =
+    resolveFeedback(
+      summaryCode,
+      lookup,
+    );
+
+  const items =
+    result.items.map(
+      (
+        item,
+      ): AssessmentItemFeedbackReference => {
+        const code =
+          item.feedbackCode ??
+          ITEM_FALLBACK_FEEDBACK_CODES[
+            item.status
+          ];
+
+        return {
+          itemId:
+            item.id,
+
+          feedback:
+            resolveFeedback(
+              code,
+              lookup,
+            ),
+        };
+      },
+    );
+
+  return {
+    version:
+      ASSESSMENT_FEEDBACK_VERSION,
+
+    summary,
+
+    items,
+  };
+}
+
+============================================================
+FILE: .\src\domain\assessment\completion.ts
+============================================================
+import type {
+  AssessmentAttempt,
+} from "@/domain/assessment/attempt";
+
+export interface AssessmentCompletionSnapshot {
+  readonly submitted:
+    boolean;
+
+  readonly evaluated:
+    boolean;
+
+  readonly correct:
+    boolean | null;
+}
+
+export function getAssessmentCompletionSnapshot<TResponse>(
+  attempt:
+    AssessmentAttempt<TResponse>,
+): AssessmentCompletionSnapshot {
+  return {
+    submitted:
+      attempt.status ===
+        "submitted" ||
+      attempt.status ===
+        "evaluated",
+
+    evaluated:
+      attempt.status ===
+      "evaluated",
+
+    correct:
+      attempt.status ===
+        "evaluated"
+        ? attempt.result
+            ?.correct ??
+          null
+        : null,
+  };
+}
+
+============================================================
+FILE: .\src\domain\learning\completion.ts
+============================================================
+import type {
+  CompletionRule,
+  CompletionRuleType,
+  LearningActivityType,
+} from "@/domain/learning/types";
+
+export type LearningCompletionEvent =
+  | "opened"
+  | "reached_end"
+  | "prediction_submitted"
+  | "meaningful_interaction"
+  | "attempt_submitted"
+  | "explicit_completion";
+
+export interface LearningCompletionEvidence {
+  readonly opened:
+    boolean;
+
+  readonly reachedEnd:
+    boolean;
+
+  readonly predictionSubmissions:
+    number;
+
+  readonly meaningfulInteractions:
+    number;
+
+  readonly attemptsSubmitted:
+    number;
+
+  readonly explicitCompletions:
+    number;
+}
+
+export interface LearningCompletionEvaluation {
+  readonly rule:
+    CompletionRuleType;
+
+  readonly completed:
+    boolean;
+}
+
+export function createEmptyLearningCompletionEvidence():
+  LearningCompletionEvidence {
+  return {
+    opened: false,
+    reachedEnd: false,
+
+    predictionSubmissions: 0,
+    meaningfulInteractions: 0,
+    attemptsSubmitted: 0,
+    explicitCompletions: 0,
+  };
+}
+
+export function recordLearningCompletionEvent(
+  current:
+    LearningCompletionEvidence,
+
+  event:
+    LearningCompletionEvent,
+): LearningCompletionEvidence {
+  switch (event) {
+    case "opened":
+      return {
+        ...current,
+        opened: true,
+      };
+
+    case "reached_end":
+      return {
+        ...current,
+        opened: true,
+        reachedEnd: true,
+      };
+
+    case "prediction_submitted":
+      return {
+        ...current,
+        opened: true,
+
+        predictionSubmissions:
+          current.predictionSubmissions +
+          1,
+      };
+
+    case "meaningful_interaction":
+      return {
+        ...current,
+        opened: true,
+
+        meaningfulInteractions:
+          current.meaningfulInteractions +
+          1,
+      };
+
+    case "attempt_submitted":
+      return {
+        ...current,
+        opened: true,
+
+        attemptsSubmitted:
+          current.attemptsSubmitted +
+          1,
+      };
+
+    case "explicit_completion":
+      return {
+        ...current,
+        opened: true,
+
+        explicitCompletions:
+          current.explicitCompletions +
+          1,
+      };
+
+    default:
+      return assertNever(
+        event,
+      );
+  }
+}
+
+export function evaluateLearningCompletion(
+  rule:
+    CompletionRule,
+
+  evidence:
+    LearningCompletionEvidence,
+): LearningCompletionEvaluation {
+  switch (rule.type) {
+    case "opened":
+      return {
+        rule:
+          rule.type,
+
+        completed:
+          evidence.opened,
+      };
+
+    case "reached_end":
+      return {
+        rule:
+          rule.type,
+
+        completed:
+          evidence.reachedEnd,
+      };
+
+    case "submitted_prediction":
+      return {
+        rule:
+          rule.type,
+
+        completed:
+          evidence.predictionSubmissions >
+          0,
+      };
+
+    case "meaningful_interaction":
+      return {
+        rule:
+          rule.type,
+
+        completed:
+          evidence.meaningfulInteractions >
+          0,
+      };
+
+    case "submitted_attempt":
+      return {
+        rule:
+          rule.type,
+
+        completed:
+          evidence.attemptsSubmitted >
+          0,
+      };
+
+    case "explicit_completion":
+      return {
+        rule:
+          rule.type,
+
+        completed:
+          evidence.explicitCompletions >
+          0,
+      };
+
+    default:
+      return assertNever(
+        rule.type,
+      );
+  }
+}
+
+export function isCompletionRuleCompatibleWithActivityType(
+  activityType:
+    LearningActivityType,
+
+  completionRule:
+    CompletionRuleType,
+): boolean {
+  switch (activityType) {
+    case "problem_context":
+    case "concept":
+    case "worked_example":
+    case "interpretation":
+    case "reflection":
+    case "summary":
+      return (
+        completionRule ===
+          "opened" ||
+        completionRule ===
+          "reached_end" ||
+        completionRule ===
+          "explicit_completion"
+      );
+
+    case "prediction":
+      return (
+        completionRule ===
+        "submitted_prediction"
+      );
+
+    case "interactive":
+    case "lab":
+      return (
+        completionRule ===
+        "meaningful_interaction"
+      );
+
+    case "problem":
+    case "quiz":
+      return (
+        completionRule ===
+        "submitted_attempt"
+      );
+
+    case "design_task":
+      return (
+        completionRule ===
+          "submitted_attempt" ||
+        completionRule ===
+          "explicit_completion"
+      );
+
+    default:
+      return assertNever(
+        activityType,
+      );
+  }
+}
+
+function assertNever(
+  value: never,
+): never {
+  throw new Error(
+    `Unsupported learning completion value: ${String(
+      value,
+    )}`,
+  );
+}
+
+============================================================
+FILE: .\src\domain\learning\prediction.ts
+============================================================
+import type {
+  EntityId,
+  LocalizedText,
+} from "@/domain/shared/types";
+
+export interface PredictionOption {
+  readonly id: EntityId;
+
+  readonly label:
+    LocalizedText;
+
+  readonly feedback:
+    LocalizedText;
+}
+
+export interface PredictionDefinition {
+  readonly activityId:
+    EntityId;
+
+  readonly prompt:
+    LocalizedText;
+
+  readonly options:
+    readonly PredictionOption[];
+
+  readonly correctOptionId:
+    EntityId;
+}
+
+export interface PredictionEvaluation {
+  readonly activityId:
+    EntityId;
+
+  readonly submittedOptionId:
+    EntityId;
+
+  readonly isCorrect:
+    boolean;
+
+  readonly feedback:
+    LocalizedText;
+}
+
+export class PredictionEvaluationError extends Error {
+  constructor(
+    message: string,
+  ) {
+    super(message);
+
+    this.name =
+      "PredictionEvaluationError";
+  }
+}
+
+export function evaluatePrediction(
+  definition:
+    PredictionDefinition,
+  submittedOptionId:
+    EntityId,
+): PredictionEvaluation {
+  const submittedOption =
+    definition.options.find(
+      (option) =>
+        option.id ===
+        submittedOptionId,
+    );
+
+  if (!submittedOption) {
+    throw new PredictionEvaluationError(
+      `Prediction option "${submittedOptionId}" does not belong to activity "${definition.activityId}".`,
+    );
+  }
+
+  return {
+    activityId:
+      definition.activityId,
+
+    submittedOptionId,
+
+    isCorrect:
+      submittedOptionId ===
+      definition.correctOptionId,
+
+    feedback:
+      submittedOption.feedback,
+  };
+}
+
+============================================================
+FILE: .\src\features\learning\prediction-activity.tsx
+============================================================
+"use client";
+
+import {
+  useMemo,
+  useState,
+} from "react";
+
+import {
+  evaluatePredictionAssessment,
+} from "@/domain/assessment";
+
+import type {
+  PredictionAssessmentDefinition,
+  PredictionAssessmentResponse,
+} from "@/domain/assessment";
+
+import type {
+  PredictionDefinition,
+} from "@/domain/learning/prediction";
+
+import type {
+  SupportedLocale,
+} from "@/domain/shared/types";
+
+import {
+  AssessmentAttemptSummary,
+  AssessmentFeedbackPanel,
+  useAssessmentSession,
+} from "@/features/learning/assessment";
+
+type PredictionSubmissionMode =
+  | "immediate"
+  | "explicit";
+
+interface PredictionActivityProps {
+  readonly definition:
+    PredictionDefinition;
+
+  readonly locale:
+    SupportedLocale;
+
+  readonly submissionMode?:
+    PredictionSubmissionMode;
+
+  readonly testId?:
+    string;
+}
+
+export function PredictionActivity({
+  definition,
+  locale,
+  submissionMode = "immediate",
+  testId,
+}: PredictionActivityProps) {
+  const [
+    selectedOptionId,
+    setSelectedOptionId,
+  ] =
+    useState<
+      string | null
+    >(
+      null,
+    );
+
+  const assessmentDefinition =
+    useMemo<
+      PredictionAssessmentDefinition
+    >(
+      () => ({
+        id:
+          `${definition.activityId}-assessment`,
+
+        kind:
+          "prediction",
+
+        options:
+          definition.options.map(
+            (option) => ({
+              id:
+                option.id,
+            }),
+          ),
+
+        correctOptionId:
+          definition.correctOptionId,
+
+        maxScore:
+          1,
+      }),
+      [
+        definition,
+      ],
+    );
+
+  const session =
+    useAssessmentSession<
+      PredictionAssessmentResponse
+    >({
+      activityId:
+        definition.activityId,
+
+      activityVersion:
+        "1.0.0",
+
+      assessmentId:
+        `${definition.activityId}-assessment`,
+
+      assessmentVersion:
+        "1.0.0",
+
+      evaluate:
+        (
+          response,
+        ) =>
+          evaluatePredictionAssessment(
+            assessmentDefinition,
+            response,
+          ).result,
+    });
+
+  const latestResult =
+    session.latestAttempt
+      ?.result ??
+    null;
+
+  const hasSubmitted =
+    session.latestAttempt
+      ?.status ===
+      "evaluated" &&
+    latestResult !==
+      null;
+
+  const isCorrect =
+    latestResult?.correct ===
+    true;
+
+  const selectedOption =
+    definition.options.find(
+      (option) =>
+        option.id ===
+        selectedOptionId,
+    );
+
+  function submitPrediction(
+    optionId:
+      string,
+  ): void {
+    if (
+      !session.canSubmit
+    ) {
+      return;
+    }
+
+    setSelectedOptionId(
+      optionId,
+    );
+
+    session.submit({
+      selectedOptionId:
+        optionId,
+    });
+  }
+
+  function selectPrediction(
+    optionId:
+      string,
+  ): void {
+    if (
+      hasSubmitted
+    ) {
+      return;
+    }
+
+    if (
+      submissionMode ===
+      "immediate"
+    ) {
+      submitPrediction(
+        optionId,
+      );
+
+      return;
+    }
+
+    setSelectedOptionId(
+      optionId,
+    );
+  }
+
+  function submitSelectedPrediction():
+    void {
+    if (
+      submissionMode !==
+        "explicit" ||
+      selectedOptionId ===
+        null ||
+      !session.canSubmit
+    ) {
+      return;
+    }
+
+    session.submit({
+      selectedOptionId,
+    });
+  }
+
+  function revisePrediction():
+    void {
+    if (
+      !session.canRevise ||
+      isCorrect
+    ) {
+      return;
+    }
+
+    session.revise();
+
+    setSelectedOptionId(
+      null,
+    );
+  }
+
+  return (
+    <div
+      data-testid={
+        testId
+      }
+      data-prediction-activity={
+        definition.activityId
+      }
+      data-prediction-submitted={
+        hasSubmitted
+          ? "true"
+          : "false"
+      }
+      data-prediction-correct={
+        hasSubmitted &&
+        isCorrect
+          ? "true"
+          : "false"
+      }
+      data-attempt-count={
+        session.summary
+          .evaluatedAttemptCount
+      }
+      className="space-y-5"
+    >
+      <p className="max-w-3xl text-lg font-semibold leading-8 text-foreground">
+        {
+          definition.prompt[
+            locale
+          ]
+        }
+      </p>
+
+      <div
+        role="group"
+        aria-label={
+          definition.prompt[
+            locale
+          ]
+        }
+        className="grid gap-3"
+      >
+        {definition.options.map(
+          (
+            option,
+            index,
+          ) => {
+            const isSelected =
+              selectedOptionId ===
+              option.id;
+
+            return (
+              <button
+                key={
+                  option.id
+                }
+                type="button"
+                disabled={
+                  hasSubmitted
+                }
+                aria-pressed={
+                  isSelected
+                }
+                onClick={() =>
+                  selectPrediction(
+                    option.id,
+                  )
+                }
+                className={[
+                  "flex w-full items-start gap-4 rounded-xl border px-4 py-4 text-left transition-colors",
+
+                  isSelected
+                    ? "border-brand bg-brand-soft text-foreground"
+                    : "border-border-strong bg-surface hover:border-brand hover:bg-brand-soft",
+
+                  hasSubmitted &&
+                  !isSelected
+                    ? "cursor-default opacity-60"
+                    : "",
+                ].join(
+                  " ",
+                )}
+              >
+                <span className="grid size-7 shrink-0 place-items-center rounded-full border border-current text-xs font-bold">
+                  {String.fromCharCode(
+                    65 +
+                    index,
+                  )}
+                </span>
+
+                <span className="leading-6">
+                  {
+                    option.label[
+                      locale
+                    ]
+                  }
+                </span>
+              </button>
+            );
+          },
+        )}
+      </div>
+
+      {submissionMode ===
+        "explicit" &&
+      !hasSubmitted ? (
+        <button
+          type="button"
+          disabled={
+            selectedOptionId ===
+              null ||
+            !session.canSubmit
+          }
+          onClick={
+            submitSelectedPrediction
+          }
+          className="min-h-11 rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {locale ===
+          "tr"
+            ? "Tahmini gÃ¶nder"
+            : "Submit prediction"}
+        </button>
+      ) : null}
+
+      {hasSubmitted &&
+      selectedOption ? (
+        <div
+          role="status"
+          className={[
+            "rounded-xl border p-4 text-sm leading-6",
+
+            isCorrect
+              ? "border-success/30 bg-success/5 text-muted-strong"
+              : "border-warning/30 bg-warning/5 text-muted-strong",
+          ].join(
+            " ",
+          )}
+        >
+          <p className="font-semibold text-foreground">
+            {isCorrect
+              ? locale ===
+                "tr"
+                ? "Tahmin doÄŸru"
+                : "Prediction correct"
+              : locale ===
+                "tr"
+                ? "Tahmini yeniden dÃ¼ÅŸÃ¼n"
+                : "Reconsider the prediction"}
+          </p>
+
+          <p className="mt-1">
+            {
+              selectedOption
+                .feedback[
+                locale
+              ]
+            }
+          </p>
+        </div>
+      ) : null}
+
+      {latestResult &&
+      hasSubmitted ? (
+        <AssessmentFeedbackPanel
+          result={
+            latestResult
+          }
+          locale={
+            locale
+          }
+          showItemFeedback={
+            false
+          }
+        />
+      ) : null}
+
+      {hasSubmitted ? (
+        <AssessmentAttemptSummary
+          summary={
+            session.summary
+          }
+          locale={
+            locale
+          }
+        />
+      ) : null}
+
+      {hasSubmitted &&
+      !isCorrect &&
+      session.canRevise ? (
+        <button
+          type="button"
+          onClick={
+            revisePrediction
+          }
+          className="min-h-11 rounded-lg border border-brand px-5 py-2.5 text-sm font-semibold text-brand transition-colors hover:bg-brand-soft"
+        >
+          {locale ===
+          "tr"
+            ? "Tahmini yeniden dene"
+            : "Revise prediction"}
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+============================================================
+FILE: .\src\features\learning\problems\beam-statics-problem-activity.tsx
+============================================================
+"use client";
+
+import {
+  useMemo,
+  useState,
+} from "react";
+
+import {
+  evaluateEngineeringProblem,
+} from "@/domain/assessment";
+
+import type {
+  AssessmentResult,
+} from "@/domain/assessment";
+
+import type {
+  BeamStaticsNumericProblemDefinition,
+  NumericProblemSubmittedValues,
+} from "@/domain/assessment/numeric-problem";
+
+import type {
+  SupportedLocale,
+} from "@/domain/shared/types";
+
+import {
+  AssessmentAttemptSummary,
+  AssessmentFeedbackPanel,
+  useAssessmentSession,
+} from "@/features/learning/assessment";
+
+import {
+  createBeamStaticsEngineeringProblemDefinition,
+  createBeamStaticsEngineeringProblemResponse,
+} from "@/features/learning/problems/beam-statics-problem-adapter";
+
+interface BeamStaticsProblemActivityProps {
+  readonly definition:
+    BeamStaticsNumericProblemDefinition;
+
+  readonly locale:
+    SupportedLocale;
+}
+
+type BeamStaticsProblemResponse =
+  NumericProblemSubmittedValues;
+
+type NumericFieldEvaluationStatus =
+  | "missing"
+  | "invalid"
+  | "correct"
+  | "incorrect";
+
+interface NumericFieldEvaluation {
+  readonly fieldId:
+    string;
+
+  readonly submittedValue:
+    number | null;
+
+  readonly status:
+    NumericFieldEvaluationStatus;
+}
+
+interface NumericProblemUiEvaluation {
+  readonly fields:
+    readonly NumericFieldEvaluation[];
+
+  readonly allAnswered:
+    boolean;
+
+  readonly allCorrect:
+    boolean;
+}
+
+function parseNumericInput(
+  value:
+    string,
+): number | null {
+  const trimmed =
+    value.trim();
+
+  if (
+    trimmed.length ===
+    0
+  ) {
+    return null;
+  }
+
+  const normalized =
+    trimmed.replace(
+      ",",
+      ".",
+    );
+
+  const parsed =
+    Number(
+      normalized,
+    );
+
+  return Number.isFinite(
+    parsed,
+  )
+    ? parsed
+    : Number.NaN;
+}
+
+function getStatusClasses(
+  status:
+    NumericFieldEvaluationStatus | undefined,
+): string {
+  switch (
+    status
+  ) {
+    case "correct":
+      return "border-success/50 bg-success/5";
+
+    case "incorrect":
+    case "missing":
+    case "invalid":
+      return "border-warning/50 bg-warning/5";
+
+    default:
+      return "border-border bg-background";
+  }
+}
+
+function createUiEvaluation(
+  definition:
+    BeamStaticsNumericProblemDefinition,
+
+  submittedValues:
+    BeamStaticsProblemResponse,
+
+  result:
+    AssessmentResult,
+): NumericProblemUiEvaluation {
+  const resultByFieldId =
+    new Map(
+      result.items.map(
+        (
+          item,
+        ) => [
+          item.id,
+          item,
+        ],
+      ),
+    );
+
+  const fields =
+    definition.fields.map(
+      (
+        field,
+      ): NumericFieldEvaluation => {
+        const submittedValue =
+          submittedValues[
+            field.id
+          ];
+
+        let status:
+          NumericFieldEvaluationStatus;
+
+        if (
+          submittedValue ===
+            null ||
+          submittedValue ===
+            undefined
+        ) {
+          status =
+            "missing";
+        } else if (
+          !Number.isFinite(
+            submittedValue,
+          )
+        ) {
+          status =
+            "invalid";
+        } else {
+          const coreStatus =
+            resultByFieldId.get(
+              field.id,
+            )?.status;
+
+          switch (
+            coreStatus
+          ) {
+            case "correct":
+              status =
+                "correct";
+              break;
+
+            case "incorrect":
+              status =
+                "incorrect";
+              break;
+
+            default:
+              status =
+                "invalid";
+              break;
+          }
+        }
+
+        return {
+          fieldId:
+            field.id,
+
+          submittedValue:
+            submittedValue ??
+            null,
+
+          status,
+        };
+      },
+    );
+
+  return {
+    fields,
+
+    allAnswered:
+      fields.every(
+        (
+          field,
+        ) =>
+          field.status !==
+            "missing" &&
+          field.status !==
+            "invalid",
+      ),
+
+    allCorrect:
+      result.correct,
+  };
+}
+
+export function BeamStaticsProblemActivity({
+  definition,
+  locale,
+}: BeamStaticsProblemActivityProps) {
+  const initialInputs =
+    useMemo(
+      () =>
+        Object.fromEntries(
+          definition.fields.map(
+            (
+              field,
+            ) => [
+              field.id,
+              "",
+            ],
+          ),
+        ) as Record<
+          string,
+          string
+        >,
+      [
+        definition.fields,
+      ],
+    );
+
+  const [
+    inputs,
+    setInputs,
+  ] =
+    useState<
+      Record<
+        string,
+        string
+      >
+    >(
+      initialInputs,
+    );
+
+  const [
+    evaluation,
+    setEvaluation,
+  ] =
+    useState<
+      NumericProblemUiEvaluation | null
+    >(
+      null,
+    );
+
+  const engineeringDefinition =
+    useMemo(
+      () =>
+        createBeamStaticsEngineeringProblemDefinition(
+          definition,
+        ),
+      [
+        definition,
+      ],
+    );
+
+  const session =
+    useAssessmentSession<
+      BeamStaticsProblemResponse
+    >({
+      activityId:
+        "activity-ssb-05",
+
+      activityVersion:
+        "1.0.0",
+
+      assessmentId:
+        "activity-ssb-05-assessment",
+
+      assessmentVersion:
+        "1.0.0",
+
+      evaluate:
+        (
+          response,
+        ) =>
+          evaluateEngineeringProblem(
+            engineeringDefinition,
+
+            createBeamStaticsEngineeringProblemResponse(
+              definition,
+              response,
+            ),
+          ).result,
+    });
+
+  const latestResult =
+    session.latestAttempt
+      .result;
+
+  const isSolved =
+    evaluation?.allCorrect ===
+    true;
+
+  function beginRevision():
+    void {
+    if (
+      evaluation !==
+        null &&
+      session.canRevise
+    ) {
+      session.revise();
+    }
+
+    setEvaluation(
+      null,
+    );
+  }
+
+  function updateInput(
+    fieldId:
+      string,
+
+    value:
+      string,
+  ): void {
+    if (
+      isSolved
+    ) {
+      return;
+    }
+
+    if (
+      evaluation !==
+      null
+    ) {
+      beginRevision();
+    }
+
+    setInputs(
+      (
+        current,
+      ) => ({
+        ...current,
+
+        [fieldId]:
+          value,
+      }),
+    );
+  }
+
+  function submitAttempt(
+    event:
+      React.FormEvent<HTMLFormElement>,
+  ): void {
+    event.preventDefault();
+
+    if (
+      !session.canSubmit
+    ) {
+      return;
+    }
+
+    const submittedValues =
+      Object.fromEntries(
+        definition.fields.map(
+          (
+            field,
+          ) => [
+            field.id,
+
+            parseNumericInput(
+              inputs[
+                field.id
+              ] ?? "",
+            ),
+          ],
+        ),
+      ) as BeamStaticsProblemResponse;
+
+    const engineeringEvaluation =
+      evaluateEngineeringProblem(
+        engineeringDefinition,
+
+        createBeamStaticsEngineeringProblemResponse(
+          definition,
+          submittedValues,
+        ),
+      );
+
+    setEvaluation(
+      createUiEvaluation(
+        definition,
+        submittedValues,
+        engineeringEvaluation.result,
+      ),
+    );
+
+    session.submit(
+      submittedValues,
+    );
+  }
+
+  const evaluationByField =
+    new Map(
+      evaluation?.fields.map(
+        (
+          field,
+        ) => [
+          field.fieldId,
+          field,
+        ],
+      ) ?? [],
+    );
+
+  const attemptCount =
+    session.summary
+      .evaluatedAttemptCount;
+
+  return (
+    <section
+      data-testid="beam-statics-problem-activity"
+      data-attempt-submitted={
+        evaluation
+          ? "true"
+          : "false"
+      }
+      data-attempt-correct={
+        evaluation
+          ? evaluation.allCorrect
+            ? "true"
+            : "false"
+          : "unknown"
+      }
+      data-attempt-count={
+        attemptCount
+      }
+      className="mt-8 rounded-2xl border border-border bg-surface-subtle p-5 sm:p-6"
+    >
+      <header>
+        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand">
+          {locale ===
+          "tr"
+            ? "Problem Ã§alÄ±ÅŸma alanÄ±"
+            : "Problem workspace"}
+        </p>
+
+        <h3 className="mt-2 text-xl font-semibold text-foreground">
+          {
+            definition.title[
+              locale
+            ]
+          }
+        </h3>
+
+        <p className="mt-2 max-w-3xl leading-7 text-muted-strong">
+          {
+            definition.instructions[
+              locale
+            ]
+          }
+        </p>
+      </header>
+
+      <div className="mt-6 grid gap-3 sm:grid-cols-3">
+        <div className="rounded-lg border border-border bg-background p-4">
+          <p className="text-xs text-muted">
+            L
+          </p>
+
+          <p className="mt-1 font-mono text-lg font-semibold">
+            {
+              definition.input
+                .spanM
+            }{" "}
+            m
+          </p>
+        </div>
+
+        <div className="rounded-lg border border-border bg-background p-4">
+          <p className="text-xs text-muted">
+            P
+          </p>
+
+          <p className="mt-1 font-mono text-lg font-semibold">
+            {
+              definition.input
+                .pointLoadKN
+            }{" "}
+            kN
+          </p>
+        </div>
+
+        <div className="rounded-lg border border-border bg-background p-4">
+          <p className="text-xs text-muted">
+            a
+          </p>
+
+          <p className="mt-1 font-mono text-lg font-semibold">
+            {
+              definition.input
+                .loadPositionM
+            }{" "}
+            m
+          </p>
+        </div>
+      </div>
+
+      <form
+        onSubmit={
+          submitAttempt
+        }
+        className="mt-7"
+      >
+        <h4 className="font-semibold text-foreground">
+          {
+            definition.ui
+              .answersHeading[
+              locale
+            ]
+          }
+        </h4>
+
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          {definition.fields.map(
+            (
+              field,
+            ) => {
+              const fieldEvaluation =
+                evaluationByField.get(
+                  field.id,
+                );
+
+              const status =
+                fieldEvaluation
+                  ?.status;
+
+              return (
+                <label
+                  key={
+                    field.id
+                  }
+                  className={[
+                    "rounded-xl border p-4 transition-colors",
+
+                    getStatusClasses(
+                      status,
+                    ),
+                  ].join(
+                    " ",
+                  )}
+                >
+                  <span className="text-sm font-medium text-foreground">
+                    {
+                      field.label[
+                        locale
+                      ]
+                    }
+                  </span>
+
+                  <div className="mt-2 flex items-center gap-2">
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      aria-label={
+                        field.label[
+                          locale
+                        ]
+                      }
+                      value={
+                        inputs[
+                          field.id
+                        ] ?? ""
+                      }
+                      disabled={
+                        isSolved
+                      }
+                      onChange={(
+                        event,
+                      ) =>
+                        updateInput(
+                          field.id,
+                          event.target
+                            .value,
+                        )
+                      }
+                      className="min-h-11 min-w-0 flex-1 rounded-lg border border-border-strong bg-surface px-3 font-mono text-foreground outline-none transition focus:border-brand focus:ring-2 focus:ring-focus/30 disabled:cursor-default disabled:opacity-70"
+                    />
+
+                    <span className="shrink-0 text-sm font-medium text-muted">
+                      {
+                        field.unitSymbol
+                      }
+                    </span>
+                  </div>
+
+                  {status ===
+                  "correct" ? (
+                    <p className="mt-2 text-sm font-medium text-success">
+                      {
+                        definition.ui
+                          .correctLabel[
+                          locale
+                        ]
+                      }
+                    </p>
+                  ) : null}
+
+                  {status ===
+                  "missing" ? (
+                    <p className="mt-2 text-sm text-warning">
+                      {
+                        definition.ui
+                          .missingLabel[
+                          locale
+                        ]
+                      }
+                    </p>
+                  ) : null}
+
+                  {status ===
+                  "invalid" ? (
+                    <p className="mt-2 text-sm text-warning">
+                      {
+                        definition.ui
+                          .invalidLabel[
+                          locale
+                        ]
+                      }
+                    </p>
+                  ) : null}
+
+                  {status ===
+                  "incorrect" ? (
+                    <p className="mt-2 text-sm leading-6 text-warning">
+                      {
+                        field.hint[
+                          locale
+                        ]
+                      }
+                    </p>
+                  ) : null}
+                </label>
+              );
+            },
+          )}
+        </div>
+
+        <div
+          aria-live="polite"
+          className="mt-5"
+        >
+          {evaluation ? (
+            evaluation.allCorrect ? (
+              <div
+                role="status"
+                className="rounded-xl border border-success/30 bg-success/5 px-4 py-3 text-sm leading-6 text-foreground"
+              >
+                {
+                  definition.ui
+                    .successMessage[
+                    locale
+                  ]
+                }
+              </div>
+            ) : (
+              <div
+                role="status"
+                className="rounded-xl border border-warning/30 bg-warning/5 px-4 py-3 text-sm leading-6 text-foreground"
+              >
+                {
+                  definition.ui
+                    .incorrectMessage[
+                    locale
+                  ]
+                }
+              </div>
+            )
+          ) : null}
+        </div>
+
+        {latestResult &&
+        evaluation ? (
+          <div className="mt-5">
+            <AssessmentFeedbackPanel
+              result={
+                latestResult
+              }
+              locale={
+                locale
+              }
+              showItemFeedback={
+                false
+              }
+            />
+          </div>
+        ) : null}
+
+        {evaluation ? (
+          <div className="mt-5">
+            <AssessmentAttemptSummary
+              summary={
+                session.summary
+              }
+              locale={
+                locale
+              }
+            />
+          </div>
+        ) : null}
+
+        {!isSolved ? (
+          <button
+            type="submit"
+            disabled={
+              !session.canSubmit
+            }
+            className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {attemptCount >
+            0
+              ? definition.ui
+                  .retryLabel[
+                  locale
+                ]
+              : definition.ui
+                  .submitLabel[
+                  locale
+                ]}
+          </button>
+        ) : null}
+      </form>
+    </section>
+  );
+}
+
+============================================================
+FILE: .\src\features\learning\bending\bending-problem-activity.tsx
+============================================================
+"use client";
+
+import {
+  useMemo,
+  useState,
+} from "react";
+
+import {
+  evaluateEngineeringProblem,
+} from "@/domain/assessment";
+
+import type {
+  AssessmentResult,
+} from "@/domain/assessment";
+
+import type {
+  BendingProblemCriterionAnswer,
+  BendingProblemDecisionFieldId,
+  BendingProblemNumericFieldId,
+  BendingProblemSubmission,
+} from "@/domain/assessment/bending-problem";
+
+import type {
+  SupportedLocale,
+} from "@/domain/shared/types";
+
+import {
+  AssessmentAttemptSummary,
+  AssessmentFeedbackPanel,
+  useAssessmentSession,
+} from "@/features/learning/assessment";
+
+import {
+  createBendingEngineeringProblemDefinition,
+  createBendingEngineeringProblemResponse,
+} from "@/features/learning/bending/bending-problem-adapter";
+
+interface BendingProblemActivityProps {
+  readonly locale:
+    SupportedLocale;
+}
+
+interface BendingUiEvaluation {
+  readonly allCorrect:
+    boolean;
+
+  readonly numeric:
+    Readonly<
+      Record<
+        BendingProblemNumericFieldId,
+        boolean
+      >
+    >;
+
+  readonly decisions:
+    Readonly<
+      Record<
+        BendingProblemDecisionFieldId,
+        boolean
+      >
+    >;
+}
+
+const numericFields = [
+  {
+    id:
+      "second_moment_area" as const,
+
+    tr:
+      "Alan atalet momenti I",
+
+    en:
+      "Second moment of area I",
+
+    unit:
+      "cmâ´",
+
+    hintTr:
+      "DikdÃ¶rtgen kesitte I = bhÂ³/12. mm deÄŸerlerini tutarlÄ± biÃ§imde dÃ¶nÃ¼ÅŸtÃ¼rmeyi unutma.",
+
+    hintEn:
+      "For a rectangular section, I = bhÂ³/12. Remember to convert the mm dimensions consistently.",
+  },
+
+  {
+    id:
+      "maximum_moment" as const,
+
+    tr:
+      "Maksimum eÄŸilme momenti",
+
+    en:
+      "Maximum bending moment",
+
+    unit:
+      "kNÂ·m",
+
+    hintTr:
+      "Bu kiriÅŸte yÃ¼k orta noktada. Ã–nce Statik sonucunu dÃ¼ÅŸÃ¼n.",
+
+    hintEn:
+      "The load is at midspan. Start from the Statics result.",
+  },
+
+  {
+    id:
+      "maximum_stress" as const,
+
+    tr:
+      "Maksimum eÄŸilme gerilmesi",
+
+    en:
+      "Maximum bending stress",
+
+    unit:
+      "MPa",
+
+    hintTr:
+      "|Ïƒ|max = |M|(h/2)/I baÄŸÄ±ntÄ±sÄ±nÄ± kullan.",
+
+    hintEn:
+      "Use |Ïƒ|max = |M|(h/2)/I.",
+  },
+
+  {
+    id:
+      "maximum_deflection" as const,
+
+    tr:
+      "Maksimum sehim",
+
+    en:
+      "Maximum deflection",
+
+    unit:
+      "mm",
+
+    hintTr:
+      "YÃ¼k orta noktada olduÄŸu iÃ§in bu Ã¶zel durumda PLÂ³/(48EI) kullanÄ±labilir.",
+
+    hintEn:
+      "Because the load is at midspan, PLÂ³/(48EI) applies in this special case.",
+  },
+] as const;
+
+const decisionFields = [
+  {
+    id:
+      "stress_criterion" as const,
+
+    tr:
+      "20 MPa gerilme Ã¶lÃ§Ã¼tÃ¼",
+
+    en:
+      "20 MPa stress criterion",
+  },
+
+  {
+    id:
+      "deflection_criterion" as const,
+
+    tr:
+      "2 mm sehim Ã¶lÃ§Ã¼tÃ¼",
+
+    en:
+      "2 mm deflection criterion",
+  },
+] as const;
+
+function parseNumericInput(
+  value:
+    string,
+):
+  | number
+  | undefined {
+  const trimmed =
+    value.trim();
+
+  if (
+    trimmed.length ===
+    0
+  ) {
+    return undefined;
+  }
+
+  const parsed =
+    Number(
+      trimmed.replace(
+        ",",
+        ".",
+      ),
+    );
+
+  return Number.isFinite(
+    parsed,
+  )
+    ? parsed
+    : undefined;
+}
+
+function createUiEvaluation(
+  result:
+    AssessmentResult,
+): BendingUiEvaluation {
+  const resultById =
+    new Map(
+      result.items.map(
+        (
+          item,
+        ) => [
+          item.id,
+          item.status,
+        ],
+      ),
+    );
+
+  return {
+    allCorrect:
+      result.correct,
+
+    numeric: {
+      second_moment_area:
+        resultById.get(
+          "second_moment_area",
+        ) ===
+        "correct",
+
+      maximum_moment:
+        resultById.get(
+          "maximum_moment",
+        ) ===
+        "correct",
+
+      maximum_stress:
+        resultById.get(
+          "maximum_stress",
+        ) ===
+        "correct",
+
+      maximum_deflection:
+        resultById.get(
+          "maximum_deflection",
+        ) ===
+        "correct",
+    },
+
+    decisions: {
+      stress_criterion:
+        resultById.get(
+          "stress_criterion",
+        ) ===
+        "correct",
+
+      deflection_criterion:
+        resultById.get(
+          "deflection_criterion",
+        ) ===
+        "correct",
+    },
+  };
+}
+
+export function BendingProblemActivity({
+  locale,
+}: BendingProblemActivityProps) {
+  const engineeringDefinition =
+    useMemo(
+      () =>
+        createBendingEngineeringProblemDefinition(),
+      [],
+    );
+
+  const [
+    numericValues,
+    setNumericValues,
+  ] =
+    useState<
+      Record<
+        BendingProblemNumericFieldId,
+        string
+      >
+    >({
+      second_moment_area:
+        "",
+
+      maximum_moment:
+        "",
+
+      maximum_stress:
+        "",
+
+      maximum_deflection:
+        "",
+    });
+
+  const [
+    decisionValues,
+    setDecisionValues,
+  ] =
+    useState<
+      Partial<
+        Record<
+          BendingProblemDecisionFieldId,
+          BendingProblemCriterionAnswer
+        >
+      >
+    >(
+      {},
+    );
+
+  const [
+    evaluation,
+    setEvaluation,
+  ] =
+    useState<
+      BendingUiEvaluation | null
+    >(
+      null,
+    );
+
+  const session =
+    useAssessmentSession<
+      BendingProblemSubmission
+    >({
+      activityId:
+        "activity-bending-05",
+
+      activityVersion:
+        "1.0.0",
+
+      assessmentId:
+        "activity-bending-05-assessment",
+
+      assessmentVersion:
+        "1.0.0",
+
+      evaluate:
+        (
+          submission,
+        ) =>
+          evaluateEngineeringProblem(
+            engineeringDefinition,
+
+            createBendingEngineeringProblemResponse(
+              submission,
+            ),
+          ).result,
+    });
+
+  const solved =
+    evaluation?.allCorrect ===
+    true;
+
+  const latestResult =
+    session.latestAttempt
+      ?.result ??
+    null;
+
+  const attemptCount =
+    session.summary
+      .evaluatedAttemptCount;
+
+  function beginRevision():
+    void {
+    if (
+      evaluation !==
+        null &&
+      session.canRevise
+    ) {
+      session.revise();
+    }
+
+    setEvaluation(
+      null,
+    );
+  }
+
+  function submit():
+    void {
+    if (
+      !session.canSubmit
+    ) {
+      return;
+    }
+
+    const numeric:
+      BendingProblemSubmission["numeric"] =
+      Object.fromEntries(
+        numericFields.flatMap(
+          (
+            field,
+          ) => {
+            const parsed =
+              parseNumericInput(
+                numericValues[
+                  field.id
+                ],
+              );
+
+            return parsed ===
+              undefined
+              ? []
+              : [
+                  [
+                    field.id,
+                    parsed,
+                  ],
+                ];
+          },
+        ),
+      );
+
+    const submission:
+      BendingProblemSubmission =
+      {
+        numeric,
+
+        decisions:
+          decisionValues,
+      };
+
+    const engineeringEvaluation =
+      evaluateEngineeringProblem(
+        engineeringDefinition,
+
+        createBendingEngineeringProblemResponse(
+          submission,
+        ),
+      );
+
+    setEvaluation(
+      createUiEvaluation(
+        engineeringEvaluation.result,
+      ),
+    );
+
+    session.submit(
+      submission,
+    );
+  }
+
+  return (
+    <section
+      data-testid="bending-problem-activity"
+      data-attempt-submitted={
+        evaluation !==
+        null
+      }
+      data-attempt-correct={
+        solved
+      }
+      data-attempt-count={
+        attemptCount
+      }
+      className="mt-8 space-y-6"
+    >
+      <div className="grid gap-3 sm:grid-cols-3">
+        {[
+          "L = 3 m",
+          "P = 8 kN",
+          "a = 1.5 m",
+          "b = 80 mm",
+          "h = 160 mm",
+          "E = 70 GPa",
+        ].map(
+          (
+            value,
+          ) => (
+            <div
+              key={
+                value
+              }
+              className="rounded-xl border border-border bg-surface-subtle p-3 text-center font-mono text-sm font-semibold text-foreground"
+            >
+              {
+                value
+              }
+            </div>
+          ),
+        )}
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        {numericFields.map(
+          (
+            field,
+          ) => {
+            const correct =
+              evaluation?.numeric[
+                field.id
+              ];
+
+            return (
+              <label
+                key={
+                  field.id
+                }
+                className="rounded-xl border border-border bg-background p-4"
+              >
+                <span className="text-sm font-semibold text-foreground">
+                  {locale ===
+                  "tr"
+                    ? field.tr
+                    : field.en}
+                </span>
+
+                <div className="mt-3 flex items-center gap-2">
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    disabled={
+                      solved
+                    }
+                    aria-label={
+                      locale ===
+                      "tr"
+                        ? field.tr
+                        : field.en
+                    }
+                    value={
+                      numericValues[
+                        field.id
+                      ]
+                    }
+                    onChange={(
+                      event,
+                    ) => {
+                      const nextValue =
+                        event
+                          .currentTarget
+                          .value;
+
+                      if (
+                        evaluation !==
+                        null
+                      ) {
+                        beginRevision();
+                      }
+
+                      setNumericValues(
+                        (
+                          current,
+                        ) => ({
+                          ...current,
+
+                          [field.id]:
+                            nextValue,
+                        }),
+                      );
+                    }}
+                    className="min-h-11 w-full rounded-lg border border-border bg-background px-3 font-mono text-foreground"
+                  />
+
+                  <span className="text-sm text-muted">
+                    {
+                      field.unit
+                    }
+                  </span>
+                </div>
+
+                {evaluation &&
+                !correct ? (
+                  <p className="mt-2 text-xs leading-5 text-warning">
+                    {locale ===
+                    "tr"
+                      ? field.hintTr
+                      : field.hintEn}
+                  </p>
+                ) : null}
+              </label>
+            );
+          },
+        )}
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        {decisionFields.map(
+          (
+            field,
+          ) => (
+            <fieldset
+              key={
+                field.id
+              }
+              className="rounded-xl border border-border bg-background p-4"
+            >
+              <legend className="px-1 text-sm font-semibold text-foreground">
+                {locale ===
+                "tr"
+                  ? field.tr
+                  : field.en}
+              </legend>
+
+              <div className="mt-3 flex flex-wrap gap-3">
+                {[
+                  {
+                    value:
+                      "satisfied" as const,
+
+                    tr:
+                      "SaÄŸlandÄ±",
+
+                    en:
+                      "Satisfied",
+                  },
+
+                  {
+                    value:
+                      "not_satisfied" as const,
+
+                    tr:
+                      "SaÄŸlanmadÄ±",
+
+                    en:
+                      "Not satisfied",
+                  },
+                ].map(
+                  (
+                    option,
+                  ) => (
+                    <label
+                      key={
+                        option.value
+                      }
+                      className="flex min-h-11 items-center gap-2 rounded-lg border border-border px-3"
+                    >
+                      <input
+                        type="radio"
+                        disabled={
+                          solved
+                        }
+                        name={
+                          field.id
+                        }
+                        value={
+                          option.value
+                        }
+                        checked={
+                          decisionValues[
+                            field.id
+                          ] ===
+                          option.value
+                        }
+                        onChange={() => {
+                          if (
+                            evaluation !==
+                            null
+                          ) {
+                            beginRevision();
+                          }
+
+                          setDecisionValues(
+                            (
+                              current,
+                            ) => ({
+                              ...current,
+
+                              [field.id]:
+                                option.value,
+                            }),
+                          );
+                        }}
+                      />
+
+                      <span className="text-sm text-muted-strong">
+                        {locale ===
+                        "tr"
+                          ? option.tr
+                          : option.en}
+                      </span>
+                    </label>
+                  ),
+                )}
+              </div>
+
+              {evaluation &&
+              !evaluation
+                .decisions[
+                field.id
+              ] ? (
+                <p className="mt-2 text-xs leading-5 text-warning">
+                  {locale ===
+                  "tr"
+                    ? "Bu Ã¶lÃ§Ã¼tÃ¼ sayÄ±sal sonuÃ§la ayrÄ± olarak karÅŸÄ±laÅŸtÄ±r."
+                    : "Compare this criterion separately with its numerical result."}
+                </p>
+              ) : null}
+            </fieldset>
+          ),
+        )}
+      </div>
+
+      {evaluation ? (
+        <div
+          role="status"
+          className={[
+            "rounded-xl border p-4 text-sm leading-6",
+
+            evaluation.allCorrect
+              ? "border-success/30 bg-success/5"
+              : "border-warning/30 bg-warning/5",
+          ].join(
+            " ",
+          )}
+        >
+          {evaluation.allCorrect
+            ? locale ===
+              "tr"
+              ? "TÃ¼m hesaplar ve iki kriter doÄŸru. Gerilme Ã¶lÃ§Ã¼tÃ¼ saÄŸlanÄ±rken sehim Ã¶lÃ§Ã¼tÃ¼nÃ¼n saÄŸlanmadÄ±ÄŸÄ±nÄ± doÄŸru ayÄ±rdÄ±n."
+              : "All calculations and both criteria are correct. You correctly distinguished that the stress criterion is satisfied while the deflection criterion is not."
+            : locale ===
+              "tr"
+              ? "BazÄ± sonuÃ§lar henÃ¼z doÄŸru deÄŸil. Ä°puÃ§larÄ±nÄ± kullanÄ±p yalnÄ±z gerekli alanlarÄ± yeniden deÄŸerlendir."
+              : "Some results are not yet correct. Use the hints and reassess the required fields."}
+        </div>
+      ) : null}
+
+      {latestResult &&
+      evaluation ? (
+        <AssessmentFeedbackPanel
+          result={
+            latestResult
+          }
+          locale={
+            locale
+          }
+          showItemFeedback={
+            false
+          }
+        />
+      ) : null}
+
+      {evaluation ? (
+        <AssessmentAttemptSummary
+          summary={
+            session.summary
+          }
+          locale={
+            locale
+          }
+        />
+      ) : null}
+
+      {!solved ? (
+        <button
+          type="button"
+          disabled={
+            !session.canSubmit
+          }
+          onClick={
+            submit
+          }
+          className="min-h-11 rounded-lg border border-brand bg-brand px-5 py-2.5 font-semibold text-white hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {attemptCount ===
+          0
+            ? locale ===
+              "tr"
+              ? "CevaplarÄ± kontrol et"
+              : "Check answers"
+            : locale ===
+              "tr"
+              ? "Tekrar kontrol et"
+              : "Check again"}
+        </button>
+      ) : null}
+    </section>
+  );
+}
+
+============================================================
+FILE: .\src\features\learning\otto\otto-problem-activity.tsx
+============================================================
+"use client";
+
+import {
+  useMemo,
+  useState,
+} from "react";
+
+import type {
+  FormEvent,
+} from "react";
+
+import {
+  evaluateEngineeringProblem,
+} from "@/domain/assessment";
+
+import type {
+  AssessmentResult,
+} from "@/domain/assessment";
+
+import type {
+  OttoProblemAnswer,
+} from "@/domain/assessment/otto-problem";
+
+import type {
+  SupportedLocale,
+} from "@/domain/shared/types";
+
+import {
+  AssessmentAttemptSummary,
+  AssessmentFeedbackPanel,
+  useAssessmentSession,
+} from "@/features/learning/assessment";
+
+import {
+  createOttoEngineeringProblemDefinition,
+  createOttoEngineeringProblemResponse,
+} from "@/features/learning/otto/otto-problem-adapter";
+
+interface OttoProblemActivityProps {
+  readonly locale:
+    SupportedLocale;
+}
+
+interface RawAnswers {
+  readonly state2TemperatureK:
+    string;
+
+  readonly state2PressureKPa:
+    string;
+
+  readonly state2SpecificVolumeM3PerKg:
+    string;
+
+  readonly state3TemperatureK:
+    string;
+
+  readonly state3PressureKPa:
+    string;
+
+  readonly state4TemperatureK:
+    string;
+
+  readonly state4PressureKPa:
+    string;
+
+  readonly heatRejectedKJPerKg:
+    string;
+
+  readonly netWorkKJPerKg:
+    string;
+
+  readonly thermalEfficiencyPercent:
+    string;
+}
+
+const EMPTY_ANSWERS:
+  RawAnswers =
+  {
+    state2TemperatureK:
+      "",
+
+    state2PressureKPa:
+      "",
+
+    state2SpecificVolumeM3PerKg:
+      "",
+
+    state3TemperatureK:
+      "",
+
+    state3PressureKPa:
+      "",
+
+    state4TemperatureK:
+      "",
+
+    state4PressureKPa:
+      "",
+
+    heatRejectedKJPerKg:
+      "",
+
+    netWorkKJPerKg:
+      "",
+
+    thermalEfficiencyPercent:
+      "",
+  };
+
+function parseLocalizedNumber(
+  raw:
+    string,
+): number {
+  const normalized =
+    raw
+      .trim()
+      .replace(
+        /\s/g,
+        "",
+      )
+      .replace(
+        ",",
+        ".",
+      );
+
+  if (
+    normalized.length ===
+    0
+  ) {
+    return Number.NaN;
+  }
+
+  return Number(
+    normalized,
+  );
+}
+
+function parseAnswers(
+  answers:
+    RawAnswers,
+): OttoProblemAnswer {
+  return {
+    state2TemperatureK:
+      parseLocalizedNumber(
+        answers
+          .state2TemperatureK,
+      ),
+
+    state2PressureKPa:
+      parseLocalizedNumber(
+        answers
+          .state2PressureKPa,
+      ),
+
+    state2SpecificVolumeM3PerKg:
+      parseLocalizedNumber(
+        answers
+          .state2SpecificVolumeM3PerKg,
+      ),
+
+    state3TemperatureK:
+      parseLocalizedNumber(
+        answers
+          .state3TemperatureK,
+      ),
+
+    state3PressureKPa:
+      parseLocalizedNumber(
+        answers
+          .state3PressureKPa,
+      ),
+
+    state4TemperatureK:
+      parseLocalizedNumber(
+        answers
+          .state4TemperatureK,
+      ),
+
+    state4PressureKPa:
+      parseLocalizedNumber(
+        answers
+          .state4PressureKPa,
+      ),
+
+    heatRejectedKJPerKg:
+      parseLocalizedNumber(
+        answers
+          .heatRejectedKJPerKg,
+      ),
+
+    netWorkKJPerKg:
+      parseLocalizedNumber(
+        answers
+          .netWorkKJPerKg,
+      ),
+
+    thermalEfficiencyPercent:
+      parseLocalizedNumber(
+        answers
+          .thermalEfficiencyPercent,
+      ),
+  };
+}
+
+export function OttoProblemActivity({
+  locale,
+}: OttoProblemActivityProps) {
+  const engineeringDefinition =
+    useMemo(
+      () =>
+        createOttoEngineeringProblemDefinition(),
+      [],
+    );
+
+  const [
+    answers,
+    setAnswers,
+  ] =
+    useState<
+      RawAnswers
+    >(
+      EMPTY_ANSWERS,
+    );
+
+  const [
+    evaluation,
+    setEvaluation,
+  ] =
+    useState<
+      AssessmentResult | null
+    >(
+      null,
+    );
+
+  const session =
+    useAssessmentSession<
+      OttoProblemAnswer
+    >({
+      activityId:
+        "activity-otto-05",
+
+      activityVersion:
+        "1.0.0",
+
+      assessmentId:
+        "activity-otto-05-assessment",
+
+      assessmentVersion:
+        "1.0.0",
+
+      evaluate:
+        (
+          response,
+        ) =>
+          evaluateEngineeringProblem(
+            engineeringDefinition,
+
+            createOttoEngineeringProblemResponse(
+              response,
+            ),
+          ).result,
+    });
+
+  const submitted =
+    evaluation !==
+    null;
+
+  const correct =
+    evaluation?.correct ===
+    true;
+
+  const latestResult =
+    session.latestAttempt
+      ?.result ??
+    null;
+
+  const attemptCount =
+    session.summary
+      .evaluatedAttemptCount;
+
+  function updateAnswer(
+    key:
+      keyof RawAnswers,
+
+    value:
+      string,
+  ): void {
+    if (
+      evaluation !==
+        null &&
+      session.canRevise
+    ) {
+      session.revise();
+    }
+
+    setAnswers(
+      (
+        previous,
+      ) => ({
+        ...previous,
+
+        [key]:
+          value,
+      }),
+    );
+
+    setEvaluation(
+      null,
+    );
+  }
+
+  function handleSubmit(
+    event:
+      FormEvent<HTMLFormElement>,
+  ): void {
+    event.preventDefault();
+
+    if (
+      !session.canSubmit
+    ) {
+      return;
+    }
+
+    const parsedAnswers =
+      parseAnswers(
+        answers,
+      );
+
+    const engineeringEvaluation =
+      evaluateEngineeringProblem(
+        engineeringDefinition,
+
+        createOttoEngineeringProblemResponse(
+          parsedAnswers,
+        ),
+      );
+
+    setEvaluation(
+      engineeringEvaluation.result,
+    );
+
+    session.submit(
+      parsedAnswers,
+    );
+  }
+
+  const fields = [
+    {
+      key:
+        "state2TemperatureK",
+
+      tr:
+        "Durum 2 sÄ±caklÄ±ÄŸÄ± Tâ‚‚",
+
+      en:
+        "State-2 temperature Tâ‚‚",
+
+      unit:
+        "K",
+    },
+
+    {
+      key:
+        "state2PressureKPa",
+
+      tr:
+        "Durum 2 basÄ±ncÄ± pâ‚‚",
+
+      en:
+        "State-2 pressure pâ‚‚",
+
+      unit:
+        "kPa",
+    },
+
+    {
+      key:
+        "state2SpecificVolumeM3PerKg",
+
+      tr:
+        "Durum 2 Ã¶zgÃ¼l hacmi vâ‚‚",
+
+      en:
+        "State-2 specific volume vâ‚‚",
+
+      unit:
+        "mÂ³/kg",
+    },
+
+    {
+      key:
+        "state3TemperatureK",
+
+      tr:
+        "Durum 3 sÄ±caklÄ±ÄŸÄ± Tâ‚ƒ",
+
+      en:
+        "State-3 temperature Tâ‚ƒ",
+
+      unit:
+        "K",
+    },
+
+    {
+      key:
+        "state3PressureKPa",
+
+      tr:
+        "Durum 3 basÄ±ncÄ± pâ‚ƒ",
+
+      en:
+        "State-3 pressure pâ‚ƒ",
+
+      unit:
+        "kPa",
+    },
+
+    {
+      key:
+        "state4TemperatureK",
+
+      tr:
+        "Durum 4 sÄ±caklÄ±ÄŸÄ± Tâ‚„",
+
+      en:
+        "State-4 temperature Tâ‚„",
+
+      unit:
+        "K",
+    },
+
+    {
+      key:
+        "state4PressureKPa",
+
+      tr:
+        "Durum 4 basÄ±ncÄ± pâ‚„",
+
+      en:
+        "State-4 pressure pâ‚„",
+
+      unit:
+        "kPa",
+    },
+
+    {
+      key:
+        "heatRejectedKJPerKg",
+
+      tr:
+        "Ã–zgÃ¼l Ä±sÄ± atÄ±mÄ± qout",
+
+      en:
+        "Specific heat rejected qout",
+
+      unit:
+        "kJ/kg",
+    },
+
+    {
+      key:
+        "netWorkKJPerKg",
+
+      tr:
+        "Net Ã¶zgÃ¼l iÅŸ wnet",
+
+      en:
+        "Net specific work wnet",
+
+      unit:
+        "kJ/kg",
+    },
+
+    {
+      key:
+        "thermalEfficiencyPercent",
+
+      tr:
+        "Ä°deal Ä±sÄ±l verim Î·",
+
+      en:
+        "Ideal thermal efficiency Î·",
+
+      unit:
+        "%",
+    },
+  ] as const;
+
+  return (
+    <section
+      data-testid="otto-problem-activity"
+      data-attempt-submitted={
+        submitted
+          ? "true"
+          : "false"
+      }
+      data-attempt-correct={
+        correct
+          ? "true"
+          : "false"
+      }
+      data-attempt-count={
+        attemptCount
+      }
+      className="mt-8 space-y-6"
+    >
+      <div className="rounded-xl border border-border bg-surface-subtle p-4">
+        <h3 className="font-semibold text-foreground">
+          {locale ===
+          "tr"
+            ? "Verilenler"
+            : "Given"}
+        </h3>
+
+        <p className="mt-2 font-mono text-sm leading-7 text-muted-strong">
+          r = 6
+          {" Â· "}
+          Tâ‚ = 320 K
+          {" Â· "}
+          pâ‚ = 120 kPa
+          {" Â· "}
+          qin = 600 kJ/kg
+          {" Â· "}
+          R = 287 J/(kgÂ·K)
+          {" Â· "}
+          Î³ = 1,4
+        </p>
+      </div>
+
+      <form
+        onSubmit={
+          handleSubmit
+        }
+        className="space-y-5"
+      >
+        <div className="grid gap-4 md:grid-cols-2">
+          {fields.map(
+            (
+              field,
+            ) => (
+              <label
+                key={
+                  field.key
+                }
+                className="block rounded-xl border border-border bg-background p-4"
+              >
+                <span className="text-sm font-semibold text-foreground">
+                  {
+                    field[
+                      locale
+                    ]
+                  }
+                </span>
+
+                <span className="mt-3 flex items-center gap-3">
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={
+                      answers[
+                        field.key
+                      ]
+                    }
+                    onChange={
+                      (
+                        event,
+                      ) => {
+                        const nextValue =
+                          event
+                            .currentTarget
+                            .value;
+
+                        updateAnswer(
+                          field.key,
+                          nextValue,
+                        );
+                      }
+                    }
+                    aria-label={
+                      field[
+                        locale
+                      ]
+                    }
+                    className="min-h-11 w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-foreground"
+                  />
+
+                  <span className="whitespace-nowrap text-sm text-muted">
+                    {
+                      field.unit
+                    }
+                  </span>
+                </span>
+              </label>
+            ),
+          )}
+        </div>
+
+        <button
+          type="submit"
+          disabled={
+            !session.canSubmit
+          }
+          className="min-h-11 rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {attemptCount ===
+          0
+            ? locale ===
+              "tr"
+              ? "CevaplarÄ± kontrol et"
+              : "Check answers"
+            : locale ===
+              "tr"
+              ? "Tekrar kontrol et"
+              : "Check again"}
+        </button>
+      </form>
+
+      {submitted ? (
+        <div
+          role="status"
+          className={[
+            "rounded-xl border p-4 text-sm leading-6",
+
+            correct
+              ? "border-success/30 bg-success/5 text-muted-strong"
+              : "border-warning/30 bg-warning/5 text-muted-strong",
+          ].join(
+            " ",
+          )}
+        >
+          {correct
+            ? locale ===
+              "tr"
+              ? "TÃ¼m sonuÃ§lar tolerans iÃ§inde doÄŸru. Enerji dengesi ve verim iliÅŸkilerini de son kez kontrol et: qin âˆ’ qout = wnet ve Î· = wnet/qin."
+              : "All results are correct within tolerance. Finish by checking the energy and efficiency relations: qin âˆ’ qout = wnet and Î· = wnet/qin."
+            : locale ===
+              "tr"
+              ? "En az bir sonuÃ§ tolerans dÄ±ÅŸÄ±nda. SÃ¼reÃ§leri sÄ±rayla Ã§Ã¶z; sabit hacim adÄ±mlarÄ±nda Ã¶zgÃ¼l hacmin deÄŸiÅŸmediÄŸini ve enerji terimlerinin aynÄ± kJ/kg temelinde olduÄŸunu kontrol et."
+              : "At least one result is outside tolerance. Solve the processes in sequence; check that specific volume remains constant on the constant-volume legs and that all energy terms use the same kJ/kg basis."}
+        </div>
+      ) : null}
+
+      {latestResult &&
+      submitted ? (
+        <AssessmentFeedbackPanel
+          result={
+            latestResult
+          }
+          locale={
+            locale
+          }
+          showItemFeedback={
+            false
+          }
+        />
+      ) : null}
+
+      {submitted ? (
+        <AssessmentAttemptSummary
+          summary={
+            session.summary
+          }
+          locale={
+            locale
+          }
+        />
+      ) : null}
+    </section>
+  );
+}
+
+============================================================
+FILE: .\src\features\learning\assessment\assessment-feedback-panel.tsx
+============================================================
+import {
+  getAssessmentFeedbackEntry,
+  getAssessmentFeedbackText,
+} from "@/content/assessment-feedback";
+
+import {
+  createAssessmentFeedbackPlan,
+} from "@/domain/assessment";
+
+import type {
+  AssessmentResult,
+} from "@/domain/assessment";
+
+import type {
+  SupportedLocale,
+} from "@/domain/shared/types";
+
+interface AssessmentFeedbackPanelProps {
+  readonly result:
+    AssessmentResult;
+
+  readonly locale:
+    SupportedLocale;
+
+  readonly showItemFeedback?:
+    boolean;
+}
+
+function toneClasses(
+  tone:
+    "success" |
+    "guidance" |
+    "warning" |
+    "info",
+): string {
+  switch (
+    tone
+  ) {
+    case "success":
+      return "border-success/30 bg-success/5";
+
+    case "warning":
+      return "border-warning/30 bg-warning/5";
+
+    case "guidance":
+      return "border-brand/20 bg-brand-soft";
+
+    case "info":
+    default:
+      return "border-border bg-surface-subtle";
+  }
+}
+
+export function AssessmentFeedbackPanel({
+  result,
+  locale,
+  showItemFeedback = true,
+}: AssessmentFeedbackPanelProps) {
+  const plan =
+    createAssessmentFeedbackPlan(
+      result,
+      getAssessmentFeedbackEntry,
+    );
+
+  const summaryText =
+    getAssessmentFeedbackText(
+      plan.summary.code,
+      locale,
+    );
+
+  if (
+    !summaryText
+  ) {
+    throw new Error(
+      `Missing localized assessment feedback for "${plan.summary.code}".`,
+    );
+  }
+
+  return (
+    <section
+      data-testid="assessment-feedback-panel"
+      data-feedback-code={
+        plan.summary.code
+      }
+      data-feedback-reason={
+        plan.summary.reason
+      }
+      data-feedback-tone={
+        plan.summary.tone
+      }
+      className={[
+        "rounded-xl border p-4",
+        toneClasses(
+          plan.summary.tone,
+        ),
+      ].join(
+        " ",
+      )}
+    >
+      <h3 className="font-semibold text-foreground">
+        {
+          summaryText.title
+        }
+      </h3>
+
+      <p className="mt-1 text-sm leading-6 text-muted-strong">
+        {
+          summaryText.message
+        }
+      </p>
+
+      {showItemFeedback &&
+      plan.items.length >
+        1 ? (
+        <ul className="mt-4 space-y-2 border-t border-border/70 pt-4">
+          {plan.items.map(
+            (
+              item,
+            ) => {
+              const text =
+                getAssessmentFeedbackText(
+                  item.feedback
+                    .code,
+                  locale,
+                );
+
+              if (
+                !text
+              ) {
+                throw new Error(
+                  `Missing localized assessment item feedback for "${item.feedback.code}".`,
+                );
+              }
+
+              return (
+                <li
+                  key={
+                    item.itemId
+                  }
+                  data-assessment-feedback-item={
+                    item.itemId
+                  }
+                  data-feedback-code={
+                    item.feedback
+                      .code
+                  }
+                  className="text-sm leading-6 text-muted-strong"
+                >
+                  <strong className="text-foreground">
+                    {
+                      item.itemId
+                    }
+                    :
+                  </strong>{" "}
+                  {
+                    text.message
+                  }
+                </li>
+              );
+            },
+          )}
+        </ul>
+      ) : null}
+    </section>
+  );
+}
+
+============================================================
+FILE: .\src\features\learning\assessment\assessment-attempt-summary.tsx
+============================================================
+import type {
+  AssessmentAttemptHistorySummary,
+} from "@/domain/assessment";
+
+import type {
+  SupportedLocale,
+} from "@/domain/shared/types";
+
+interface AssessmentAttemptSummaryProps {
+  readonly summary:
+    AssessmentAttemptHistorySummary;
+
+  readonly locale:
+    SupportedLocale;
+}
+
+function correctnessText(
+  value:
+    boolean | null,
+
+  locale:
+    SupportedLocale,
+): string {
+  if (
+    value ===
+    null
+  ) {
+    return locale ===
+      "tr"
+      ? "â€”"
+      : "â€”";
+  }
+
+  if (
+    value
+  ) {
+    return locale ===
+      "tr"
+      ? "doÄŸru"
+      : "correct";
+  }
+
+  return locale ===
+    "tr"
+    ? "yanlÄ±ÅŸ"
+    : "incorrect";
+}
+
+export function AssessmentAttemptSummary({
+  summary,
+  locale,
+}: AssessmentAttemptSummaryProps) {
+  return (
+    <aside
+      data-testid="assessment-attempt-summary"
+      data-attempt-count={
+        summary.attemptCount
+      }
+      data-has-correct-attempt={
+        summary.hasCorrectAttempt
+          ? "true"
+          : "false"
+      }
+      className="rounded-xl border border-border bg-surface-subtle p-4"
+    >
+      <h3 className="text-sm font-semibold text-foreground">
+        {locale ===
+        "tr"
+          ? "Deneme geÃ§miÅŸi"
+          : "Attempt history"}
+      </h3>
+
+      <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-3">
+        <div>
+          <dt className="text-muted">
+            {locale ===
+            "tr"
+              ? "Deneme"
+              : "Attempts"}
+          </dt>
+
+          <dd className="mt-1 font-semibold text-foreground">
+            {
+              summary.attemptCount
+            }
+          </dd>
+        </div>
+
+        <div>
+          <dt className="text-muted">
+            {locale ===
+            "tr"
+              ? "Ä°lk sonuÃ§"
+              : "First result"}
+          </dt>
+
+          <dd className="mt-1 font-semibold text-foreground">
+            {correctnessText(
+              summary
+                .firstAttemptCorrect,
+              locale,
+            )}
+          </dd>
+        </div>
+
+        <div>
+          <dt className="text-muted">
+            {locale ===
+            "tr"
+              ? "Son sonuÃ§"
+              : "Latest result"}
+          </dt>
+
+          <dd className="mt-1 font-semibold text-foreground">
+            {correctnessText(
+              summary
+                .latestAttemptCorrect,
+              locale,
+            )}
+          </dd>
+        </div>
+      </dl>
+
+      <p className="mt-3 text-xs leading-5 text-muted">
+        {locale ===
+        "tr"
+          ? "Bir soruyu daha sonraki denemede doÄŸru Ã§Ã¶zmek Ã¶nceki denemeyi silmez ve tek baÅŸÄ±na kavramÄ±n ustalaÅŸÄ±ldÄ±ÄŸÄ±nÄ± gÃ¶stermez."
+          : "Solving a problem correctly on a later attempt does not erase earlier attempts and does not by itself establish mastery of the concept."}
+      </p>
+    </aside>
+  );
+}
+
+============================================================
+FILE: .\src\content\predictions.test.ts
+============================================================
+import {
+  describe,
+  expect,
+  it,
+} from "vitest";
+
+import {
+  getPredictionDefinition,
+  getPredictionDefinitions,
+} from "@/content/predictions";
+
+describe(
+  "Prediction content registry",
+  () => {
+    it(
+      "contains the Statics load-position prediction",
+      () => {
+        const definition =
+          getPredictionDefinition(
+            "activity-ssb-03",
+          );
+
+        expect(
+          definition,
+        ).toBeDefined();
+
+        expect(
+          definition?.options,
+        ).toHaveLength(3);
+
+        expect(
+          definition?.correctOptionId,
+        ).toBe(
+          "prediction-ssb-reactions-b",
+        );
+      },
+    );
+
+    it(
+      "uses unique activity IDs",
+      () => {
+        const definitions =
+          getPredictionDefinitions();
+
+        const ids =
+          definitions.map(
+            (definition) =>
+              definition.activityId,
+          );
+
+        expect(
+          new Set(ids).size,
+        ).toBe(
+          ids.length,
+        );
+      },
+    );
+
+    it(
+      "returns undefined for an activity without a prediction definition",
+      () => {
+        expect(
+          getPredictionDefinition(
+            "activity-ssb-01",
+          ),
+        ).toBeUndefined();
+      },
+    );
+  },
+);
+
+============================================================
+FILE: .\src\content\assessment-feedback.test.ts
+============================================================
+import {
+  describe,
+  expect,
+  it,
+} from "vitest";
+
+import {
+  ASSESSMENT_FEEDBACK_CATALOG,
+  getAssessmentFeedbackEntry,
+  getAssessmentFeedbackText,
+} from "@/content/assessment-feedback";
+
+describe(
+  "Assessment feedback catalog",
+  () => {
+    it(
+      "uses unique feedback codes",
+      () => {
+        const codes =
+          ASSESSMENT_FEEDBACK_CATALOG.map(
+            (
+              item,
+            ) =>
+              item.code,
+          );
+
+        expect(
+          new Set(
+            codes,
+          ).size,
+        ).toBe(
+          codes.length,
+        );
+      },
+    );
+
+    it(
+      "provides complete Turkish and English text for every entry",
+      () => {
+        for (
+          const item
+          of ASSESSMENT_FEEDBACK_CATALOG
+        ) {
+          expect(
+            item.text.tr.title
+              .trim().length,
+          ).toBeGreaterThan(
+            0,
+          );
+
+          expect(
+            item.text.tr.message
+              .trim().length,
+          ).toBeGreaterThan(
+            0,
+          );
+
+          expect(
+            item.text.en.title
+              .trim().length,
+          ).toBeGreaterThan(
+            0,
+          );
+
+          expect(
+            item.text.en.message
+              .trim().length,
+          ).toBeGreaterThan(
+            0,
+          );
+        }
+      },
+    );
+
+    it(
+      "contains the required generic feedback codes",
+      () => {
+        const requiredCodes = [
+          "assessment.result.correct",
+          "assessment.result.partially-correct",
+          "assessment.result.incorrect",
+          "assessment.result.invalid",
+          "assessment.result.not-evaluated",
+          "assessment.item.correct",
+          "assessment.item.incorrect",
+          "assessment.item.invalid",
+          "assessment.numeric.missing",
+          "assessment.numeric.invalid",
+          "assessment.numeric.outside-tolerance",
+          "assessment.choice.missing",
+          "assessment.choice.wrong-concept",
+          "assessment.criterion.wrong",
+          "assessment.unit.mismatch",
+          "assessment.model.limit",
+        ];
+
+        for (
+          const code
+          of requiredCodes
+        ) {
+          expect(
+            getAssessmentFeedbackEntry(
+              code,
+            ),
+          ).toBeDefined();
+        }
+      },
+    );
+
+    it(
+      "keeps unit, concept, criterion, and model-limit reasons distinct",
+      () => {
+        expect(
+          getAssessmentFeedbackEntry(
+            "assessment.unit.mismatch",
+          )?.reason,
+        ).toBe(
+          "unit_mismatch",
+        );
+
+        expect(
+          getAssessmentFeedbackEntry(
+            "assessment.choice.wrong-concept",
+          )?.reason,
+        ).toBe(
+          "wrong_concept",
+        );
+
+        expect(
+          getAssessmentFeedbackEntry(
+            "assessment.criterion.wrong",
+          )?.reason,
+        ).toBe(
+          "wrong_criterion",
+        );
+
+        expect(
+          getAssessmentFeedbackEntry(
+            "assessment.model.limit",
+          )?.reason,
+        ).toBe(
+          "model_limit",
+        );
+      },
+    );
+
+    it(
+      "resolves localized text without changing the feedback code",
+      () => {
+        expect(
+          getAssessmentFeedbackText(
+            "assessment.unit.mismatch",
+            "tr",
+          )?.title,
+        ).toBe(
+          "Birimi kontrol et",
+        );
+
+        expect(
+          getAssessmentFeedbackText(
+            "assessment.unit.mismatch",
+            "en",
+          )?.title,
+        ).toBe(
+          "Check the unit",
+        );
+
+        expect(
+          getAssessmentFeedbackEntry(
+            "assessment.unit.mismatch",
+          )?.code,
+        ).toBe(
+          "assessment.unit.mismatch",
+        );
+      },
+    );
+
+    it(
+      "returns undefined for an unknown feedback code",
+      () => {
+        expect(
+          getAssessmentFeedbackEntry(
+            "invented.feedback",
+          ),
+        ).toBeUndefined();
+
+        expect(
+          getAssessmentFeedbackText(
+            "invented.feedback",
+            "tr",
+          ),
+        ).toBeUndefined();
+      },
+    );
+  },
+);
+
+============================================================
+FILE: .\src\content\assessment-feedback.integration.test.ts
+============================================================
+import {
+  describe,
+  expect,
+  it,
+} from "vitest";
+
+import {
+  getAssessmentFeedbackEntry,
+  getAssessmentFeedbackText,
+} from "@/content/assessment-feedback";
+
+import {
+  createAssessmentFeedbackPlan,
+} from "@/domain/assessment/feedback";
+
+import {
+  createAssessmentResult,
+} from "@/domain/assessment/result";
+
+describe(
+  "Assessment feedback integration",
+  () => {
+    it(
+      "resolves a complete correct result into bilingual feedback",
+      () => {
+        const result =
+          createAssessmentResult(
+            [
+              {
+                id:
+                  "answer",
+
+                status:
+                  "correct",
+
+                score:
+                  1,
+
+                maxScore:
+                  1,
+              },
+            ],
+          );
+
+        const plan =
+          createAssessmentFeedbackPlan(
+            result,
+            getAssessmentFeedbackEntry,
+          );
+
+        expect(
+          plan.summary.code,
+        ).toBe(
+          "assessment.result.correct",
+        );
+
+        expect(
+          getAssessmentFeedbackText(
+            plan.summary.code,
+            "tr",
+          )?.title,
+        ).toBe(
+          "DoÄŸru",
+        );
+
+        expect(
+          getAssessmentFeedbackText(
+            plan.summary.code,
+            "en",
+          )?.title,
+        ).toBe(
+          "Correct",
+        );
+      },
+    );
+
+    it(
+      "resolves specific targeted feedback rather than collapsing it to generic incorrect",
+      () => {
+        const result =
+          createAssessmentResult(
+            [
+              {
+                id:
+                  "pressure",
+
+                status:
+                  "incorrect",
+
+                score:
+                  0,
+
+                maxScore:
+                  1,
+
+                feedbackCode:
+                  "assessment.numeric.outside-tolerance",
+              },
+            ],
+          );
+
+        const plan =
+          createAssessmentFeedbackPlan(
+            result,
+            getAssessmentFeedbackEntry,
+          );
+
+        expect(
+          plan.items[0]
+            ?.feedback.reason,
+        ).toBe(
+          "outside_tolerance",
+        );
+
+        expect(
+          getAssessmentFeedbackText(
+            plan.items[0]
+              ?.feedback.code ??
+              "",
+            "tr",
+          )?.title,
+        ).toBe(
+          "SayÄ±sal sonucu kontrol et",
+        );
+      },
+    );
+
+    it(
+      "keeps criterion error separate from numeric correctness",
+      () => {
+        const result =
+          createAssessmentResult(
+            [
+              {
+                id:
+                  "stress",
+
+                status:
+                  "correct",
+
+                score:
+                  1,
+
+                maxScore:
+                  1,
+              },
+
+              {
+                id:
+                  "stress-criterion",
+
+                status:
+                  "incorrect",
+
+                score:
+                  0,
+
+                maxScore:
+                  1,
+
+                feedbackCode:
+                  "assessment.criterion.wrong",
+              },
+            ],
+          );
+
+        const plan =
+          createAssessmentFeedbackPlan(
+            result,
+            getAssessmentFeedbackEntry,
+          );
+
+        expect(
+          plan.summary.reason,
+        ).toBe(
+          "partial",
+        );
+
+        expect(
+          plan.items[0]
+            ?.feedback.reason,
+        ).toBe(
+          "correct",
+        );
+
+        expect(
+          plan.items[1]
+            ?.feedback.reason,
+        ).toBe(
+          "wrong_criterion",
+        );
+      },
+    );
+  },
+);
+
+============================================================
+FILE: .\src\features\learning\prediction-activity.test.tsx
+============================================================
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
+
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
+
+import {
+  getPredictionDefinition,
+} from "@/content/predictions";
+
+import { PredictionActivity } from "@/features/learning/prediction-activity";
+
+afterEach(() => {
+  cleanup();
+});
+
+function getStaticsPrediction() {
+  const definition =
+    getPredictionDefinition(
+      "activity-ssb-03",
+    );
+
+  if (!definition) {
+    throw new Error(
+      "Expected Statics prediction definition.",
+    );
+  }
+
+  return definition;
+}
+
+describe(
+  "PredictionActivity",
+  () => {
+    it(
+      "renders the prediction prompt and options in Turkish",
+      () => {
+        render(
+          <PredictionActivity
+            definition={
+              getStaticsPrediction()
+            }
+            locale="tr"
+          />,
+        );
+
+        expect(
+          screen.getByText(
+            /yÃ¼k saÄŸ mesnete doÄŸru hareket ederse/i,
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.getAllByRole(
+            "button",
+          ),
+        ).toHaveLength(3);
+      },
+    );
+
+    it(
+      "renders English prediction content",
+      () => {
+        render(
+          <PredictionActivity
+            definition={
+              getStaticsPrediction()
+            }
+            locale="en"
+          />,
+        );
+
+        expect(
+          screen.getByText(
+            /load moves toward the right support/i,
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      "does not reveal feedback before a prediction is submitted",
+      () => {
+        render(
+          <PredictionActivity
+            definition={
+              getStaticsPrediction()
+            }
+            locale="tr"
+          />,
+        );
+
+        expect(
+          screen.queryByRole(
+            "status",
+          ),
+        ).not.toBeInTheDocument();
+      },
+    );
+
+    it(
+      "submits a prediction when an option is selected",
+      () => {
+        const {
+          container,
+        } = render(
+          <PredictionActivity
+            definition={
+              getStaticsPrediction()
+            }
+            locale="tr"
+          />,
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                /sol mesnet tepkisi azalÄ±r/i,
+            },
+          ),
+        );
+
+        expect(
+          container.querySelector(
+            '[data-prediction-submitted="true"]',
+          ),
+        ).not.toBeNull();
+
+        expect(
+          screen.getByRole(
+            "status",
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      "provides explanatory feedback for an incorrect prediction",
+      () => {
+        render(
+          <PredictionActivity
+            definition={
+              getStaticsPrediction()
+            }
+            locale="tr"
+          />,
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                /sol mesnet tepkisi artar/i,
+            },
+          ),
+        );
+
+        expect(
+          screen.getByRole(
+            "status",
+          ),
+        ).toHaveTextContent(
+          /sol mesnet tepkisi artmaz; azalÄ±r/i,
+        );
+      },
+    );
+
+    it(
+      "locks the submitted prediction instead of allowing post-hoc answer changes",
+      () => {
+        render(
+          <PredictionActivity
+            definition={
+              getStaticsPrediction()
+            }
+            locale="en"
+          />,
+        );
+
+        const buttons =
+          screen.getAllByRole(
+            "button",
+          );
+
+        fireEvent.click(
+          buttons[0]!,
+        );
+
+        for (
+          const button
+          of buttons
+        ) {
+          expect(
+            button,
+          ).toBeDisabled();
+        }
+      },
+    );
+
+    it(
+      "records correctness separately from submission state",
+      () => {
+        const {
+          container,
+        } = render(
+          <PredictionActivity
+            definition={
+              getStaticsPrediction()
+            }
+            locale="en"
+          />,
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                /both support reactions remain unchanged/i,
+            },
+          ),
+        );
+
+        expect(
+          container.querySelector(
+            '[data-prediction-submitted="true"]',
+          ),
+        ).not.toBeNull();
+
+        expect(
+          container.querySelector(
+            '[data-prediction-correct="false"]',
+          ),
+        ).not.toBeNull();
+      },
+    );
+  },
+);
+
+============================================================
+FILE: .\src\features\learning\problems\beam-statics-problem-activity.test.tsx
+============================================================
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
+
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
+
+import {
+  getNumericProblemDefinition,
+} from "@/content/statics-problems";
+
+import { BeamStaticsProblemActivity } from "@/features/learning/problems/beam-statics-problem-activity";
+
+afterEach(() => {
+  cleanup();
+});
+
+function getDefinition() {
+  const definition =
+    getNumericProblemDefinition(
+      "activity-ssb-05",
+    );
+
+  if (
+    !definition ||
+    definition.kind !==
+      "beam_statics_numeric_problem"
+  ) {
+    throw new Error(
+      "Expected Statics numeric problem.",
+    );
+  }
+
+  return definition;
+}
+
+function enterCorrectAnswers():
+  void {
+  fireEvent.change(
+    screen.getByRole(
+      "textbox",
+      {
+        name:
+          "Left support reaction RA",
+      },
+    ),
+    {
+      target: {
+        value: "8",
+      },
+    },
+  );
+
+  fireEvent.change(
+    screen.getByRole(
+      "textbox",
+      {
+        name:
+          "Right support reaction RB",
+      },
+    ),
+    {
+      target: {
+        value: "4",
+      },
+    },
+  );
+
+  fireEvent.change(
+    screen.getByRole(
+      "textbox",
+      {
+        name:
+          "Shear force to the left of the load",
+      },
+    ),
+    {
+      target: {
+        value: "8",
+      },
+    },
+  );
+
+  fireEvent.change(
+    screen.getByRole(
+      "textbox",
+      {
+        name:
+          "Shear force to the right of the load",
+      },
+    ),
+    {
+      target: {
+        value: "-4",
+      },
+    },
+  );
+
+  fireEvent.change(
+    screen.getByRole(
+      "textbox",
+      {
+        name:
+          "Maximum bending moment",
+      },
+    ),
+    {
+      target: {
+        value: "16",
+      },
+    },
+  );
+
+  fireEvent.change(
+    screen.getByRole(
+      "textbox",
+      {
+        name:
+          "Location of maximum moment",
+      },
+    ),
+    {
+      target: {
+        value: "2",
+      },
+    },
+  );
+}
+
+describe(
+  "BeamStaticsProblemActivity",
+  () => {
+    it(
+      "renders six answer fields and the problem givens",
+      () => {
+        render(
+          <BeamStaticsProblemActivity
+            definition={
+              getDefinition()
+            }
+            locale="en"
+          />,
+        );
+
+        expect(
+          screen.getAllByRole(
+            "textbox",
+          ),
+        ).toHaveLength(6);
+
+        expect(
+          screen.getByText(
+            "12 kN",
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.getByText(
+            "6 m",
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      "records an incorrect submission without marking the problem correct",
+      () => {
+        const {
+          container,
+        } = render(
+          <BeamStaticsProblemActivity
+            definition={
+              getDefinition()
+            }
+            locale="en"
+          />,
+        );
+
+        fireEvent.change(
+          screen.getByRole(
+            "textbox",
+            {
+              name:
+                "Right support reaction RB",
+            },
+          ),
+          {
+            target: {
+              value: "8",
+            },
+          },
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                "Check answers",
+            },
+          ),
+        );
+
+        expect(
+          container.querySelector(
+            '[data-attempt-submitted="true"]',
+          ),
+        ).not.toBeNull();
+
+        expect(
+          container.querySelector(
+            '[data-attempt-correct="false"]',
+          ),
+        ).not.toBeNull();
+
+        expect(
+          screen.getByText(
+            /Take moments about A/i,
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      "accepts the complete Engineering Core solution",
+      () => {
+        const {
+          container,
+        } = render(
+          <BeamStaticsProblemActivity
+            definition={
+              getDefinition()
+            }
+            locale="en"
+          />,
+        );
+
+        enterCorrectAnswers();
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                "Check answers",
+            },
+          ),
+        );
+
+        expect(
+          container.querySelector(
+            '[data-attempt-correct="true"]',
+          ),
+        ).not.toBeNull();
+
+        expect(
+          screen.getByRole(
+            "status",
+          ),
+        ).toHaveTextContent(
+          /All six results agree/i,
+        );
+
+        expect(
+          screen.queryByRole(
+            "button",
+            {
+              name:
+                "Check again",
+            },
+          ),
+        ).not.toBeInTheDocument();
+      },
+    );
+
+    it(
+      "accepts Turkish decimal-comma input",
+      () => {
+        render(
+          <BeamStaticsProblemActivity
+            definition={
+              getDefinition()
+            }
+            locale="tr"
+          />,
+        );
+
+        const fields =
+          screen.getAllByRole(
+            "textbox",
+          );
+
+        const values = [
+          "8,0",
+          "4,0",
+          "8,0",
+          "-4,0",
+          "16,0",
+          "2,0",
+        ];
+
+        for (
+          let index = 0;
+          index <
+          fields.length;
+          index += 1
+        ) {
+          fireEvent.change(
+            fields[index]!,
+            {
+              target: {
+                value:
+                  values[index],
+              },
+            },
+          );
+        }
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                "SonuÃ§larÄ± kontrol et",
+            },
+          ),
+        );
+
+        expect(
+          screen.getByRole(
+            "status",
+          ),
+        ).toHaveTextContent(
+          /AltÄ± sonuÃ§ da/i,
+        );
+      },
+    );
+
+    it(
+      "allows revision and a second attempt after an incorrect submission",
+      () => {
+        const {
+          container,
+        } = render(
+          <BeamStaticsProblemActivity
+            definition={
+              getDefinition()
+            }
+            locale="en"
+          />,
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                "Check answers",
+            },
+          ),
+        );
+
+        expect(
+          container.querySelector(
+            '[data-attempt-count="1"]',
+          ),
+        ).not.toBeNull();
+
+        enterCorrectAnswers();
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                "Check again",
+            },
+          ),
+        );
+
+        expect(
+          container.querySelector(
+            '[data-attempt-count="2"]',
+          ),
+        ).not.toBeNull();
+
+        expect(
+          container.querySelector(
+            '[data-attempt-correct="true"]',
+          ),
+        ).not.toBeNull();
+      },
+    );
+  },
+);
+
+============================================================
+FILE: .\src\features\learning\bending\bending-height-prediction.test.tsx
+============================================================
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
+
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
+
+import {
+  BendingHeightPrediction,
+} from "@/features/learning/bending/bending-height-prediction";
+
+afterEach(() => {
+  cleanup();
+});
+
+function getPredictionOptionButtons():
+  HTMLButtonElement[] {
+  const activity =
+    screen.getByTestId(
+      "bending-height-prediction",
+    );
+
+  return within(
+    activity,
+  )
+    .getAllByRole(
+      "button",
+    )
+    .filter(
+      (
+        button,
+      ): button is HTMLButtonElement =>
+        button.hasAttribute(
+          "aria-pressed",
+        ),
+    );
+}
+
+describe(
+  "BendingHeightPrediction",
+  () => {
+    it(
+      "renders three prediction options without revealing the answer before submission",
+      () => {
+        render(
+          <BendingHeightPrediction
+            locale="tr"
+          />,
+        );
+
+        const activity =
+          screen.getByTestId(
+            "bending-height-prediction",
+          );
+
+        const optionButtons =
+          getPredictionOptionButtons();
+
+        expect(
+          optionButtons,
+        ).toHaveLength(
+          3,
+        );
+
+        expect(
+          activity,
+        ).toHaveAttribute(
+          "data-prediction-submitted",
+          "false",
+        );
+
+        expect(
+          screen.queryByText(
+            "Tahmin doÄŸru",
+          ),
+        ).not.toBeInTheDocument();
+
+        expect(
+          screen.queryByText(
+            "Tahmini yeniden dÃ¼ÅŸÃ¼n",
+          ),
+        ).not.toBeInTheDocument();
+
+        for (
+          const button
+          of optionButtons
+        ) {
+          expect(
+            button,
+          ).not.toBeDisabled();
+        }
+      },
+    );
+
+    it(
+      "accepts the correct h-scaling prediction",
+      () => {
+        render(
+          <BendingHeightPrediction
+            locale="tr"
+          />,
+        );
+
+        const activity =
+          screen.getByTestId(
+            "bending-height-prediction",
+          );
+
+        const optionButtons =
+          getPredictionOptionButtons();
+
+        fireEvent.click(
+          optionButtons[1],
+        );
+
+        expect(
+          activity,
+        ).toHaveAttribute(
+          "data-prediction-submitted",
+          "true",
+        );
+
+        expect(
+          activity,
+        ).toHaveAttribute(
+          "data-prediction-correct",
+          "true",
+        );
+
+        expect(
+          screen.getByText(
+            "Tahmin doÄŸru",
+          ),
+        ).toBeInTheDocument();
+
+        for (
+          const button
+          of optionButtons
+        ) {
+          expect(
+            button,
+          ).toBeDisabled();
+        }
+      },
+    );
+
+    it(
+      "locks all options after submission while keeping revision available",
+      () => {
+        render(
+          <BendingHeightPrediction
+            locale="tr"
+          />,
+        );
+
+        const activity =
+          screen.getByTestId(
+            "bending-height-prediction",
+          );
+
+        const optionButtons =
+          getPredictionOptionButtons();
+
+        fireEvent.click(
+          optionButtons[0],
+        );
+
+        expect(
+          activity,
+        ).toHaveAttribute(
+          "data-prediction-submitted",
+          "true",
+        );
+
+        expect(
+          activity,
+        ).toHaveAttribute(
+          "data-prediction-correct",
+          "false",
+        );
+
+        expect(
+          screen.getByText(
+            "Tahmini yeniden dÃ¼ÅŸÃ¼n",
+          ),
+        ).toBeInTheDocument();
+
+        for (
+          const button
+          of optionButtons
+        ) {
+          expect(
+            button,
+          ).toBeDisabled();
+        }
+
+        const reviseButton =
+          screen.getByRole(
+            "button",
+            {
+              name:
+                "Tahmini yeniden dene",
+            },
+          );
+
+        expect(
+          reviseButton,
+        ).toBeEnabled();
+      },
+    );
+  },
+);
+
+============================================================
+FILE: .\src\features\learning\bending\bending-problem-activity.test.tsx
+============================================================
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
+
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
+
+import { BendingProblemActivity } from "@/features/learning/bending/bending-problem-activity";
+
+afterEach(() => {
+  cleanup();
+});
+
+function fillCorrectNumericAnswers() {
+  fireEvent.change(
+    screen.getByRole(
+      "textbox",
+      {
+        name:
+          "Second moment of area I",
+      },
+    ),
+    {
+      target: {
+        value:
+          "2730.667",
+      },
+    },
+  );
+
+  fireEvent.change(
+    screen.getByRole(
+      "textbox",
+      {
+        name:
+          "Maximum bending moment",
+      },
+    ),
+    {
+      target: {
+        value:
+          "6",
+      },
+    },
+  );
+
+  fireEvent.change(
+    screen.getByRole(
+      "textbox",
+      {
+        name:
+          "Maximum bending stress",
+      },
+    ),
+    {
+      target: {
+        value:
+          "17.578",
+      },
+    },
+  );
+
+  fireEvent.change(
+    screen.getByRole(
+      "textbox",
+      {
+        name:
+          "Maximum deflection",
+      },
+    ),
+    {
+      target: {
+        value:
+          "2.354",
+      },
+    },
+  );
+}
+
+describe(
+  "BendingProblemActivity",
+  () => {
+    it(
+      "renders four numerical answers and two independent criteria",
+      () => {
+        render(
+          <BendingProblemActivity
+            locale="en"
+          />,
+        );
+
+        expect(
+          screen.getAllByRole(
+            "textbox",
+          ),
+        ).toHaveLength(4);
+
+        expect(
+          screen.getByText(
+            "20 MPa stress criterion",
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.getByText(
+            "2 mm deflection criterion",
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      "accepts the correct complete solution",
+      () => {
+        const {
+          container,
+        } = render(
+          <BendingProblemActivity
+            locale="en"
+          />,
+        );
+
+        fillCorrectNumericAnswers();
+
+        const satisfied =
+          screen.getAllByRole(
+            "radio",
+            {
+              name:
+                "Satisfied",
+            },
+          );
+
+        const notSatisfied =
+          screen.getAllByRole(
+            "radio",
+            {
+              name:
+                "Not satisfied",
+            },
+          );
+
+        fireEvent.click(
+          satisfied[0]!,
+        );
+
+        fireEvent.click(
+          notSatisfied[1]!,
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                "Check answers",
+            },
+          ),
+        );
+
+        expect(
+          container.querySelector(
+            '[data-attempt-correct="true"]',
+          ),
+        ).not.toBeNull();
+
+        expect(
+          screen.getByRole(
+            "status",
+          ),
+        ).toHaveTextContent(
+          /All calculations and both criteria are correct/i,
+        );
+      },
+    );
+
+    it(
+      "accepts Turkish decimal comma",
+      () => {
+        render(
+          <BendingProblemActivity
+            locale="tr"
+          />,
+        );
+
+        fireEvent.change(
+          screen.getByRole(
+            "textbox",
+            {
+              name:
+                "Maksimum sehim",
+            },
+          ),
+          {
+            target: {
+              value:
+                "2,354",
+            },
+          },
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                "CevaplarÄ± kontrol et",
+            },
+          ),
+        );
+
+        expect(
+          screen.getByRole(
+            "status",
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+  },
+);
+
+============================================================
+FILE: .\src\features\learning\otto\otto-compression-ratio-prediction.test.tsx
+============================================================
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
+
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
+
+import { OttoCompressionRatioPrediction } from "@/features/learning/otto/otto-compression-ratio-prediction";
+
+afterEach(() => {
+  cleanup();
+});
+
+describe(
+  "OttoCompressionRatioPrediction",
+  () => {
+    it(
+      "does not reveal the answer before submission",
+      () => {
+        render(
+          <OttoCompressionRatioPrediction
+            locale="en"
+          />,
+        );
+
+        expect(
+          screen.getByTestId(
+            "otto-compression-ratio-prediction",
+          ),
+        ).toHaveAttribute(
+          "data-prediction-submitted",
+          "false",
+        );
+
+        expect(
+          screen.queryByRole(
+            "status",
+          ),
+        ).not.toBeInTheDocument();
+      },
+    );
+
+    it(
+      "accepts the correct compression-ratio prediction",
+      () => {
+        render(
+          <OttoCompressionRatioPrediction
+            locale="en"
+          />,
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                /Ideal efficiency increases; Tâ‚‚ and pâ‚‚ increase, while vâ‚‚ decreases/i,
+            },
+          ),
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                "Submit prediction",
+            },
+          ),
+        );
+
+        expect(
+          screen.getByTestId(
+            "otto-compression-ratio-prediction",
+          ),
+        ).toHaveAttribute(
+          "data-prediction-correct",
+          "true",
+        );
+
+        expect(
+          screen.getByRole(
+            "status",
+          ),
+        ).toHaveTextContent(
+          /Prediction correct/i,
+        );
+      },
+    );
+
+    it(
+      "locks all choices after submission",
+      () => {
+        render(
+          <OttoCompressionRatioPrediction
+            locale="tr"
+          />,
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                /Ä°deal verim artar; Tâ‚‚ ve pâ‚‚ artar, vâ‚‚ azalÄ±r/i,
+            },
+          ),
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                "Tahmini gÃ¶nder",
+            },
+          ),
+        );
+
+        const optionButtons =
+          screen
+            .getAllByRole(
+              "button",
+            )
+            .filter(
+              (
+                button,
+              ) =>
+                button.textContent?.startsWith(
+                  "A",
+                ) ||
+                button.textContent?.startsWith(
+                  "B",
+                ) ||
+                button.textContent?.startsWith(
+                  "C",
+                ),
+            );
+
+        expect(
+          optionButtons,
+        ).toHaveLength(3);
+
+        for (
+          const button
+          of optionButtons
+        ) {
+          expect(
+            button,
+          ).toBeDisabled();
+        }
+      },
+    );
+  },
+);
+
+============================================================
+FILE: .\src\features\learning\otto\otto-problem-activity.test.tsx
+============================================================
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
+
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
+
+import { OttoProblemActivity } from "@/features/learning/otto/otto-problem-activity";
+
+afterEach(() => {
+  cleanup();
+});
+
+describe(
+  "OttoProblemActivity",
+  () => {
+    it(
+      "renders ten engineering answer fields",
+      () => {
+        render(
+          <OttoProblemActivity
+            locale="en"
+          />,
+        );
+
+        expect(
+          screen.getAllByRole(
+            "textbox",
+          ),
+        ).toHaveLength(10);
+
+        expect(
+          screen.getByText(
+            /r = 6/i,
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.getByText(
+            /qin = 600 kJ\/kg/i,
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      "accepts the complete verified solution",
+      () => {
+        render(
+          <OttoProblemActivity
+            locale="en"
+          />,
+        );
+
+        const answers = [
+          [
+            "State-2 temperature Tâ‚‚",
+            "655.255",
+          ],
+
+          [
+            "State-2 pressure pâ‚‚",
+            "1474.324",
+          ],
+
+          [
+            "State-2 specific volume vâ‚‚",
+            "0.127556",
+          ],
+
+          [
+            "State-3 temperature Tâ‚ƒ",
+            "1491.492",
+          ],
+
+          [
+            "State-3 pressure pâ‚ƒ",
+            "3355.857",
+          ],
+
+          [
+            "State-4 temperature Tâ‚„",
+            "728.384",
+          ],
+
+          [
+            "State-4 pressure pâ‚„",
+            "273.144",
+          ],
+
+          [
+            "Specific heat rejected qout",
+            "293.016",
+          ],
+
+          [
+            "Net specific work wnet",
+            "306.984",
+          ],
+
+          [
+            "Ideal thermal efficiency Î·",
+            "51.164",
+          ],
+        ] as const;
+
+        for (
+          const [
+            label,
+            value,
+          ]
+          of answers
+        ) {
+          fireEvent.change(
+            screen.getByRole(
+              "textbox",
+              {
+                name:
+                  label,
+              },
+            ),
+            {
+              target: {
+                value,
+              },
+            },
+          );
+        }
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                "Check answers",
+            },
+          ),
+        );
+
+        expect(
+          screen.getByTestId(
+            "otto-problem-activity",
+          ),
+        ).toHaveAttribute(
+          "data-attempt-correct",
+          "true",
+        );
+
+        expect(
+          screen.getByRole(
+            "status",
+          ),
+        ).toHaveTextContent(
+          /All results are correct within tolerance/i,
+        );
+      },
+    );
+
+    it(
+      "accepts Turkish decimal commas",
+      () => {
+        render(
+          <OttoProblemActivity
+            locale="tr"
+          />,
+        );
+
+        fireEvent.change(
+          screen.getByRole(
+            "textbox",
+            {
+              name:
+                "Ä°deal Ä±sÄ±l verim Î·",
+            },
+          ),
+          {
+            target: {
+              value:
+                "51,164",
+            },
+          },
+        );
+
+        expect(
+          screen.getByRole(
+            "textbox",
+            {
+              name:
+                "Ä°deal Ä±sÄ±l verim Î·",
+            },
+          ),
+        ).toHaveValue(
+          "51,164",
+        );
+      },
+    );
+  },
+);

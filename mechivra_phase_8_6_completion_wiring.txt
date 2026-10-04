@@ -1,0 +1,1458 @@
+﻿
+
+============================================================
+FILE: .\src\features\learning\learning-activity-renderer.tsx
+============================================================
+import type {
+  LearningActivity,
+} from "@/domain/learning/types";
+
+import type {
+  SupportedLocale,
+} from "@/domain/shared/types";
+
+import {
+  getLearningActivityRendererKind,
+} from "@/features/learning/activity-renderer-kind";
+
+import { DesignActivityRenderer } from "@/features/learning/renderers/design-activity-renderer";
+
+import { InteractiveActivityRenderer } from "@/features/learning/renderers/interactive-activity-renderer";
+
+import { NarrativeActivityRenderer } from "@/features/learning/renderers/narrative-activity-renderer";
+
+import { ResponseActivityRenderer } from "@/features/learning/renderers/response-activity-renderer";
+
+interface LearningActivityRendererProps {
+  readonly activity:
+    LearningActivity;
+
+  readonly locale:
+    SupportedLocale;
+}
+
+export function LearningActivityRenderer({
+  activity,
+  locale,
+}: LearningActivityRendererProps) {
+  const rendererKind =
+    getLearningActivityRendererKind(
+      activity.type,
+    );
+
+  switch (
+    rendererKind
+  ) {
+    case "narrative":
+      return (
+        <NarrativeActivityRenderer
+          activity={
+            activity
+          }
+          locale={
+            locale
+          }
+        />
+      );
+
+    case "response":
+      return (
+        <ResponseActivityRenderer
+          activity={
+            activity
+          }
+          locale={
+            locale
+          }
+        />
+      );
+
+    case "interactive":
+      return (
+        <InteractiveActivityRenderer
+          activity={
+            activity
+          }
+          locale={
+            locale
+          }
+        />
+      );
+
+    case "design":
+      return (
+        <DesignActivityRenderer
+          activity={
+            activity
+          }
+          locale={
+            locale
+          }
+        />
+      );
+
+    default:
+      return assertNever(
+        rendererKind,
+      );
+  }
+}
+
+function assertNever(
+  value: never,
+): never {
+  throw new Error(
+    `Unsupported learning activity renderer kind: ${String(
+      value,
+    )}`,
+  );
+}
+
+============================================================
+FILE: .\src\features\learning\renderers\narrative-activity-renderer.tsx
+============================================================
+import {
+  getBendingActivityContentBlocks,
+} from "@/content/bending-content";
+
+import {
+  getOttoActivityContentBlocks,
+} from "@/content/otto-content";
+
+import {
+  getWorkedExampleDefinition,
+} from "@/content/worked-examples";
+
+import type {
+  LearningActivity,
+} from "@/domain/learning/types";
+
+import type {
+  SupportedLocale,
+} from "@/domain/shared/types";
+
+import { BendingConceptVisualizationPanel } from "@/features/learning/bending/bending-concept-visualization-panel";
+
+import { BendingSummaryPanel } from "@/features/learning/bending/bending-summary-panel";
+
+import { BendingWorkedExample } from "@/features/learning/bending/bending-worked-example";
+
+import { ContentBlockRenderer } from "@/features/learning/content-block-renderer";
+
+import { OttoConceptVisualizationPanel } from "@/features/learning/otto/otto-concept-visualization-panel";
+
+import { OttoContentBlockRenderer } from "@/features/learning/otto/otto-content-block-renderer";
+
+import { OttoSummaryPanel } from "@/features/learning/otto/otto-summary-panel";
+
+import { OttoWorkedExample } from "@/features/learning/otto/otto-worked-example";
+
+import { StaticsSummaryPanel } from "@/features/learning/statics/statics-summary-panel";
+
+import { WorkedExampleHost } from "@/features/learning/worked-example-host";
+
+interface NarrativeActivityRendererProps {
+  readonly activity:
+    LearningActivity;
+
+  readonly locale:
+    SupportedLocale;
+}
+
+export function NarrativeActivityRenderer({
+  activity,
+  locale,
+}: NarrativeActivityRendererProps) {
+  const workedExample =
+    getWorkedExampleDefinition(
+      activity.id,
+    );
+
+  const bendingContentBlocks =
+    getBendingActivityContentBlocks(
+      activity.id,
+    );
+
+  const ottoContentBlocks =
+    getOttoActivityContentBlocks(
+      activity.id,
+    );
+
+  const isOttoActivity =
+    ottoContentBlocks.length >
+    0;
+
+  const genericContentBlocks =
+    bendingContentBlocks.length >
+    0
+      ? bendingContentBlocks
+      : activity.contentBlocks;
+
+  const isStaticsSummary =
+    activity.id ===
+    "activity-ssb-06";
+
+  const isBendingConcept =
+    activity.id ===
+    "activity-bending-02";
+
+  const isBendingSummary =
+    activity.id ===
+    "activity-bending-06";
+
+  const isOttoConcept =
+    activity.id ===
+    "activity-otto-02";
+
+  const isOttoSummary =
+    activity.id ===
+    "activity-otto-06";
+
+  return (
+    <section
+      data-activity-renderer="narrative"
+      data-activity-type={
+        activity.type
+      }
+    >
+      {isOttoActivity ? (
+        <OttoContentBlockRenderer
+          blocks={
+            ottoContentBlocks
+          }
+          locale={
+            locale
+          }
+        />
+      ) : (
+        <ContentBlockRenderer
+          blocks={
+            genericContentBlocks
+          }
+          locale={
+            locale
+          }
+        />
+      )}
+
+      {isBendingConcept ? (
+        <>
+          <BendingConceptVisualizationPanel
+            locale={
+              locale
+            }
+          />
+
+          <BendingWorkedExample
+            locale={
+              locale
+            }
+          />
+        </>
+      ) : null}
+
+      {isOttoConcept ? (
+        <>
+          <OttoConceptVisualizationPanel
+            locale={
+              locale
+            }
+          />
+
+          <OttoWorkedExample
+            locale={
+              locale
+            }
+          />
+        </>
+      ) : null}
+
+      {workedExample ? (
+        <WorkedExampleHost
+          definition={
+            workedExample
+          }
+          locale={
+            locale
+          }
+        />
+      ) : null}
+
+      {isStaticsSummary ? (
+        <StaticsSummaryPanel
+          locale={
+            locale
+          }
+        />
+      ) : null}
+
+      {isBendingSummary ? (
+        <BendingSummaryPanel
+          locale={
+            locale
+          }
+        />
+      ) : null}
+
+      {isOttoSummary ? (
+        <OttoSummaryPanel
+          locale={
+            locale
+          }
+        />
+      ) : null}
+    </section>
+  );
+}
+
+============================================================
+FILE: .\src\features\learning\renderers\response-activity-renderer.tsx
+============================================================
+import {
+  getBendingActivityContentBlocks,
+} from "@/content/bending-content";
+
+import {
+  getOttoActivityContentBlocks,
+} from "@/content/otto-content";
+
+import {
+  getPredictionDefinition,
+} from "@/content/predictions";
+
+import {
+  getNumericProblemDefinition,
+} from "@/content/statics-problems";
+
+import type {
+  LearningActivity,
+} from "@/domain/learning/types";
+
+import type {
+  SupportedLocale,
+} from "@/domain/shared/types";
+
+import { BendingHeightPrediction } from "@/features/learning/bending/bending-height-prediction";
+
+import { BendingProblemActivity } from "@/features/learning/bending/bending-problem-activity";
+
+import { ContentBlockRenderer } from "@/features/learning/content-block-renderer";
+
+import { OttoCompressionRatioPrediction } from "@/features/learning/otto/otto-compression-ratio-prediction";
+
+import { OttoContentBlockRenderer } from "@/features/learning/otto/otto-content-block-renderer";
+
+import { OttoProblemActivity } from "@/features/learning/otto/otto-problem-activity";
+
+import { PredictionActivity } from "@/features/learning/prediction-activity";
+
+import { ProblemActivityHost } from "@/features/learning/problem-activity-host";
+
+interface ResponseActivityRendererProps {
+  readonly activity:
+    LearningActivity;
+
+  readonly locale:
+    SupportedLocale;
+}
+
+export function ResponseActivityRenderer({
+  activity,
+  locale,
+}: ResponseActivityRendererProps) {
+  const predictionDefinition =
+    getPredictionDefinition(
+      activity.id,
+    );
+
+  const problemDefinition =
+    getNumericProblemDefinition(
+      activity.id,
+    );
+
+  const bendingContentBlocks =
+    getBendingActivityContentBlocks(
+      activity.id,
+    );
+
+  const ottoContentBlocks =
+    getOttoActivityContentBlocks(
+      activity.id,
+    );
+
+  const isOttoActivity =
+    ottoContentBlocks.length >
+    0;
+
+  const genericContentBlocks =
+    bendingContentBlocks.length >
+    0
+      ? bendingContentBlocks
+      : activity.contentBlocks;
+
+  const isBendingPrediction =
+    activity.id ===
+    "activity-bending-03";
+
+  const isBendingProblem =
+    activity.id ===
+    "activity-bending-05";
+
+  const isOttoPrediction =
+    activity.id ===
+    "activity-otto-03";
+
+  const isOttoProblem =
+    activity.id ===
+    "activity-otto-05";
+
+  return (
+    <section
+      data-activity-renderer="response"
+      data-activity-type={
+        activity.type
+      }
+    >
+      {isOttoActivity ? (
+        <OttoContentBlockRenderer
+          blocks={
+            ottoContentBlocks
+          }
+          locale={
+            locale
+          }
+        />
+      ) : (
+        <ContentBlockRenderer
+          blocks={
+            genericContentBlocks
+          }
+          locale={
+            locale
+          }
+        />
+      )}
+
+      {isBendingPrediction ? (
+        <BendingHeightPrediction
+          locale={
+            locale
+          }
+        />
+      ) : isOttoPrediction ? (
+        <OttoCompressionRatioPrediction
+          locale={
+            locale
+          }
+        />
+      ) : predictionDefinition ? (
+        <PredictionActivity
+          definition={
+            predictionDefinition
+          }
+          locale={
+            locale
+          }
+        />
+      ) : null}
+
+      {isBendingProblem ? (
+        <BendingProblemActivity
+          locale={
+            locale
+          }
+        />
+      ) : isOttoProblem ? (
+        <OttoProblemActivity
+          locale={
+            locale
+          }
+        />
+      ) : problemDefinition ? (
+        <ProblemActivityHost
+          definition={
+            problemDefinition
+          }
+          locale={
+            locale
+          }
+        />
+      ) : null}
+    </section>
+  );
+}
+
+============================================================
+FILE: .\src\features\learning\renderers\interactive-activity-renderer.tsx
+============================================================
+import {
+  getBendingActivityContentBlocks,
+} from "@/content/bending-content";
+
+import {
+  getInteractiveDefinition,
+} from "@/content/interactives";
+
+import {
+  getOttoActivityContentBlocks,
+} from "@/content/otto-content";
+
+import type {
+  LearningActivity,
+} from "@/domain/learning/types";
+
+import type {
+  SupportedLocale,
+} from "@/domain/shared/types";
+
+import { BendingInteractiveExplorer } from "@/features/learning/bending/bending-interactive-explorer";
+
+import { ContentBlockRenderer } from "@/features/learning/content-block-renderer";
+
+import { InteractiveActivityHost } from "@/features/learning/interactive-activity-host";
+
+import { OttoContentBlockRenderer } from "@/features/learning/otto/otto-content-block-renderer";
+
+import { OttoInteractiveExplorer } from "@/features/learning/otto/otto-interactive-explorer";
+
+interface InteractiveActivityRendererProps {
+  readonly activity:
+    LearningActivity;
+
+  readonly locale:
+    SupportedLocale;
+}
+
+export function InteractiveActivityRenderer({
+  activity,
+  locale,
+}: InteractiveActivityRendererProps) {
+  const interactiveDefinition =
+    getInteractiveDefinition(
+      activity.id,
+    );
+
+  const bendingContentBlocks =
+    getBendingActivityContentBlocks(
+      activity.id,
+    );
+
+  const ottoContentBlocks =
+    getOttoActivityContentBlocks(
+      activity.id,
+    );
+
+  const isOttoActivity =
+    ottoContentBlocks.length >
+    0;
+
+  const genericContentBlocks =
+    bendingContentBlocks.length >
+    0
+      ? bendingContentBlocks
+      : activity.contentBlocks;
+
+  const isBendingInteractive =
+    activity.id ===
+    "activity-bending-04";
+
+  const isOttoInteractive =
+    activity.id ===
+    "activity-otto-04";
+
+  return (
+    <section
+      data-activity-renderer="interactive"
+      data-activity-type={
+        activity.type
+      }
+    >
+      {isOttoActivity ? (
+        <OttoContentBlockRenderer
+          blocks={
+            ottoContentBlocks
+          }
+          locale={
+            locale
+          }
+        />
+      ) : (
+        <ContentBlockRenderer
+          blocks={
+            genericContentBlocks
+          }
+          locale={
+            locale
+          }
+        />
+      )}
+
+      {isBendingInteractive ? (
+        <BendingInteractiveExplorer
+          locale={
+            locale
+          }
+        />
+      ) : isOttoInteractive ? (
+        <OttoInteractiveExplorer
+          locale={
+            locale
+          }
+        />
+      ) : interactiveDefinition ? (
+        <InteractiveActivityHost
+          definition={
+            interactiveDefinition
+          }
+          locale={
+            locale
+          }
+        />
+      ) : null}
+    </section>
+  );
+}
+
+============================================================
+FILE: .\src\features\learning\interactives\beam-statics-point-load-explorer.tsx
+============================================================
+"use client";
+
+import {
+  useMemo,
+  useState,
+} from "react";
+
+import {
+  beamStaticsModel,
+  createSimplySupportedBeamStateFromDisplayInput,
+  fromSI,
+} from "@/domain/engineering";
+
+import {
+  createInteractiveEngagement,
+  recordMeaningfulInteraction,
+} from "@/domain/learning/interactive";
+
+import type {
+  BeamStaticsPointLoadExplorerDefinition,
+} from "@/domain/learning/interactive";
+
+import type {
+  SupportedLocale,
+} from "@/domain/shared/types";
+
+import { BeamStaticsScene } from "@/visualization/beam/beam-statics-scene";
+
+import { BendingMomentDiagram } from "@/visualization/beam/bending-moment-diagram";
+
+import type {
+  BeamInteractionParameter,
+} from "@/visualization/beam/interaction-state";
+
+import { ShearForceDiagram } from "@/visualization/beam/shear-force-diagram";
+
+interface BeamStaticsPointLoadExplorerProps {
+  readonly definition:
+    BeamStaticsPointLoadExplorerDefinition;
+
+  readonly locale:
+    SupportedLocale;
+}
+
+export function BeamStaticsPointLoadExplorer({
+  definition,
+  locale,
+}: BeamStaticsPointLoadExplorerProps) {
+  const [
+    pointLoadKN,
+    setPointLoadKN,
+  ] = useState(
+    definition.configuration
+      .pointLoad.initial,
+  );
+
+  const [
+    loadPositionM,
+    setLoadPositionM,
+  ] = useState(
+    definition.configuration
+      .loadPosition.initial,
+  );
+
+  const [
+    engagement,
+    setEngagement,
+  ] = useState(
+    createInteractiveEngagement,
+  );
+
+  const [
+    syncRevision,
+    setSyncRevision,
+  ] = useState(0);
+
+  const [
+    activeParameter,
+    setActiveParameter,
+  ] =
+    useState<
+      BeamInteractionParameter | null
+    >(null);
+
+  const numberFormatter =
+    useMemo(
+      () =>
+        new Intl.NumberFormat(
+          locale === "tr"
+            ? "tr-TR"
+            : "en-US",
+          {
+            maximumFractionDigits:
+              2,
+
+            minimumFractionDigits:
+              0,
+          },
+        ),
+      [locale],
+    );
+
+  const values =
+    useMemo(
+      () => {
+        const stateResult =
+          createSimplySupportedBeamStateFromDisplayInput(
+            {
+              span: {
+                value:
+                  definition.configuration
+                    .spanM,
+
+                unit: "m",
+              },
+
+              pointLoad: {
+                value:
+                  pointLoadKN,
+
+                unit: "kN",
+              },
+
+              loadPosition: {
+                value:
+                  loadPositionM,
+
+                unit: "m",
+              },
+            },
+          );
+
+        if (
+          !stateResult.state
+        ) {
+          return null;
+        }
+
+        const result =
+          beamStaticsModel.evaluate(
+            stateResult.state,
+          );
+
+        return result.values;
+      },
+      [
+        definition.configuration
+          .spanM,
+        pointLoadKN,
+        loadPositionM,
+      ],
+    );
+
+  function markInteraction(
+    parameter:
+      BeamInteractionParameter,
+  ): void {
+    setEngagement(
+      (
+        current,
+      ) =>
+        recordMeaningfulInteraction(
+          current,
+        ),
+    );
+
+    setActiveParameter(
+      parameter,
+    );
+
+    setSyncRevision(
+      (
+        current,
+      ) =>
+        current + 1,
+    );
+  }
+
+  function updatePointLoad(
+    value: number,
+  ): void {
+    if (
+      value ===
+      pointLoadKN
+    ) {
+      return;
+    }
+
+    setPointLoadKN(
+      value,
+    );
+
+    markInteraction(
+      "point_load",
+    );
+  }
+
+  function updateLoadPosition(
+    value: number,
+  ): void {
+    if (
+      value ===
+      loadPositionM
+    ) {
+      return;
+    }
+
+    setLoadPositionM(
+      value,
+    );
+
+    markInteraction(
+      "load_position",
+    );
+  }
+
+  if (!values) {
+    return (
+      <div
+        data-interactive-invalid="true"
+        className="rounded-xl border border-danger/30 bg-danger/10 p-5"
+      >
+        <p className="text-sm font-medium text-danger">
+          Interactive engineering state is invalid.
+        </p>
+      </div>
+    );
+  }
+
+  const leftReactionKN =
+    fromSI(
+      "force",
+      values.leftReactionN,
+      "kN",
+    );
+
+  const rightReactionKN =
+    fromSI(
+      "force",
+      values.rightReactionN,
+      "kN",
+    );
+
+  const leftShearKN =
+    fromSI(
+      "force",
+      values.shear
+        .leftOfLoadN,
+      "kN",
+    );
+
+  const rightShearKN =
+    fromSI(
+      "force",
+      values.shear
+        .rightOfLoadN,
+      "kN",
+    );
+
+  const maximumMomentKNm =
+    fromSI(
+      "moment",
+      values.moment.maximum
+        .valueNm,
+      "kN_m",
+    );
+
+  const maximumMomentLocation =
+    values.moment.maximum
+      .location;
+
+  if (
+    maximumMomentLocation.type !==
+    "point"
+  ) {
+    return (
+      <div
+        data-interactive-invalid="true"
+        className="rounded-xl border border-danger/30 bg-danger/10 p-5"
+      >
+        <p className="text-sm font-medium text-danger">
+          Interactive moment state does not have a unique maximum location.
+        </p>
+      </div>
+    );
+  }
+
+  const sceneAriaLabel =
+    locale === "tr"
+      ? "Tek dÃ¼ÅŸey noktasal yÃ¼klÃ¼ basit mesnetli kiriÅŸ ÅŸemasÄ±"
+      : "Simply supported beam with a single vertical point load";
+
+  const synchronizationMessage =
+    activeParameter ===
+    "point_load"
+      ? locale === "tr"
+        ? "YÃ¼k bÃ¼yÃ¼klÃ¼ÄŸÃ¼ deÄŸiÅŸti. KiriÅŸ tepkileri, V(x) ve M(x) aynÄ± fiziksel duruma gÃ¶re birlikte gÃ¼ncellendi."
+        : "Load magnitude changed. Support reactions, V(x), and M(x) were updated together for the same physical state."
+      : activeParameter ===
+          "load_position"
+        ? locale === "tr"
+          ? "YÃ¼k konumu deÄŸiÅŸti. YÃ¼k noktasÄ±, mesnet tepkileri, kesme sÄ±Ã§ramasÄ± ve maksimum moment konumu birlikte gÃ¼ncellendi."
+          : "Load position changed. The load point, support reactions, shear discontinuity, and maximum-moment position were updated together."
+        : locale === "tr"
+          ? "Bir parametreyi deÄŸiÅŸtir. KiriÅŸ, mesnet tepkileri, V(x) ve M(x) aynÄ± fiziksel durumu birlikte gÃ¶sterecek."
+          : "Change a parameter. The beam, support reactions, V(x), and M(x) will represent the same physical state together.";
+
+  return (
+    <div
+      data-interactive-kind={
+        definition.kind
+      }
+      data-meaningful-interaction={
+        engagement.hasMeaningfulInteraction
+          ? "true"
+          : "false"
+      }
+      data-interaction-count={
+        engagement.interactionCount
+      }
+      data-sync-revision={
+        syncRevision
+      }
+      data-active-parameter={
+        activeParameter ??
+        "none"
+      }
+      className="space-y-6"
+    >
+      <div>
+        <h3 className="text-xl font-semibold tracking-[-0.02em] text-foreground">
+          {
+            definition.title[
+              locale
+            ]
+          }
+        </h3>
+
+        <p className="mt-2 max-w-3xl leading-7 text-muted-strong">
+          {
+            definition.instructions[
+              locale
+            ]
+          }
+        </p>
+      </div>
+
+      <BeamStaticsScene
+        spanM={
+          definition.configuration
+            .spanM
+        }
+        pointLoadKN={
+          pointLoadKN
+        }
+        loadPositionM={
+          loadPositionM
+        }
+        leftReactionKN={
+          leftReactionKN
+        }
+        rightReactionKN={
+          rightReactionKN
+        }
+        locale={
+          locale
+        }
+        ariaLabel={
+          sceneAriaLabel
+        }
+        syncRevision={
+          syncRevision
+        }
+        activeParameter={
+          activeParameter
+        }
+      />
+
+      <div className="rounded-xl border border-border bg-background p-5">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
+          <span className="text-sm text-muted">
+            {
+              definition.labels
+                .fixedSpan[
+                locale
+              ]
+            }
+          </span>
+
+          <strong className="font-mono text-sm text-foreground">
+            {numberFormatter.format(
+              definition.configuration
+                .spanM,
+            )}{" "}
+            m
+          </strong>
+        </div>
+
+        <div className="space-y-7">
+          <label
+            className={[
+              "block rounded-lg transition-colors",
+              activeParameter ===
+              "point_load"
+                ? "bg-brand-soft/60 p-3"
+                : "",
+            ].join(" ")}
+          >
+            <div className="mb-3 flex items-center justify-between gap-4">
+              <span className="font-medium text-foreground">
+                {
+                  definition.configuration
+                    .pointLoad.label[
+                    locale
+                  ]
+                }
+              </span>
+
+              <strong
+                data-testid="point-load-value"
+                className="font-mono text-sm text-brand"
+              >
+                {numberFormatter.format(
+                  pointLoadKN,
+                )}{" "}
+                {
+                  definition.configuration
+                    .pointLoad.unitSymbol
+                }
+              </strong>
+            </div>
+
+            <input
+              aria-label={
+                definition.configuration
+                  .pointLoad.label[
+                  locale
+                ]
+              }
+              type="range"
+              min={
+                definition.configuration
+                  .pointLoad.minimum
+              }
+              max={
+                definition.configuration
+                  .pointLoad.maximum
+              }
+              step={
+                definition.configuration
+                  .pointLoad.step
+              }
+              value={
+                pointLoadKN
+              }
+              onChange={(
+                event,
+              ) =>
+                updatePointLoad(
+                  Number(
+                    event.target
+                      .value,
+                  ),
+                )
+              }
+              className="w-full accent-[var(--brand)]"
+            />
+          </label>
+
+          <label
+            className={[
+              "block rounded-lg transition-colors",
+              activeParameter ===
+              "load_position"
+                ? "bg-brand-soft/60 p-3"
+                : "",
+            ].join(" ")}
+          >
+            <div className="mb-3 flex items-center justify-between gap-4">
+              <span className="font-medium text-foreground">
+                {
+                  definition.configuration
+                    .loadPosition
+                    .label[
+                    locale
+                  ]
+                }
+              </span>
+
+              <strong
+                data-testid="load-position-value"
+                className="font-mono text-sm text-brand"
+              >
+                {numberFormatter.format(
+                  loadPositionM,
+                )}{" "}
+                {
+                  definition.configuration
+                    .loadPosition
+                    .unitSymbol
+                }
+              </strong>
+            </div>
+
+            <input
+              aria-label={
+                definition.configuration
+                  .loadPosition.label[
+                  locale
+                ]
+              }
+              type="range"
+              min={
+                definition.configuration
+                  .loadPosition.minimum
+              }
+              max={
+                definition.configuration
+                  .loadPosition.maximum
+              }
+              step={
+                definition.configuration
+                  .loadPosition.step
+              }
+              value={
+                loadPositionM
+              }
+              onChange={(
+                event,
+              ) =>
+                updateLoadPosition(
+                  Number(
+                    event.target
+                      .value,
+                  ),
+                )
+              }
+              className="w-full accent-[var(--brand)]"
+            />
+          </label>
+        </div>
+      </div>
+
+      <div
+        role="status"
+        data-testid="synchronized-feedback"
+        className="rounded-xl border border-brand/20 bg-brand-soft px-4 py-3 text-sm leading-6 text-muted-strong"
+      >
+        {
+          synchronizationMessage
+        }
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="rounded-xl border border-border bg-surface-subtle p-4">
+          <p className="text-sm text-muted">
+            {
+              definition.labels
+                .leftReaction[
+                locale
+              ]
+            }
+          </p>
+
+          <p
+            data-testid="left-reaction-value"
+            className="mt-2 font-mono text-xl font-semibold text-foreground"
+          >
+            {numberFormatter.format(
+              leftReactionKN,
+            )}{" "}
+            kN
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-border bg-surface-subtle p-4">
+          <p className="text-sm text-muted">
+            {
+              definition.labels
+                .rightReaction[
+                locale
+              ]
+            }
+          </p>
+
+          <p
+            data-testid="right-reaction-value"
+            className="mt-2 font-mono text-xl font-semibold text-foreground"
+          >
+            {numberFormatter.format(
+              rightReactionKN,
+            )}{" "}
+            kN
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-border bg-surface-subtle p-4">
+          <p className="text-sm text-muted">
+            {
+              definition.labels
+                .maximumMoment[
+                locale
+              ]
+            }
+          </p>
+
+          <p
+            data-testid="maximum-moment-value"
+            className="mt-2 font-mono text-xl font-semibold text-foreground"
+          >
+            {numberFormatter.format(
+              maximumMomentKNm,
+            )}{" "}
+            kNÂ·m
+          </p>
+        </div>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-2">
+        <ShearForceDiagram
+          spanM={
+            definition.configuration
+              .spanM
+          }
+          loadPositionM={
+            loadPositionM
+          }
+          leftShearKN={
+            leftShearKN
+          }
+          rightShearKN={
+            rightShearKN
+          }
+          locale={
+            locale
+          }
+          syncRevision={
+            syncRevision
+          }
+          activeParameter={
+            activeParameter
+          }
+        />
+
+        <BendingMomentDiagram
+          spanM={
+            definition.configuration
+              .spanM
+          }
+          maximumMomentPositionM={
+            maximumMomentLocation
+              .xM
+          }
+          maximumMomentKNm={
+            maximumMomentKNm
+          }
+          locale={
+            locale
+          }
+          syncRevision={
+            syncRevision
+          }
+          activeParameter={
+            activeParameter
+          }
+        />
+      </div>
+    </div>
+  );
+}
+
+============================================================
+FILE: .\src\app\[locale]\app\learn\[courseSlug]\[moduleSlug]\[activityId]\page.tsx
+============================================================
+import {
+  getActivitiesForModule,
+  getMvpCatalogItems,
+} from "@/content/registry";
+
+import type {
+  SupportedLocale,
+} from "@/domain/shared/types";
+
+import { LearningActivityView } from "@/features/learning/learning-activity-view";
+
+interface LearningActivityPageProps {
+  readonly params: Promise<{
+    locale: string;
+    courseSlug: string;
+    moduleSlug: string;
+    activityId: string;
+  }>;
+}
+
+export function generateStaticParams() {
+  return getMvpCatalogItems().flatMap(
+    ({
+      course,
+      module: moduleItem,
+    }) =>
+      getActivitiesForModule(
+        moduleItem.id,
+      ).map(
+        (activity) => ({
+          courseSlug:
+            course.slug,
+
+          moduleSlug:
+            moduleItem.slug,
+
+          activityId:
+            activity.id,
+        }),
+      ),
+  );
+}
+
+export default async function LearningActivityPage({
+  params,
+}: LearningActivityPageProps) {
+  const {
+    locale: localeParameter,
+    courseSlug,
+    moduleSlug,
+    activityId,
+  } = await params;
+
+  return (
+    <LearningActivityView
+      locale={
+        localeParameter as SupportedLocale
+      }
+      courseSlug={
+        courseSlug
+      }
+      moduleSlug={
+        moduleSlug
+      }
+      activityId={
+        activityId
+      }
+    />
+  );
+}
+
+============================================================
+COMPLETION / INTERACTION SEARCH
+============================================================
+
+SEARCH: data-meaningful-interaction
+C:\dev\projects\mechivra\src\features\learning\bending\bending-interactive-explorer.test.tsx:255: "data-meaningful-interaction",
+C:\dev\projects\mechivra\src\features\learning\bending\bending-interactive-explorer.test.tsx:278: "data-meaningful-interaction",
+C:\dev\projects\mechivra\src\features\learning\bending\bending-interactive-explorer.tsx:358: data-meaningful-interaction={
+C:\dev\projects\mechivra\src\features\learning\interactives\beam-statics-point-load-explorer.tsx:313: data-meaningful-interaction={
+C:\dev\projects\mechivra\src\features\learning\otto\otto-interactive-explorer.test.tsx:210: "data-meaningful-interaction",
+C:\dev\projects\mechivra\src\features\learning\otto\otto-interactive-explorer.test.tsx:236: "data-meaningful-interaction",
+C:\dev\projects\mechivra\src\features\learning\otto\otto-interactive-explorer.test.tsx:253: "data-meaningful-interaction",
+C:\dev\projects\mechivra\src\features\learning\otto\otto-interactive-explorer.tsx:155: data-meaningful-interaction={
+
+SEARCH: data-interaction-count
+C:\dev\projects\mechivra\src\features\learning\bending\bending-interactive-explorer.test.tsx:285: "data-interaction-count",
+C:\dev\projects\mechivra\src\features\learning\bending\bending-interactive-explorer.tsx:362: data-interaction-count={
+C:\dev\projects\mechivra\src\features\learning\interactives\beam-statics-point-load-explorer.test.tsx:380: '[data-interaction-count="2"]',
+C:\dev\projects\mechivra\src\features\learning\interactives\beam-statics-point-load-explorer.tsx:318: data-interaction-count={
+
+SEARCH: data-prediction-submitted
+C:\dev\projects\mechivra\src\features\learning\prediction-activity.test.tsx:135: '[data-prediction-submitted="true"]',
+C:\dev\projects\mechivra\src\features\learning\prediction-activity.test.tsx:237: '[data-prediction-submitted="true"]',
+C:\dev\projects\mechivra\src\features\learning\prediction-activity.tsx:280: data-prediction-submitted={
+C:\dev\projects\mechivra\src\features\learning\assessment\assessment-migration-regression.test.tsx:325: "data-prediction-submitted",
+C:\dev\projects\mechivra\src\features\learning\assessment\assessment-migration-regression.test.tsx:356: "data-prediction-submitted",
+C:\dev\projects\mechivra\src\features\learning\assessment\assessment-migration-regression.test.tsx:380: "data-prediction-submitted",
+C:\dev\projects\mechivra\src\features\learning\assessment\assessment-migration-regression.test.tsx:427: "data-prediction-submitted",
+C:\dev\projects\mechivra\src\features\learning\assessment\assessment-migration-regression.test.tsx:457: "data-prediction-submitted",
+C:\dev\projects\mechivra\src\features\learning\assessment\assessment-migration-regression.test.tsx:488: "data-prediction-submitted",
+C:\dev\projects\mechivra\src\features\learning\assessment\assessment-migration-regression.test.tsx:512: "data-prediction-submitted",
+C:\dev\projects\mechivra\src\features\learning\bending\bending-height-prediction.test.tsx:76: "data-prediction-submitted",
+C:\dev\projects\mechivra\src\features\learning\bending\bending-height-prediction.test.tsx:127: "data-prediction-submitted",
+C:\dev\projects\mechivra\src\features\learning\bending\bending-height-prediction.test.tsx:179: "data-prediction-submitted",
+C:\dev\projects\mechivra\src\features\learning\otto\otto-compression-ratio-prediction.test.tsx:38: "data-prediction-submitted",
+
+SEARCH: data-attempt-submitted
+C:\dev\projects\mechivra\src\features\learning\bending\bending-problem-activity.tsx:715: data-attempt-submitted={
+C:\dev\projects\mechivra\src\features\learning\bending\bending-problem-persistence.integration.test.tsx:306: "data-attempt-submitted",
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-activity.tsx:742: data-attempt-submitted={
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-persistence.integration.test.tsx:359: "data-attempt-submitted",
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-persistence.integration.test.tsx:532: "data-attempt-submitted",
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-activity.test.tsx:213: '[data-attempt-submitted="true"]',
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-activity.tsx:654: data-attempt-submitted={
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-persistence.integration.test.tsx:369: "data-attempt-submitted",
+
+SEARCH: completionRule
+C:\dev\projects\mechivra\src\features\learning\learning-activity-renderer.test.tsx:71: completionRule: {
+C:\dev\projects\mechivra\src\features\learning\learning-engine.integration.test.ts:30: isCompletionRuleCompatibleWithActivityType,
+C:\dev\projects\mechivra\src\features\learning\learning-engine.integration.test.ts:57: completionRule:
+C:\dev\projects\mechivra\src\features\learning\learning-engine.integration.test.ts:59: .completionRule
+C:\dev\projects\mechivra\src\features\learning\learning-engine.integration.test.ts:71: completionRule:
+C:\dev\projects\mechivra\src\features\learning\learning-engine.integration.test.ts:82: completionRule:
+C:\dev\projects\mechivra\src\features\learning\learning-engine.integration.test.ts:93: completionRule:
+C:\dev\projects\mechivra\src\features\learning\learning-engine.integration.test.ts:104: completionRule:
+C:\dev\projects\mechivra\src\features\learning\learning-engine.integration.test.ts:115: completionRule:
+C:\dev\projects\mechivra\src\features\learning\learning-engine.integration.test.ts:126: completionRule:
+C:\dev\projects\mechivra\src\features\learning\learning-engine.integration.test.ts:219: isCompletionRuleCompatibleWithActivityType(
+C:\dev\projects\mechivra\src\features\learning\learning-engine.integration.test.ts:222: .completionRule.type,
+C:\dev\projects\mechivra\src\features\learning\mvp-module-contract.integration.test.ts:171: .completionRule
+C:\dev\projects\mechivra\src\features\learning\mvp-module-contract.integration.test.ts:336: ?.completionRule
+C:\dev\projects\mechivra\src\features\learning\mvp-module-contract.integration.test.ts:351: ?.completionRule
+C:\dev\projects\mechivra\src\features\learning\mvp-module-contract.integration.test.ts:366: ?.completionRule
+C:\dev\projects\mechivra\src\features\learning\assessment\assessment-locale-equivalence.integration.test.tsx:808: activity.completionRule,
+C:\dev\projects\mechivra\src\features\learning\statics\statics-module.integration.test.ts:58: completionRule:
+C:\dev\projects\mechivra\src\features\learning\statics\statics-module.integration.test.ts:60: .completionRule
+C:\dev\projects\mechivra\src\features\learning\statics\statics-module.integration.test.ts:74: completionRule:
+C:\dev\projects\mechivra\src\features\learning\statics\statics-module.integration.test.ts:87: completionRule:
+C:\dev\projects\mechivra\src\features\learning\statics\statics-module.integration.test.ts:100: completionRule:
+C:\dev\projects\mechivra\src\features\learning\statics\statics-module.integration.test.ts:113: completionRule:
+C:\dev\projects\mechivra\src\features\learning\statics\statics-module.integration.test.ts:126: completionRule:
+C:\dev\projects\mechivra\src\features\learning\statics\statics-module.integration.test.ts:139: completionRule:
+
+SEARCH: reached_end
+C:\dev\projects\mechivra\src\features\learning\learning-activity-renderer.test.tsx:73: "reached_end",
+C:\dev\projects\mechivra\src\features\learning\learning-engine.integration.test.ts:72: "reached_end",
+C:\dev\projects\mechivra\src\features\learning\learning-engine.integration.test.ts:83: "reached_end",
+C:\dev\projects\mechivra\src\features\learning\learning-engine.integration.test.ts:127: "reached_end",
+C:\dev\projects\mechivra\src\features\learning\mvp-module-contract.integration.test.ts:68: "reached_end",
+C:\dev\projects\mechivra\src\features\learning\mvp-module-contract.integration.test.ts:69: "reached_end",
+C:\dev\projects\mechivra\src\features\learning\mvp-module-contract.integration.test.ts:73: "reached_end",
+C:\dev\projects\mechivra\src\features\learning\statics\statics-module.integration.test.ts:75: "reached_end",
+C:\dev\projects\mechivra\src\features\learning\statics\statics-module.integration.test.ts:88: "reached_end",
+C:\dev\projects\mechivra\src\features\learning\statics\statics-module.integration.test.ts:140: "reached_end",
+
+SEARCH: meaningful_interaction
+C:\dev\projects\mechivra\src\features\learning\learning-engine.integration.test.ts:105: "meaningful_interaction",
+C:\dev\projects\mechivra\src\features\learning\mvp-module-contract.integration.test.ts:71: "meaningful_interaction",
+C:\dev\projects\mechivra\src\features\learning\mvp-module-contract.integration.test.ts:354: "meaningful_interaction",
+C:\dev\projects\mechivra\src\features\learning\statics\statics-module.integration.test.ts:114: "meaningful_interaction",
+
+SEARCH: prediction_submitted
+
+SEARCH: attempt_submitted
+C:\dev\projects\mechivra\src\features\learning\assessment\assessment-locale-equivalence.integration.test.tsx:803: "attempt_submitted",

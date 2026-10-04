@@ -1,0 +1,188 @@
+﻿
+
+============================================================
+SEARCH: evaluateNumericProblemAttempt
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.test.ts:8: evaluateNumericProblemAttempt,
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.test.ts:80: evaluateNumericProblemAttempt(
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.test.ts:130: evaluateNumericProblemAttempt(
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.test.ts:170: evaluateNumericProblemAttempt(
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.test.ts:216: evaluateNumericProblemAttempt(
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.ts:212: export function evaluateNumericProblemAttempt(
+
+============================================================
+SEARCH: NumericProblemEvaluation
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.test.ts:10: NumericProblemEvaluationError,
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.test.ts:231: NumericProblemEvaluationError,
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.ts:135: export interface NumericProblemEvaluation {
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.ts:146: export class NumericProblemEvaluationError extends Error {
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.ts:153: "NumericProblemEvaluationError";
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.ts:221: ): NumericProblemEvaluation {
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.ts:242: throw new NumericProblemEvaluationError(
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.ts:259: throw new NumericProblemEvaluationError(
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-activity.tsx:19: NumericProblemEvaluation,
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-activity.tsx:108: ): NumericProblemEvaluation {
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-activity.tsx:250: NumericProblemEvaluation | null
+
+============================================================
+SEARCH: NumericFieldEvaluation
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.ts:118: export type NumericFieldEvaluationStatus =
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.ts:124: export interface NumericFieldEvaluation {
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.ts:132: NumericFieldEvaluationStatus;
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.ts:137: readonly NumericFieldEvaluation[];
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.ts:236: ): NumericFieldEvaluation => {
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-activity.tsx:18: NumericFieldEvaluationStatus,
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-activity.tsx:83: NumericFieldEvaluationStatus | undefined,
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-activity.tsx:132: NumericFieldEvaluationStatus;
+
+============================================================
+SEARCH: NumericFieldEvaluationStatus
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.ts:118: export type NumericFieldEvaluationStatus =
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.ts:132: NumericFieldEvaluationStatus;
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-activity.tsx:18: NumericFieldEvaluationStatus,
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-activity.tsx:83: NumericFieldEvaluationStatus | undefined,
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-activity.tsx:132: NumericFieldEvaluationStatus;
+
+============================================================
+SEARCH: isWithinNumericTolerance
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.test.ts:9: isWithinNumericTolerance,
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.test.ts:114: isWithinNumericTolerance(
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.ts:157: export function isWithinNumericTolerance(
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.ts:310: isWithinNumericTolerance(
+
+============================================================
+SEARCH: NumericProblemEvaluationError
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.test.ts:10: NumericProblemEvaluationError,
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.test.ts:231: NumericProblemEvaluationError,
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.ts:146: export class NumericProblemEvaluationError extends Error {
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.ts:153: "NumericProblemEvaluationError";
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.ts:242: throw new NumericProblemEvaluationError(
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.ts:259: throw new NumericProblemEvaluationError(
+
+============================================================
+SEARCH: evaluateBendingProblemSubmission
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.test.ts:8: evaluateBendingProblemSubmission,
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.test.ts:23: evaluateBendingProblemSubmission(
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.test.ts:67: evaluateBendingProblemSubmission(
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.ts:207: export function evaluateBendingProblemSubmission(
+
+============================================================
+SEARCH: BendingProblemEvaluation
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.ts:69: export interface BendingProblemEvaluation {
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.ts:213: ): BendingProblemEvaluation {
+
+============================================================
+SEARCH: BendingProblemNumericField
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.ts:1: export type BendingProblemNumericFieldId =
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.ts:15: export interface BendingProblemNumericField {
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.ts:17: BendingProblemNumericFieldId;
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.ts:33: BendingProblemNumericFieldId,
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.ts:52: BendingProblemNumericFieldId,
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.ts:79: BendingProblemNumericFieldId,
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.ts:94: readonly BendingProblemNumericField[] =
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.ts:202: export function getBendingProblemNumericFields():
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.ts:203: readonly BendingProblemNumericField[] {
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.ts:242: BendingProblemNumericFieldId,
+C:\dev\projects\mechivra\src\features\learning\bending\bending-problem-activity.tsx:19: BendingProblemNumericFieldId,
+C:\dev\projects\mechivra\src\features\learning\bending\bending-problem-activity.tsx:50: BendingProblemNumericFieldId,
+C:\dev\projects\mechivra\src\features\learning\bending\bending-problem-activity.tsx:279: BendingProblemNumericFieldId,
+
+============================================================
+SEARCH: getBendingProblemNumericFields
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.ts:202: export function getBendingProblemNumericFields():
+
+============================================================
+SEARCH: gradeOttoProblem
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.test.ts:8: gradeOttoProblem,
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.test.ts:50: gradeOttoProblem(
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.test.ts:73: gradeOttoProblem(
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.ts:188: export function gradeOttoProblem(
+
+============================================================
+SEARCH: OttoProblemGradingResult
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.ts:58: export interface OttoProblemGradingResult {
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.ts:198: ): OttoProblemGradingResult {
+
+============================================================
+SEARCH: OttoProblemTolerance
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.ts:33: export interface OttoProblemTolerance {
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.ts:41: export interface OttoProblemTolerances {
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.ts:43: OttoProblemTolerance;
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.ts:46: OttoProblemTolerance;
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.ts:49: OttoProblemTolerance;
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.ts:52: OttoProblemTolerance;
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.ts:55: OttoProblemTolerance;
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.ts:96: OttoProblemTolerances =
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.ts:147: OttoProblemTolerance,
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.ts:196: OttoProblemTolerances =
+
+============================================================
+SEARCH: OttoProblemTolerances
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.ts:41: export interface OttoProblemTolerances {
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.ts:96: OttoProblemTolerances =
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.ts:196: OttoProblemTolerances =
+
+============================================================
+SEARCH: DEFAULT_OTTO_PROBLEM_TOLERANCES
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.ts:95: export const DEFAULT_OTTO_PROBLEM_TOLERANCES:
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.ts:197: DEFAULT_OTTO_PROBLEM_TOLERANCES,
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-adapter.ts:7: DEFAULT_OTTO_PROBLEM_TOLERANCES,
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-adapter.ts:55: DEFAULT_OTTO_PROBLEM_TOLERANCES
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-adapter.ts:70: DEFAULT_OTTO_PROBLEM_TOLERANCES
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-adapter.ts:85: DEFAULT_OTTO_PROBLEM_TOLERANCES
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-adapter.ts:100: DEFAULT_OTTO_PROBLEM_TOLERANCES
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-adapter.ts:115: DEFAULT_OTTO_PROBLEM_TOLERANCES
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-adapter.ts:130: DEFAULT_OTTO_PROBLEM_TOLERANCES
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-adapter.ts:145: DEFAULT_OTTO_PROBLEM_TOLERANCES
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-adapter.ts:160: DEFAULT_OTTO_PROBLEM_TOLERANCES
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-adapter.ts:175: DEFAULT_OTTO_PROBLEM_TOLERANCES
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-adapter.ts:190: DEFAULT_OTTO_PROBLEM_TOLERANCES
+
+============================================================
+SEARCH: evaluateEngineeringProblem
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-attempt.integration.test.ts:18: evaluateEngineeringProblem,
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-attempt.integration.test.ts:148: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts:9: evaluateEngineeringProblem,
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts:209: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts:288: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts:370: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts:473: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts:541: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts:602: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts:672: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts:750: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts:834: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts:894: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.ts:257: export function evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\index.ts:126: evaluateEngineeringProblem,
+C:\dev\projects\mechivra\src\features\learning\assessment\engineering-problem-adapters.integration.test.ts:8: evaluateEngineeringProblem,
+C:\dev\projects\mechivra\src\features\learning\assessment\engineering-problem-adapters.integration.test.ts:137: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\features\learning\assessment\engineering-problem-adapters.integration.test.ts:217: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\features\learning\assessment\engineering-problem-adapters.integration.test.ts:309: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\features\learning\assessment\engineering-problem-adapters.integration.test.ts:406: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\features\learning\assessment\engineering-problem-adapters.integration.test.ts:468: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\features\learning\assessment\engineering-problem-adapters.integration.test.ts:532: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\features\learning\bending\bending-problem-activity.tsx:9: evaluateEngineeringProblem,
+C:\dev\projects\mechivra\src\features\learning\bending\bending-problem-activity.tsx:341: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\features\learning\bending\bending-problem-activity.tsx:423: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-activity.tsx:13: evaluateEngineeringProblem,
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-activity.tsx:255: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-activity.tsx:330: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-activity.tsx:9: evaluateEngineeringProblem,
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-activity.tsx:286: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-activity.tsx:382: evaluateEngineeringProblem(

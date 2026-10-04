@@ -1,0 +1,4140 @@
+﻿
+
+============================================================
+FILE: .\src\domain\assessment\index.ts
+============================================================
+export {
+  ASSESSMENT_RESULT_VERSION,
+  AssessmentResultError,
+  createAssessmentResult,
+} from "@/domain/assessment/result";
+
+export type {
+  AssessmentEvaluationStatus,
+  AssessmentItemResult,
+  AssessmentItemStatus,
+  AssessmentResult,
+} from "@/domain/assessment/result";
+
+export {
+  ASSESSMENT_ATTEMPT_VERSION,
+  AssessmentAttemptError,
+  createAssessmentAttempt,
+  evaluateAssessmentAttempt,
+  submitAssessmentAttempt,
+} from "@/domain/assessment/attempt";
+
+export type {
+  AssessmentAttempt,
+  AssessmentAttemptIdentity,
+  AssessmentAttemptStatus,
+  CreateAssessmentAttemptInput,
+} from "@/domain/assessment/attempt";
+
+export {
+  createAssessmentRevision,
+} from "@/domain/assessment/revision";
+
+export type {
+  CreateAssessmentRevisionInput,
+} from "@/domain/assessment/revision";
+
+export {
+  ASSESSMENT_ATTEMPT_HISTORY_VERSION,
+  AssessmentAttemptHistoryError,
+  appendAssessmentAttempt,
+  createAssessmentAttemptHistory,
+  getLatestAssessmentAttempt,
+  replaceLatestAssessmentAttempt,
+} from "@/domain/assessment/attempt-history";
+
+export type {
+  AssessmentAttemptHistory,
+} from "@/domain/assessment/attempt-history";
+
+export {
+  summarizeAssessmentAttemptHistory,
+} from "@/domain/assessment/attempt-history-summary";
+
+export type {
+  AssessmentAttemptHistorySummary,
+} from "@/domain/assessment/attempt-history-summary";
+
+export {
+  getAssessmentCompletionSnapshot,
+} from "@/domain/assessment/completion";
+
+export type {
+  AssessmentCompletionSnapshot,
+} from "@/domain/assessment/completion";
+
+export {
+  NumericToleranceError,
+  evaluateNumericTolerance,
+  validateNumericTolerance,
+} from "@/domain/assessment/numeric-tolerance";
+
+export type {
+  NumericTolerance,
+  NumericToleranceEvaluation,
+} from "@/domain/assessment/numeric-tolerance";
+
+export {
+  NUMERIC_ASSESSMENT_VERSION,
+  NumericAssessmentError,
+  evaluateNumericAssessment,
+} from "@/domain/assessment/numeric-evaluation";
+
+export type {
+  NumericAssessmentEvaluation,
+  NumericAssessmentItemDefinition,
+  NumericAssessmentItemEvaluation,
+  NumericAssessmentResponse,
+} from "@/domain/assessment/numeric-evaluation";
+
+export {
+  parseNumericAssessmentInput,
+} from "@/domain/assessment/numeric-input";
+
+export type {
+  NumericInputLocale,
+  NumericInputParseResult,
+} from "@/domain/assessment/numeric-input";
+
+export {
+  CHOICE_ASSESSMENT_VERSION,
+  ChoiceAssessmentError,
+  evaluateChoiceAssessment,
+} from "@/domain/assessment/choice-evaluation";
+
+export type {
+  ChoiceAssessmentDefinition,
+  ChoiceAssessmentEvaluation,
+  ChoiceAssessmentKind,
+  ChoiceAssessmentOptionDefinition,
+  ChoiceAssessmentResponse,
+} from "@/domain/assessment/choice-evaluation";
+
+export {
+  evaluatePredictionAssessment,
+} from "@/domain/assessment/prediction-evaluation";
+
+export type {
+  PredictionAssessmentDefinition,
+  PredictionAssessmentEvaluation,
+  PredictionAssessmentResponse,
+} from "@/domain/assessment/prediction-evaluation";
+
+export {
+  ENGINEERING_PROBLEM_EVALUATION_VERSION,
+  EngineeringProblemEvaluationError,
+  evaluateEngineeringProblem,
+} from "@/domain/assessment/engineering-problem-evaluation";
+
+export type {
+  EngineeringChoiceRole,
+  EngineeringProblemChoiceEvaluation,
+  EngineeringProblemChoiceItemDefinition,
+  EngineeringProblemChoiceResponse,
+  EngineeringProblemDefinition,
+  EngineeringProblemEvaluation,
+  EngineeringProblemResponse,
+} from "@/domain/assessment/engineering-problem-evaluation";
+
+export {
+  ENGINEERING_CRITERION_OPTION_IDS,
+  createEngineeringCriterionOptions,
+  isEngineeringCriterionStatus,
+} from "@/domain/assessment/criterion";
+
+export type {
+  EngineeringCriterionStatus,
+} from "@/domain/assessment/criterion";
+
+export {
+  ASSESSMENT_FEEDBACK_VERSION,
+  AssessmentFeedbackError,
+  createAssessmentFeedbackPlan,
+} from "@/domain/assessment/feedback";
+
+export type {
+  AssessmentFeedbackDescriptor,
+  AssessmentFeedbackLookup,
+  AssessmentFeedbackPlan,
+  AssessmentFeedbackReason,
+  AssessmentFeedbackTone,
+  AssessmentItemFeedbackReference,
+} from "@/domain/assessment/feedback";
+
+============================================================
+FILE: .\src\domain\assessment\attempt.ts
+============================================================
+import type {
+  AssessmentResult,
+} from "@/domain/assessment/result";
+
+export const ASSESSMENT_ATTEMPT_VERSION =
+  "1.0.0" as const;
+
+export type AssessmentAttemptStatus =
+  | "draft"
+  | "submitted"
+  | "evaluated";
+
+export interface AssessmentAttemptIdentity {
+  readonly attemptId:
+    string;
+
+  readonly activityId:
+    string;
+
+  readonly activityVersion:
+    string;
+
+  readonly assessmentId:
+    string;
+
+  readonly assessmentVersion:
+    string;
+}
+
+export interface AssessmentAttempt<TResponse> {
+  readonly version:
+    typeof ASSESSMENT_ATTEMPT_VERSION;
+
+  readonly identity:
+    AssessmentAttemptIdentity;
+
+  readonly attemptNumber:
+    number;
+
+  readonly status:
+    AssessmentAttemptStatus;
+
+  readonly response:
+    TResponse | null;
+
+  readonly result:
+    AssessmentResult | null;
+}
+
+export interface CreateAssessmentAttemptInput {
+  readonly attemptId:
+    string;
+
+  readonly activityId:
+    string;
+
+  readonly activityVersion:
+    string;
+
+  readonly assessmentId:
+    string;
+
+  readonly assessmentVersion:
+    string;
+
+  readonly attemptNumber:
+    number;
+}
+
+export class AssessmentAttemptError extends Error {
+  constructor(
+    message: string,
+  ) {
+    super(message);
+
+    this.name =
+      "AssessmentAttemptError";
+  }
+}
+
+function assertNonEmpty(
+  value:
+    string,
+
+  name:
+    string,
+): void {
+  if (
+    value.trim().length ===
+    0
+  ) {
+    throw new AssessmentAttemptError(
+      `${name} must not be empty.`,
+    );
+  }
+}
+
+export function createAssessmentAttempt<TResponse>(
+  input:
+    CreateAssessmentAttemptInput,
+): AssessmentAttempt<TResponse> {
+  assertNonEmpty(
+    input.attemptId,
+    "Attempt ID",
+  );
+
+  assertNonEmpty(
+    input.activityId,
+    "Activity ID",
+  );
+
+  assertNonEmpty(
+    input.activityVersion,
+    "Activity version",
+  );
+
+  assertNonEmpty(
+    input.assessmentId,
+    "Assessment ID",
+  );
+
+  assertNonEmpty(
+    input.assessmentVersion,
+    "Assessment version",
+  );
+
+  if (
+    !Number.isInteger(
+      input.attemptNumber,
+    ) ||
+    input.attemptNumber <
+      1
+  ) {
+    throw new AssessmentAttemptError(
+      "Attempt number must be a positive integer.",
+    );
+  }
+
+  return {
+    version:
+      ASSESSMENT_ATTEMPT_VERSION,
+
+    identity: {
+      attemptId:
+        input.attemptId,
+
+      activityId:
+        input.activityId,
+
+      activityVersion:
+        input.activityVersion,
+
+      assessmentId:
+        input.assessmentId,
+
+      assessmentVersion:
+        input.assessmentVersion,
+    },
+
+    attemptNumber:
+      input.attemptNumber,
+
+    status:
+      "draft",
+
+    response:
+      null,
+
+    result:
+      null,
+  };
+}
+
+export function submitAssessmentAttempt<TResponse>(
+  attempt:
+    AssessmentAttempt<TResponse>,
+
+  response:
+    TResponse,
+): AssessmentAttempt<TResponse> {
+  if (
+    attempt.status !==
+    "draft"
+  ) {
+    throw new AssessmentAttemptError(
+      "Only a draft assessment attempt can be submitted.",
+    );
+  }
+
+  return {
+    ...attempt,
+
+    status:
+      "submitted",
+
+    response,
+
+    result:
+      null,
+  };
+}
+
+export function evaluateAssessmentAttempt<TResponse>(
+  attempt:
+    AssessmentAttempt<TResponse>,
+
+  result:
+    AssessmentResult,
+): AssessmentAttempt<TResponse> {
+  if (
+    attempt.status !==
+    "submitted"
+  ) {
+    throw new AssessmentAttemptError(
+      "Only a submitted assessment attempt can be evaluated.",
+    );
+  }
+
+  if (
+    attempt.response ===
+    null
+  ) {
+    throw new AssessmentAttemptError(
+      "Submitted assessment attempt must contain a response.",
+    );
+  }
+
+  return {
+    ...attempt,
+
+    status:
+      "evaluated",
+
+    result,
+  };
+}
+
+============================================================
+FILE: .\src\domain\assessment\attempt-history.ts
+============================================================
+import type {
+  AssessmentAttempt,
+} from "@/domain/assessment/attempt";
+
+export const ASSESSMENT_ATTEMPT_HISTORY_VERSION =
+  "1.0.0" as const;
+
+export interface AssessmentAttemptHistory<TResponse> {
+  readonly version:
+    typeof ASSESSMENT_ATTEMPT_HISTORY_VERSION;
+
+  readonly activityId:
+    string;
+
+  readonly activityVersion:
+    string;
+
+  readonly assessmentId:
+    string;
+
+  readonly assessmentVersion:
+    string;
+
+  readonly attempts:
+    readonly AssessmentAttempt<TResponse>[];
+}
+
+export class AssessmentAttemptHistoryError extends Error {
+  constructor(
+    message:
+      string,
+  ) {
+    super(
+      message,
+    );
+
+    this.name =
+      "AssessmentAttemptHistoryError";
+  }
+}
+
+function assertSameAssessmentIdentity<TResponse>(
+  history:
+    AssessmentAttemptHistory<TResponse>,
+
+  attempt:
+    AssessmentAttempt<TResponse>,
+): void {
+  if (
+    attempt.identity
+      .activityId !==
+      history.activityId ||
+    attempt.identity
+      .activityVersion !==
+      history.activityVersion ||
+    attempt.identity
+      .assessmentId !==
+      history.assessmentId ||
+    attempt.identity
+      .assessmentVersion !==
+      history.assessmentVersion
+  ) {
+    throw new AssessmentAttemptHistoryError(
+      "All attempts in one history must belong to the same activity and assessment versions.",
+    );
+  }
+}
+
+export function createAssessmentAttemptHistory<TResponse>(
+  initialAttempt:
+    AssessmentAttempt<TResponse>,
+): AssessmentAttemptHistory<TResponse> {
+  if (
+    initialAttempt.attemptNumber !==
+    1
+  ) {
+    throw new AssessmentAttemptHistoryError(
+      "Initial assessment attempt must have attempt number 1.",
+    );
+  }
+
+  return {
+    version:
+      ASSESSMENT_ATTEMPT_HISTORY_VERSION,
+
+    activityId:
+      initialAttempt
+        .identity
+        .activityId,
+
+    activityVersion:
+      initialAttempt
+        .identity
+        .activityVersion,
+
+    assessmentId:
+      initialAttempt
+        .identity
+        .assessmentId,
+
+    assessmentVersion:
+      initialAttempt
+        .identity
+        .assessmentVersion,
+
+    attempts: [
+      initialAttempt,
+    ],
+  };
+}
+
+export function appendAssessmentAttempt<TResponse>(
+  history:
+    AssessmentAttemptHistory<TResponse>,
+
+  attempt:
+    AssessmentAttempt<TResponse>,
+): AssessmentAttemptHistory<TResponse> {
+  assertSameAssessmentIdentity(
+    history,
+    attempt,
+  );
+
+  const previousAttempt =
+    history.attempts[
+      history.attempts.length -
+        1
+    ];
+
+  if (
+    !previousAttempt
+  ) {
+    throw new AssessmentAttemptHistoryError(
+      "Assessment attempt history must contain a previous attempt.",
+    );
+  }
+
+  const expectedAttemptNumber =
+    previousAttempt.attemptNumber +
+    1;
+
+  if (
+    attempt.attemptNumber !==
+    expectedAttemptNumber
+  ) {
+    throw new AssessmentAttemptHistoryError(
+      `Expected attempt number ${expectedAttemptNumber}, received ${attempt.attemptNumber}.`,
+    );
+  }
+
+  if (
+    history.attempts.some(
+      (
+        existing,
+      ) =>
+        existing.identity
+          .attemptId ===
+        attempt.identity
+          .attemptId,
+    )
+  ) {
+    throw new AssessmentAttemptHistoryError(
+      "Assessment attempt IDs must be unique within a history.",
+    );
+  }
+
+  return {
+    ...history,
+
+    attempts: [
+      ...history.attempts,
+      attempt,
+    ],
+  };
+}
+
+export function replaceLatestAssessmentAttempt<TResponse>(
+  history:
+    AssessmentAttemptHistory<TResponse>,
+
+  attempt:
+    AssessmentAttempt<TResponse>,
+): AssessmentAttemptHistory<TResponse> {
+  assertSameAssessmentIdentity(
+    history,
+    attempt,
+  );
+
+  const latest =
+    history.attempts[
+      history.attempts.length -
+        1
+    ];
+
+  if (
+    !latest
+  ) {
+    throw new AssessmentAttemptHistoryError(
+      "Assessment attempt history must contain an attempt.",
+    );
+  }
+
+  if (
+    latest.identity
+      .attemptId !==
+      attempt.identity
+        .attemptId ||
+    latest.attemptNumber !==
+      attempt.attemptNumber
+  ) {
+    throw new AssessmentAttemptHistoryError(
+      "Only the latest attempt with the same attempt identity can advance through its lifecycle.",
+    );
+  }
+
+  return {
+    ...history,
+
+    attempts: [
+      ...history.attempts.slice(
+        0,
+        -1,
+      ),
+      attempt,
+    ],
+  };
+}
+
+export function getLatestAssessmentAttempt<TResponse>(
+  history:
+    AssessmentAttemptHistory<TResponse>,
+): AssessmentAttempt<TResponse> {
+  const latest =
+    history.attempts[
+      history.attempts.length -
+        1
+    ];
+
+  if (
+    !latest
+  ) {
+    throw new AssessmentAttemptHistoryError(
+      "Assessment attempt history contains no attempts.",
+    );
+  }
+
+  return latest;
+}
+
+============================================================
+FILE: .\src\domain\assessment\attempt-history-summary.ts
+============================================================
+import type {
+  AssessmentAttemptHistory,
+} from "@/domain/assessment/attempt-history";
+
+export interface AssessmentAttemptHistorySummary {
+  readonly attemptCount:
+    number;
+
+  readonly evaluatedAttemptCount:
+    number;
+
+  readonly firstAttemptCorrect:
+    boolean | null;
+
+  readonly latestAttemptCorrect:
+    boolean | null;
+
+  readonly hasCorrectAttempt:
+    boolean;
+
+  readonly highestNormalizedScore:
+    number | null;
+}
+
+export function summarizeAssessmentAttemptHistory<TResponse>(
+  history:
+    AssessmentAttemptHistory<TResponse>,
+): AssessmentAttemptHistorySummary {
+  const evaluatedAttempts =
+    history.attempts.filter(
+      (
+        attempt,
+      ) =>
+        attempt.status ===
+          "evaluated" &&
+        attempt.result !==
+          null,
+    );
+
+  const first =
+    evaluatedAttempts[0];
+
+  const latest =
+    evaluatedAttempts[
+      evaluatedAttempts.length -
+        1
+    ];
+
+  const scores =
+    evaluatedAttempts.flatMap(
+      (
+        attempt,
+      ) =>
+        attempt.result
+          ?.normalizedScore ===
+        null ||
+        attempt.result
+          ?.normalizedScore ===
+          undefined
+          ? []
+          : [
+              attempt.result
+                .normalizedScore,
+            ],
+    );
+
+  return {
+    attemptCount:
+      history.attempts.length,
+
+    evaluatedAttemptCount:
+      evaluatedAttempts.length,
+
+    firstAttemptCorrect:
+      first?.result
+        ?.correct ??
+      null,
+
+    latestAttemptCorrect:
+      latest?.result
+        ?.correct ??
+      null,
+
+    hasCorrectAttempt:
+      evaluatedAttempts.some(
+        (
+          attempt,
+        ) =>
+          attempt.result
+            ?.correct ===
+          true,
+      ),
+
+    highestNormalizedScore:
+      scores.length >
+      0
+        ? Math.max(
+            ...scores,
+          )
+        : null,
+  };
+}
+
+============================================================
+FILE: .\src\domain\assessment\revision.ts
+============================================================
+import {
+  AssessmentAttemptError,
+  createAssessmentAttempt,
+} from "@/domain/assessment/attempt";
+
+import type {
+  AssessmentAttempt,
+} from "@/domain/assessment/attempt";
+
+export interface CreateAssessmentRevisionInput {
+  readonly attemptId:
+    string;
+}
+
+export function createAssessmentRevision<TResponse>(
+  previousAttempt:
+    AssessmentAttempt<TResponse>,
+
+  input:
+    CreateAssessmentRevisionInput,
+): AssessmentAttempt<TResponse> {
+  if (
+    previousAttempt.status !==
+    "evaluated"
+  ) {
+    throw new AssessmentAttemptError(
+      "A revision can only be created from an evaluated assessment attempt.",
+    );
+  }
+
+  if (
+    input.attemptId.trim().length ===
+    0
+  ) {
+    throw new AssessmentAttemptError(
+      "Revision attempt ID must not be empty.",
+    );
+  }
+
+  if (
+    input.attemptId ===
+    previousAttempt.identity
+      .attemptId
+  ) {
+    throw new AssessmentAttemptError(
+      "Revision attempt ID must differ from the previous attempt ID.",
+    );
+  }
+
+  return createAssessmentAttempt<TResponse>(
+    {
+      attemptId:
+        input.attemptId,
+
+      activityId:
+        previousAttempt
+          .identity
+          .activityId,
+
+      activityVersion:
+        previousAttempt
+          .identity
+          .activityVersion,
+
+      assessmentId:
+        previousAttempt
+          .identity
+          .assessmentId,
+
+      assessmentVersion:
+        previousAttempt
+          .identity
+          .assessmentVersion,
+
+      attemptNumber:
+        previousAttempt
+          .attemptNumber +
+        1,
+    },
+  );
+}
+
+============================================================
+FILE: .\src\domain\assessment\result.ts
+============================================================
+export const ASSESSMENT_RESULT_VERSION =
+  "1.0.0" as const;
+
+export type AssessmentEvaluationStatus =
+  | "not_evaluated"
+  | "correct"
+  | "partially_correct"
+  | "incorrect"
+  | "invalid";
+
+export type AssessmentItemStatus =
+  | "correct"
+  | "incorrect"
+  | "invalid";
+
+export interface AssessmentItemResult {
+  readonly id:
+    string;
+
+  readonly status:
+    AssessmentItemStatus;
+
+  readonly score:
+    number;
+
+  readonly maxScore:
+    number;
+
+  readonly feedbackCode?:
+    string;
+}
+
+export interface AssessmentResult {
+  readonly version:
+    typeof ASSESSMENT_RESULT_VERSION;
+
+  readonly status:
+    AssessmentEvaluationStatus;
+
+  readonly score:
+    number;
+
+  readonly maxScore:
+    number;
+
+  readonly normalizedScore:
+    number | null;
+
+  readonly correct:
+    boolean;
+
+  readonly items:
+    readonly AssessmentItemResult[];
+}
+
+export class AssessmentResultError extends Error {
+  constructor(
+    message: string,
+  ) {
+    super(message);
+
+    this.name =
+      "AssessmentResultError";
+  }
+}
+
+function assertFiniteNonNegative(
+  value:
+    number,
+
+  name:
+    string,
+): void {
+  if (
+    !Number.isFinite(
+      value,
+    ) ||
+    value < 0
+  ) {
+    throw new AssessmentResultError(
+      `${name} must be finite and greater than or equal to zero.`,
+    );
+  }
+}
+
+function assertUniqueItemIds(
+  items:
+    readonly AssessmentItemResult[],
+): void {
+  const ids =
+    items.map(
+      (
+        item,
+      ) =>
+        item.id,
+    );
+
+  if (
+    new Set(
+      ids,
+    ).size !==
+    ids.length
+  ) {
+    throw new AssessmentResultError(
+      "Assessment item IDs must be unique.",
+    );
+  }
+}
+
+function deriveEvaluationStatus(
+  items:
+    readonly AssessmentItemResult[],
+): AssessmentEvaluationStatus {
+  if (
+    items.some(
+      (
+        item,
+      ) =>
+        item.status ===
+        "invalid",
+    )
+  ) {
+    return "invalid";
+  }
+
+  if (
+    items.every(
+      (
+        item,
+      ) =>
+        item.status ===
+        "correct",
+    )
+  ) {
+    return "correct";
+  }
+
+  if (
+    items.every(
+      (
+        item,
+      ) =>
+        item.status ===
+        "incorrect",
+    )
+  ) {
+    return "incorrect";
+  }
+
+  return "partially_correct";
+}
+
+export function createAssessmentResult(
+  items:
+    readonly AssessmentItemResult[],
+): AssessmentResult {
+  if (
+    items.length ===
+    0
+  ) {
+    throw new AssessmentResultError(
+      "Assessment result requires at least one evaluated item.",
+    );
+  }
+
+  assertUniqueItemIds(
+    items,
+  );
+
+  for (
+    const item
+    of items
+  ) {
+    if (
+      item.id.trim().length ===
+      0
+    ) {
+      throw new AssessmentResultError(
+        "Assessment item ID must not be empty.",
+      );
+    }
+
+    assertFiniteNonNegative(
+      item.score,
+      `Score for "${item.id}"`,
+    );
+
+    assertFiniteNonNegative(
+      item.maxScore,
+      `Maximum score for "${item.id}"`,
+    );
+
+    if (
+      item.maxScore <= 0
+    ) {
+      throw new AssessmentResultError(
+        `Maximum score for "${item.id}" must be greater than zero.`,
+      );
+    }
+
+    if (
+      item.score >
+      item.maxScore
+    ) {
+      throw new AssessmentResultError(
+        `Score for "${item.id}" cannot exceed its maximum score.`,
+      );
+    }
+
+    if (
+      item.status ===
+        "correct" &&
+      item.score !==
+        item.maxScore
+    ) {
+      throw new AssessmentResultError(
+        `Correct item "${item.id}" must receive full score.`,
+      );
+    }
+
+    if (
+      item.status ===
+        "incorrect" &&
+      item.score ===
+        item.maxScore
+    ) {
+      throw new AssessmentResultError(
+        `Incorrect item "${item.id}" cannot receive full score.`,
+      );
+    }
+  }
+
+  const score =
+    items.reduce(
+      (
+        total,
+        item,
+      ) =>
+        total +
+        item.score,
+      0,
+    );
+
+  const maxScore =
+    items.reduce(
+      (
+        total,
+        item,
+      ) =>
+        total +
+        item.maxScore,
+      0,
+    );
+
+  const status =
+    deriveEvaluationStatus(
+      items,
+    );
+
+  return {
+    version:
+      ASSESSMENT_RESULT_VERSION,
+
+    status,
+
+    score,
+
+    maxScore,
+
+    normalizedScore:
+      maxScore >
+      0
+        ? score /
+          maxScore
+        : null,
+
+    correct:
+      status ===
+      "correct",
+
+    items:
+      items.map(
+        (
+          item,
+        ) => ({
+          ...item,
+        }),
+      ),
+  };
+}
+
+============================================================
+FILE: .\src\domain\assessment\feedback.ts
+============================================================
+import type {
+  AssessmentEvaluationStatus,
+  AssessmentItemStatus,
+  AssessmentResult,
+} from "@/domain/assessment/result";
+
+export const ASSESSMENT_FEEDBACK_VERSION =
+  "1.0.0" as const;
+
+export type AssessmentFeedbackReason =
+  | "correct"
+  | "partial"
+  | "incorrect"
+  | "missing_input"
+  | "invalid_input"
+  | "outside_tolerance"
+  | "wrong_concept"
+  | "wrong_criterion"
+  | "unit_mismatch"
+  | "model_limit"
+  | "not_evaluated";
+
+export type AssessmentFeedbackTone =
+  | "success"
+  | "guidance"
+  | "warning"
+  | "info";
+
+export interface AssessmentFeedbackDescriptor {
+  readonly code:
+    string;
+
+  readonly reason:
+    AssessmentFeedbackReason;
+
+  readonly tone:
+    AssessmentFeedbackTone;
+
+  readonly retryable:
+    boolean;
+}
+
+export interface AssessmentItemFeedbackReference {
+  readonly itemId:
+    string;
+
+  readonly feedback:
+    AssessmentFeedbackDescriptor;
+}
+
+export interface AssessmentFeedbackPlan {
+  readonly version:
+    typeof ASSESSMENT_FEEDBACK_VERSION;
+
+  readonly summary:
+    AssessmentFeedbackDescriptor;
+
+  readonly items:
+    readonly AssessmentItemFeedbackReference[];
+}
+
+export type AssessmentFeedbackLookup =
+  (
+    code:
+      string,
+  ) =>
+    AssessmentFeedbackDescriptor |
+    undefined;
+
+export class AssessmentFeedbackError extends Error {
+  constructor(
+    message:
+      string,
+  ) {
+    super(
+      message,
+    );
+
+    this.name =
+      "AssessmentFeedbackError";
+  }
+}
+
+const SUMMARY_FEEDBACK_CODES:
+  Readonly<
+    Record<
+      AssessmentEvaluationStatus,
+      string
+    >
+  > =
+  {
+    not_evaluated:
+      "assessment.result.not-evaluated",
+
+    correct:
+      "assessment.result.correct",
+
+    partially_correct:
+      "assessment.result.partially-correct",
+
+    incorrect:
+      "assessment.result.incorrect",
+
+    invalid:
+      "assessment.result.invalid",
+  };
+
+const ITEM_FALLBACK_FEEDBACK_CODES:
+  Readonly<
+    Record<
+      AssessmentItemStatus,
+      string
+    >
+  > =
+  {
+    correct:
+      "assessment.item.correct",
+
+    incorrect:
+      "assessment.item.incorrect",
+
+    invalid:
+      "assessment.item.invalid",
+  };
+
+function resolveFeedback(
+  code:
+    string,
+
+  lookup:
+    AssessmentFeedbackLookup,
+): AssessmentFeedbackDescriptor {
+  const feedback =
+    lookup(
+      code,
+    );
+
+  if (
+    !feedback
+  ) {
+    throw new AssessmentFeedbackError(
+      `Unknown assessment feedback code "${code}".`,
+    );
+  }
+
+  if (
+    feedback.code !==
+    code
+  ) {
+    throw new AssessmentFeedbackError(
+      `Assessment feedback lookup returned mismatched code "${feedback.code}" for "${code}".`,
+    );
+  }
+
+  if (
+    feedback.code.trim().length ===
+    0
+  ) {
+    throw new AssessmentFeedbackError(
+      "Assessment feedback code must not be empty.",
+    );
+  }
+
+  return feedback;
+}
+
+export function createAssessmentFeedbackPlan(
+  result:
+    AssessmentResult,
+
+  lookup:
+    AssessmentFeedbackLookup,
+): AssessmentFeedbackPlan {
+  const summaryCode =
+    SUMMARY_FEEDBACK_CODES[
+      result.status
+    ];
+
+  const summary =
+    resolveFeedback(
+      summaryCode,
+      lookup,
+    );
+
+  const items =
+    result.items.map(
+      (
+        item,
+      ): AssessmentItemFeedbackReference => {
+        const code =
+          item.feedbackCode ??
+          ITEM_FALLBACK_FEEDBACK_CODES[
+            item.status
+          ];
+
+        return {
+          itemId:
+            item.id,
+
+          feedback:
+            resolveFeedback(
+              code,
+              lookup,
+            ),
+        };
+      },
+    );
+
+  return {
+    version:
+      ASSESSMENT_FEEDBACK_VERSION,
+
+    summary,
+
+    items,
+  };
+}
+
+============================================================
+FILE: .\src\domain\assessment\completion.ts
+============================================================
+import type {
+  AssessmentAttempt,
+} from "@/domain/assessment/attempt";
+
+export interface AssessmentCompletionSnapshot {
+  readonly submitted:
+    boolean;
+
+  readonly evaluated:
+    boolean;
+
+  readonly correct:
+    boolean | null;
+}
+
+export function getAssessmentCompletionSnapshot<TResponse>(
+  attempt:
+    AssessmentAttempt<TResponse>,
+): AssessmentCompletionSnapshot {
+  return {
+    submitted:
+      attempt.status ===
+        "submitted" ||
+      attempt.status ===
+        "evaluated",
+
+    evaluated:
+      attempt.status ===
+      "evaluated",
+
+    correct:
+      attempt.status ===
+        "evaluated"
+        ? attempt.result
+            ?.correct ??
+          null
+        : null,
+  };
+}
+
+============================================================
+FILE: .\src\domain\assessment\prediction-evaluation.ts
+============================================================
+import {
+  ChoiceAssessmentError,
+  evaluateChoiceAssessment,
+} from "@/domain/assessment/choice-evaluation";
+
+import type {
+  ChoiceAssessmentDefinition,
+  ChoiceAssessmentEvaluation,
+  ChoiceAssessmentResponse,
+} from "@/domain/assessment/choice-evaluation";
+
+export type PredictionAssessmentDefinition =
+  Omit<
+    ChoiceAssessmentDefinition,
+    "kind"
+  > & {
+    readonly kind:
+      "prediction";
+  };
+
+export type PredictionAssessmentResponse =
+  ChoiceAssessmentResponse;
+
+export type PredictionAssessmentEvaluation =
+  ChoiceAssessmentEvaluation;
+
+export function evaluatePredictionAssessment(
+  definition:
+    PredictionAssessmentDefinition,
+
+  response:
+    PredictionAssessmentResponse,
+): PredictionAssessmentEvaluation {
+  if (
+    definition.kind !==
+    "prediction"
+  ) {
+    throw new ChoiceAssessmentError(
+      "Prediction assessment definition must use kind \"prediction\".",
+    );
+  }
+
+  return evaluateChoiceAssessment(
+    definition,
+    response,
+  );
+}
+
+============================================================
+FILE: .\src\domain\assessment\engineering-problem-evaluation.ts
+============================================================
+import {
+  evaluateChoiceAssessment,
+} from "@/domain/assessment/choice-evaluation";
+
+import type {
+  ChoiceAssessmentDefinition,
+  ChoiceAssessmentEvaluation,
+} from "@/domain/assessment/choice-evaluation";
+
+import {
+  evaluateNumericAssessment,
+} from "@/domain/assessment/numeric-evaluation";
+
+import type {
+  NumericAssessmentEvaluation,
+  NumericAssessmentItemDefinition,
+  NumericAssessmentResponse,
+} from "@/domain/assessment/numeric-evaluation";
+
+import {
+  createAssessmentResult,
+} from "@/domain/assessment/result";
+
+import type {
+  AssessmentResult,
+} from "@/domain/assessment/result";
+
+export const ENGINEERING_PROBLEM_EVALUATION_VERSION =
+  "1.0.0" as const;
+
+export type EngineeringChoiceRole =
+  | "criterion"
+  | "decision"
+  | "interpretation";
+
+export interface EngineeringProblemChoiceItemDefinition {
+  readonly role:
+    EngineeringChoiceRole;
+
+  readonly definition:
+    ChoiceAssessmentDefinition;
+}
+
+export interface EngineeringProblemDefinition {
+  readonly id:
+    string;
+
+  readonly version:
+    string;
+
+  readonly numericItems:
+    readonly NumericAssessmentItemDefinition[];
+
+  readonly choiceItems:
+    readonly EngineeringProblemChoiceItemDefinition[];
+}
+
+export interface EngineeringProblemChoiceResponse {
+  readonly itemId:
+    string;
+
+  readonly selectedOptionId:
+    string | null;
+}
+
+export interface EngineeringProblemResponse {
+  readonly numeric:
+    readonly NumericAssessmentResponse[];
+
+  readonly choices:
+    readonly EngineeringProblemChoiceResponse[];
+}
+
+export interface EngineeringProblemChoiceEvaluation {
+  readonly role:
+    EngineeringChoiceRole;
+
+  readonly evaluation:
+    ChoiceAssessmentEvaluation;
+}
+
+export interface EngineeringProblemEvaluation {
+  readonly version:
+    typeof ENGINEERING_PROBLEM_EVALUATION_VERSION;
+
+  readonly problemId:
+    string;
+
+  readonly problemVersion:
+    string;
+
+  readonly numeric:
+    NumericAssessmentEvaluation | null;
+
+  readonly choices:
+    readonly EngineeringProblemChoiceEvaluation[];
+
+  readonly result:
+    AssessmentResult;
+}
+
+export class EngineeringProblemEvaluationError extends Error {
+  constructor(
+    message:
+      string,
+  ) {
+    super(
+      message,
+    );
+
+    this.name =
+      "EngineeringProblemEvaluationError";
+  }
+}
+
+function assertNonEmpty(
+  value:
+    string,
+
+  name:
+    string,
+): void {
+  if (
+    value.trim().length ===
+    0
+  ) {
+    throw new EngineeringProblemEvaluationError(
+      `${name} must not be empty.`,
+    );
+  }
+}
+
+function validateDefinition(
+  definition:
+    EngineeringProblemDefinition,
+): void {
+  assertNonEmpty(
+    definition.id,
+    "Engineering problem ID",
+  );
+
+  assertNonEmpty(
+    definition.version,
+    "Engineering problem version",
+  );
+
+  if (
+    definition.numericItems.length ===
+      0 &&
+    definition.choiceItems.length ===
+      0
+  ) {
+    throw new EngineeringProblemEvaluationError(
+      "Engineering problem requires at least one numeric or choice item.",
+    );
+  }
+
+  const numericIds =
+    definition.numericItems.map(
+      (
+        item,
+      ) =>
+        item.id,
+    );
+
+  const choiceIds =
+    definition.choiceItems.map(
+      (
+        item,
+      ) =>
+        item.definition.id,
+    );
+
+  const allIds = [
+    ...numericIds,
+    ...choiceIds,
+  ];
+
+  if (
+    new Set(
+      allIds,
+    ).size !==
+    allIds.length
+  ) {
+    throw new EngineeringProblemEvaluationError(
+      "Engineering problem item IDs must be unique across numeric and choice items.",
+    );
+  }
+
+  for (
+    const choiceItem
+    of definition.choiceItems
+  ) {
+    if (
+      choiceItem.definition.kind !==
+      "choice"
+    ) {
+      throw new EngineeringProblemEvaluationError(
+        `Engineering problem choice item "${choiceItem.definition.id}" must use kind "choice".`,
+      );
+    }
+  }
+}
+
+function validateChoiceResponses(
+  definition:
+    EngineeringProblemDefinition,
+
+  responses:
+    readonly EngineeringProblemChoiceResponse[],
+): void {
+  const responseIds =
+    responses.map(
+      (
+        response,
+      ) =>
+        response.itemId,
+    );
+
+  if (
+    new Set(
+      responseIds,
+    ).size !==
+    responseIds.length
+  ) {
+    throw new EngineeringProblemEvaluationError(
+      "Engineering problem choice response IDs must be unique.",
+    );
+  }
+
+  const knownIds =
+    new Set(
+      definition.choiceItems.map(
+        (
+          item,
+        ) =>
+          item.definition.id,
+      ),
+    );
+
+  for (
+    const response
+    of responses
+  ) {
+    if (
+      !knownIds.has(
+        response.itemId,
+      )
+    ) {
+      throw new EngineeringProblemEvaluationError(
+        `Unknown engineering problem choice response "${response.itemId}".`,
+      );
+    }
+  }
+}
+
+export function evaluateEngineeringProblem(
+  definition:
+    EngineeringProblemDefinition,
+
+  response:
+    EngineeringProblemResponse,
+): EngineeringProblemEvaluation {
+  validateDefinition(
+    definition,
+  );
+
+  validateChoiceResponses(
+    definition,
+    response.choices,
+  );
+
+  const numeric =
+    definition.numericItems.length >
+    0
+      ? evaluateNumericAssessment(
+          definition.numericItems,
+          response.numeric,
+        )
+      : null;
+
+  if (
+    definition.numericItems.length ===
+      0 &&
+    response.numeric.length >
+      0
+  ) {
+    throw new EngineeringProblemEvaluationError(
+      "Engineering problem does not define numeric items.",
+    );
+  }
+
+  const choiceResponseById =
+    new Map(
+      response.choices.map(
+        (
+          choiceResponse,
+        ) => [
+          choiceResponse.itemId,
+          choiceResponse,
+        ] as const,
+      ),
+    );
+
+  const choices =
+    definition.choiceItems.map(
+      (
+        choiceItem,
+      ): EngineeringProblemChoiceEvaluation => {
+        const choiceResponse =
+          choiceResponseById.get(
+            choiceItem.definition.id,
+          );
+
+        return {
+          role:
+            choiceItem.role,
+
+          evaluation:
+            evaluateChoiceAssessment(
+              choiceItem.definition,
+              {
+                selectedOptionId:
+                  choiceResponse
+                    ?.selectedOptionId ??
+                  null,
+              },
+            ),
+        };
+      },
+    );
+
+  const combinedItems = [
+    ...(
+      numeric?.result.items ??
+      []
+    ),
+    ...choices.flatMap(
+      (
+        choice,
+      ) =>
+        choice.evaluation
+          .result.items,
+    ),
+  ];
+
+  return {
+    version:
+      ENGINEERING_PROBLEM_EVALUATION_VERSION,
+
+    problemId:
+      definition.id,
+
+    problemVersion:
+      definition.version,
+
+    numeric,
+
+    choices,
+
+    result:
+      createAssessmentResult(
+        combinedItems,
+      ),
+  };
+}
+
+============================================================
+FILE: .\src\features\learning\assessment\index.ts
+============================================================
+export {
+  useAssessmentSession,
+} from "@/features/learning/assessment/use-assessment-session";
+
+export type {
+  AssessmentSessionConfig,
+  AssessmentSessionState,
+} from "@/features/learning/assessment/use-assessment-session";
+
+export {
+  AssessmentFeedbackPanel,
+} from "@/features/learning/assessment/assessment-feedback-panel";
+
+export {
+  AssessmentAttemptSummary,
+} from "@/features/learning/assessment/assessment-attempt-summary";
+
+============================================================
+FILE: .\src\features\learning\assessment\use-assessment-session.tsx
+============================================================
+[FILE NOT FOUND]
+
+============================================================
+FILE: .\src\features\learning\assessment\use-assessment-session.test.tsx
+============================================================
+import {
+  act,
+  cleanup,
+  renderHook,
+} from "@testing-library/react";
+
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
+
+import {
+  createAssessmentResult,
+} from "@/domain/assessment";
+
+import { useAssessmentSession } from "@/features/learning/assessment/use-assessment-session";
+
+afterEach(() => {
+  cleanup();
+});
+
+interface TestResponse {
+  readonly value:
+    number;
+}
+
+function evaluate(
+  response:
+    TestResponse,
+) {
+  const correct =
+    response.value ===
+    10;
+
+  return createAssessmentResult(
+    [
+      {
+        id:
+          "answer",
+
+        status:
+          correct
+            ? "correct"
+            : "incorrect",
+
+        score:
+          correct
+            ? 1
+            : 0,
+
+        maxScore:
+          1,
+      },
+    ],
+  );
+}
+
+describe(
+  "useAssessmentSession",
+  () => {
+    it(
+      "starts with one draft attempt",
+      () => {
+        const {
+          result,
+        } =
+          renderHook(
+            () =>
+              useAssessmentSession<TestResponse>(
+                {
+                  activityId:
+                    "activity-test",
+
+                  activityVersion:
+                    "1.0.0",
+
+                  assessmentId:
+                    "assessment-test",
+
+                  assessmentVersion:
+                    "1.0.0",
+
+                  evaluate,
+                },
+              ),
+          );
+
+        expect(
+          result.current
+            .history
+            .attempts,
+        ).toHaveLength(
+          1,
+        );
+
+        expect(
+          result.current
+            .latestAttempt
+            .status,
+        ).toBe(
+          "draft",
+        );
+
+        expect(
+          result.current
+            .canSubmit,
+        ).toBe(
+          true,
+        );
+
+        expect(
+          result.current
+            .canRevise,
+        ).toBe(
+          false,
+        );
+      },
+    );
+
+    it(
+      "submits and evaluates one attempt atomically from the UI perspective",
+      () => {
+        const {
+          result,
+        } =
+          renderHook(
+            () =>
+              useAssessmentSession<TestResponse>(
+                {
+                  activityId:
+                    "activity-test",
+
+                  activityVersion:
+                    "1.0.0",
+
+                  assessmentId:
+                    "assessment-test",
+
+                  assessmentVersion:
+                    "1.0.0",
+
+                  evaluate,
+                },
+              ),
+          );
+
+        act(
+          () => {
+            result.current.submit(
+              {
+                value:
+                  5,
+              },
+            );
+          },
+        );
+
+        expect(
+          result.current
+            .latestAttempt
+            .status,
+        ).toBe(
+          "evaluated",
+        );
+
+        expect(
+          result.current
+            .latestAttempt
+            .response,
+        ).toEqual({
+          value:
+            5,
+        });
+
+        expect(
+          result.current
+            .latestAttempt
+            .result
+            ?.correct,
+        ).toBe(
+          false,
+        );
+
+        expect(
+          result.current
+            .summary
+            .evaluatedAttemptCount,
+        ).toBe(
+          1,
+        );
+      },
+    );
+
+    it(
+      "creates a new revision instead of overwriting the previous result",
+      () => {
+        const {
+          result,
+        } =
+          renderHook(
+            () =>
+              useAssessmentSession<TestResponse>(
+                {
+                  activityId:
+                    "activity-test",
+
+                  activityVersion:
+                    "1.0.0",
+
+                  assessmentId:
+                    "assessment-test",
+
+                  assessmentVersion:
+                    "1.0.0",
+
+                  evaluate,
+                },
+              ),
+          );
+
+        act(
+          () => {
+            result.current.submit(
+              {
+                value:
+                  5,
+              },
+            );
+          },
+        );
+
+        act(
+          () => {
+            result.current.revise();
+          },
+        );
+
+        expect(
+          result.current
+            .history
+            .attempts,
+        ).toHaveLength(
+          2,
+        );
+
+        expect(
+          result.current
+            .history
+            .attempts[0]
+            ?.result
+            ?.correct,
+        ).toBe(
+          false,
+        );
+
+        expect(
+          result.current
+            .history
+            .attempts[1]
+            ?.status,
+        ).toBe(
+          "draft",
+        );
+
+        expect(
+          result.current
+            .latestAttempt
+            .attemptNumber,
+        ).toBe(
+          2,
+        );
+      },
+    );
+
+    it(
+      "preserves first-attempt failure after eventual success",
+      () => {
+        const {
+          result,
+        } =
+          renderHook(
+            () =>
+              useAssessmentSession<TestResponse>(
+                {
+                  activityId:
+                    "activity-test",
+
+                  activityVersion:
+                    "1.0.0",
+
+                  assessmentId:
+                    "assessment-test",
+
+                  assessmentVersion:
+                    "1.0.0",
+
+                  evaluate,
+                },
+              ),
+          );
+
+        act(
+          () => {
+            result.current.submit(
+              {
+                value:
+                  5,
+              },
+            );
+          },
+        );
+
+        act(
+          () => {
+            result.current.revise();
+          },
+        );
+
+        act(
+          () => {
+            result.current.submit(
+              {
+                value:
+                  10,
+              },
+            );
+          },
+        );
+
+        expect(
+          result.current
+            .summary
+            .attemptCount,
+        ).toBe(
+          2,
+        );
+
+        expect(
+          result.current
+            .summary
+            .firstAttemptCorrect,
+        ).toBe(
+          false,
+        );
+
+        expect(
+          result.current
+            .summary
+            .latestAttemptCorrect,
+        ).toBe(
+          true,
+        );
+
+        expect(
+          result.current
+            .summary
+            .hasCorrectAttempt,
+        ).toBe(
+          true,
+        );
+      },
+    );
+
+    it(
+      "does not create duplicate submissions for an already evaluated attempt",
+      () => {
+        const {
+          result,
+        } =
+          renderHook(
+            () =>
+              useAssessmentSession<TestResponse>(
+                {
+                  activityId:
+                    "activity-test",
+
+                  activityVersion:
+                    "1.0.0",
+
+                  assessmentId:
+                    "assessment-test",
+
+                  assessmentVersion:
+                    "1.0.0",
+
+                  evaluate,
+                },
+              ),
+          );
+
+        act(
+          () => {
+            result.current.submit(
+              {
+                value:
+                  5,
+              },
+            );
+          },
+        );
+
+        act(
+          () => {
+            result.current.submit(
+              {
+                value:
+                  10,
+              },
+            );
+          },
+        );
+
+        expect(
+          result.current
+            .history
+            .attempts,
+        ).toHaveLength(
+          1,
+        );
+
+        expect(
+          result.current
+            .latestAttempt
+            .response,
+        ).toEqual({
+          value:
+            5,
+        });
+      },
+    );
+
+    it(
+      "uses deterministic attempt IDs by default",
+      () => {
+        const {
+          result,
+        } =
+          renderHook(
+            () =>
+              useAssessmentSession<TestResponse>(
+                {
+                  activityId:
+                    "activity-test",
+
+                  activityVersion:
+                    "1.0.0",
+
+                  assessmentId:
+                    "assessment-test",
+
+                  assessmentVersion:
+                    "1.0.0",
+
+                  evaluate,
+                },
+              ),
+          );
+
+        expect(
+          result.current
+            .latestAttempt
+            .identity
+            .attemptId,
+        ).toBe(
+          "assessment-test-attempt-1",
+        );
+
+        act(
+          () => {
+            result.current.submit(
+              {
+                value:
+                  5,
+              },
+            );
+
+            result.current.revise();
+          },
+        );
+
+        /*
+         * Revision itself is tested separately in the next
+         * test because React batches updates in one act().
+         */
+      },
+    );
+
+    it(
+      "assigns the next deterministic ID after revision",
+      () => {
+        const {
+          result,
+        } =
+          renderHook(
+            () =>
+              useAssessmentSession<TestResponse>(
+                {
+                  activityId:
+                    "activity-test",
+
+                  activityVersion:
+                    "1.0.0",
+
+                  assessmentId:
+                    "assessment-test",
+
+                  assessmentVersion:
+                    "1.0.0",
+
+                  evaluate,
+                },
+              ),
+          );
+
+        act(
+          () => {
+            result.current.submit(
+              {
+                value:
+                  5,
+              },
+            );
+          },
+        );
+
+        act(
+          () => {
+            result.current.revise();
+          },
+        );
+
+        expect(
+          result.current
+            .latestAttempt
+            .identity
+            .attemptId,
+        ).toBe(
+          "assessment-test-attempt-2",
+        );
+      },
+    );
+  },
+);
+
+============================================================
+FILE: .\src\features\learning\prediction-activity.test.tsx
+============================================================
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
+
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
+
+import {
+  getPredictionDefinition,
+} from "@/content/predictions";
+
+import { PredictionActivity } from "@/features/learning/prediction-activity";
+
+afterEach(() => {
+  cleanup();
+});
+
+function getStaticsPrediction() {
+  const definition =
+    getPredictionDefinition(
+      "activity-ssb-03",
+    );
+
+  if (!definition) {
+    throw new Error(
+      "Expected Statics prediction definition.",
+    );
+  }
+
+  return definition;
+}
+
+describe(
+  "PredictionActivity",
+  () => {
+    it(
+      "renders the prediction prompt and options in Turkish",
+      () => {
+        render(
+          <PredictionActivity
+            definition={
+              getStaticsPrediction()
+            }
+            locale="tr"
+          />,
+        );
+
+        expect(
+          screen.getByText(
+            /yÃ¼k saÄŸ mesnete doÄŸru hareket ederse/i,
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.getAllByRole(
+            "button",
+          ),
+        ).toHaveLength(3);
+      },
+    );
+
+    it(
+      "renders English prediction content",
+      () => {
+        render(
+          <PredictionActivity
+            definition={
+              getStaticsPrediction()
+            }
+            locale="en"
+          />,
+        );
+
+        expect(
+          screen.getByText(
+            /load moves toward the right support/i,
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      "does not reveal feedback before a prediction is submitted",
+      () => {
+        render(
+          <PredictionActivity
+            definition={
+              getStaticsPrediction()
+            }
+            locale="tr"
+          />,
+        );
+
+        expect(
+          screen.queryByRole(
+            "status",
+          ),
+        ).not.toBeInTheDocument();
+      },
+    );
+
+    it(
+      "submits a prediction when an option is selected",
+      () => {
+        const {
+          container,
+        } = render(
+          <PredictionActivity
+            definition={
+              getStaticsPrediction()
+            }
+            locale="tr"
+          />,
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                /sol mesnet tepkisi azalÄ±r/i,
+            },
+          ),
+        );
+
+        expect(
+          container.querySelector(
+            '[data-prediction-submitted="true"]',
+          ),
+        ).not.toBeNull();
+
+        expect(
+          screen.getByRole(
+            "status",
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      "provides explanatory feedback for an incorrect prediction",
+      () => {
+        render(
+          <PredictionActivity
+            definition={
+              getStaticsPrediction()
+            }
+            locale="tr"
+          />,
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                /sol mesnet tepkisi artar/i,
+            },
+          ),
+        );
+
+        expect(
+          screen.getByRole(
+            "status",
+          ),
+        ).toHaveTextContent(
+          /sol mesnet tepkisi artmaz; azalÄ±r/i,
+        );
+      },
+    );
+
+    it(
+      "locks the submitted prediction instead of allowing post-hoc answer changes",
+      () => {
+        render(
+          <PredictionActivity
+            definition={
+              getStaticsPrediction()
+            }
+            locale="en"
+          />,
+        );
+
+        const buttons =
+          screen.getAllByRole(
+            "button",
+          );
+
+        fireEvent.click(
+          buttons[0]!,
+        );
+
+        for (
+          const button
+          of buttons
+        ) {
+          expect(
+            button,
+          ).toBeDisabled();
+        }
+      },
+    );
+
+    it(
+      "records correctness separately from submission state",
+      () => {
+        const {
+          container,
+        } = render(
+          <PredictionActivity
+            definition={
+              getStaticsPrediction()
+            }
+            locale="en"
+          />,
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                /both support reactions remain unchanged/i,
+            },
+          ),
+        );
+
+        expect(
+          container.querySelector(
+            '[data-prediction-submitted="true"]',
+          ),
+        ).not.toBeNull();
+
+        expect(
+          container.querySelector(
+            '[data-prediction-correct="false"]',
+          ),
+        ).not.toBeNull();
+      },
+    );
+  },
+);
+
+============================================================
+FILE: .\src\features\learning\problems\beam-statics-problem-activity.test.tsx
+============================================================
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
+
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
+
+import {
+  getNumericProblemDefinition,
+} from "@/content/statics-problems";
+
+import { BeamStaticsProblemActivity } from "@/features/learning/problems/beam-statics-problem-activity";
+
+afterEach(() => {
+  cleanup();
+});
+
+function getDefinition() {
+  const definition =
+    getNumericProblemDefinition(
+      "activity-ssb-05",
+    );
+
+  if (
+    !definition ||
+    definition.kind !==
+      "beam_statics_numeric_problem"
+  ) {
+    throw new Error(
+      "Expected Statics numeric problem.",
+    );
+  }
+
+  return definition;
+}
+
+function enterCorrectAnswers():
+  void {
+  fireEvent.change(
+    screen.getByRole(
+      "textbox",
+      {
+        name:
+          "Left support reaction RA",
+      },
+    ),
+    {
+      target: {
+        value: "8",
+      },
+    },
+  );
+
+  fireEvent.change(
+    screen.getByRole(
+      "textbox",
+      {
+        name:
+          "Right support reaction RB",
+      },
+    ),
+    {
+      target: {
+        value: "4",
+      },
+    },
+  );
+
+  fireEvent.change(
+    screen.getByRole(
+      "textbox",
+      {
+        name:
+          "Shear force to the left of the load",
+      },
+    ),
+    {
+      target: {
+        value: "8",
+      },
+    },
+  );
+
+  fireEvent.change(
+    screen.getByRole(
+      "textbox",
+      {
+        name:
+          "Shear force to the right of the load",
+      },
+    ),
+    {
+      target: {
+        value: "-4",
+      },
+    },
+  );
+
+  fireEvent.change(
+    screen.getByRole(
+      "textbox",
+      {
+        name:
+          "Maximum bending moment",
+      },
+    ),
+    {
+      target: {
+        value: "16",
+      },
+    },
+  );
+
+  fireEvent.change(
+    screen.getByRole(
+      "textbox",
+      {
+        name:
+          "Location of maximum moment",
+      },
+    ),
+    {
+      target: {
+        value: "2",
+      },
+    },
+  );
+}
+
+describe(
+  "BeamStaticsProblemActivity",
+  () => {
+    it(
+      "renders six answer fields and the problem givens",
+      () => {
+        render(
+          <BeamStaticsProblemActivity
+            definition={
+              getDefinition()
+            }
+            locale="en"
+          />,
+        );
+
+        expect(
+          screen.getAllByRole(
+            "textbox",
+          ),
+        ).toHaveLength(6);
+
+        expect(
+          screen.getByText(
+            "12 kN",
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.getByText(
+            "6 m",
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      "records an incorrect submission without marking the problem correct",
+      () => {
+        const {
+          container,
+        } = render(
+          <BeamStaticsProblemActivity
+            definition={
+              getDefinition()
+            }
+            locale="en"
+          />,
+        );
+
+        fireEvent.change(
+          screen.getByRole(
+            "textbox",
+            {
+              name:
+                "Right support reaction RB",
+            },
+          ),
+          {
+            target: {
+              value: "8",
+            },
+          },
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                "Check answers",
+            },
+          ),
+        );
+
+        expect(
+          container.querySelector(
+            '[data-attempt-submitted="true"]',
+          ),
+        ).not.toBeNull();
+
+        expect(
+          container.querySelector(
+            '[data-attempt-correct="false"]',
+          ),
+        ).not.toBeNull();
+
+        expect(
+          screen.getByText(
+            /Take moments about A/i,
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      "accepts the complete Engineering Core solution",
+      () => {
+        const {
+          container,
+        } = render(
+          <BeamStaticsProblemActivity
+            definition={
+              getDefinition()
+            }
+            locale="en"
+          />,
+        );
+
+        enterCorrectAnswers();
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                "Check answers",
+            },
+          ),
+        );
+
+        expect(
+          container.querySelector(
+            '[data-attempt-correct="true"]',
+          ),
+        ).not.toBeNull();
+
+        expect(
+          screen.getByRole(
+            "status",
+          ),
+        ).toHaveTextContent(
+          /All six results agree/i,
+        );
+
+        expect(
+          screen.queryByRole(
+            "button",
+            {
+              name:
+                "Check again",
+            },
+          ),
+        ).not.toBeInTheDocument();
+      },
+    );
+
+    it(
+      "accepts Turkish decimal-comma input",
+      () => {
+        render(
+          <BeamStaticsProblemActivity
+            definition={
+              getDefinition()
+            }
+            locale="tr"
+          />,
+        );
+
+        const fields =
+          screen.getAllByRole(
+            "textbox",
+          );
+
+        const values = [
+          "8,0",
+          "4,0",
+          "8,0",
+          "-4,0",
+          "16,0",
+          "2,0",
+        ];
+
+        for (
+          let index = 0;
+          index <
+          fields.length;
+          index += 1
+        ) {
+          fireEvent.change(
+            fields[index]!,
+            {
+              target: {
+                value:
+                  values[index],
+              },
+            },
+          );
+        }
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                "SonuÃ§larÄ± kontrol et",
+            },
+          ),
+        );
+
+        expect(
+          screen.getByRole(
+            "status",
+          ),
+        ).toHaveTextContent(
+          /AltÄ± sonuÃ§ da/i,
+        );
+      },
+    );
+
+    it(
+      "allows revision and a second attempt after an incorrect submission",
+      () => {
+        const {
+          container,
+        } = render(
+          <BeamStaticsProblemActivity
+            definition={
+              getDefinition()
+            }
+            locale="en"
+          />,
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                "Check answers",
+            },
+          ),
+        );
+
+        expect(
+          container.querySelector(
+            '[data-attempt-count="1"]',
+          ),
+        ).not.toBeNull();
+
+        enterCorrectAnswers();
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                "Check again",
+            },
+          ),
+        );
+
+        expect(
+          container.querySelector(
+            '[data-attempt-count="2"]',
+          ),
+        ).not.toBeNull();
+
+        expect(
+          container.querySelector(
+            '[data-attempt-correct="true"]',
+          ),
+        ).not.toBeNull();
+      },
+    );
+  },
+);
+
+============================================================
+FILE: .\src\features\learning\bending\bending-height-prediction.test.tsx
+============================================================
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
+
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
+
+import {
+  BendingHeightPrediction,
+} from "@/features/learning/bending/bending-height-prediction";
+
+afterEach(() => {
+  cleanup();
+});
+
+function getPredictionOptionButtons():
+  HTMLButtonElement[] {
+  const activity =
+    screen.getByTestId(
+      "bending-height-prediction",
+    );
+
+  return within(
+    activity,
+  )
+    .getAllByRole(
+      "button",
+    )
+    .filter(
+      (
+        button,
+      ): button is HTMLButtonElement =>
+        button.hasAttribute(
+          "aria-pressed",
+        ),
+    );
+}
+
+describe(
+  "BendingHeightPrediction",
+  () => {
+    it(
+      "renders three prediction options without revealing the answer before submission",
+      () => {
+        render(
+          <BendingHeightPrediction
+            locale="tr"
+          />,
+        );
+
+        const activity =
+          screen.getByTestId(
+            "bending-height-prediction",
+          );
+
+        const optionButtons =
+          getPredictionOptionButtons();
+
+        expect(
+          optionButtons,
+        ).toHaveLength(
+          3,
+        );
+
+        expect(
+          activity,
+        ).toHaveAttribute(
+          "data-prediction-submitted",
+          "false",
+        );
+
+        expect(
+          screen.queryByText(
+            "Tahmin doÄŸru",
+          ),
+        ).not.toBeInTheDocument();
+
+        expect(
+          screen.queryByText(
+            "Tahmini yeniden dÃ¼ÅŸÃ¼n",
+          ),
+        ).not.toBeInTheDocument();
+
+        for (
+          const button
+          of optionButtons
+        ) {
+          expect(
+            button,
+          ).not.toBeDisabled();
+        }
+      },
+    );
+
+    it(
+      "accepts the correct h-scaling prediction",
+      () => {
+        render(
+          <BendingHeightPrediction
+            locale="tr"
+          />,
+        );
+
+        const activity =
+          screen.getByTestId(
+            "bending-height-prediction",
+          );
+
+        const optionButtons =
+          getPredictionOptionButtons();
+
+        fireEvent.click(
+          optionButtons[1],
+        );
+
+        expect(
+          activity,
+        ).toHaveAttribute(
+          "data-prediction-submitted",
+          "true",
+        );
+
+        expect(
+          activity,
+        ).toHaveAttribute(
+          "data-prediction-correct",
+          "true",
+        );
+
+        expect(
+          screen.getByText(
+            "Tahmin doÄŸru",
+          ),
+        ).toBeInTheDocument();
+
+        for (
+          const button
+          of optionButtons
+        ) {
+          expect(
+            button,
+          ).toBeDisabled();
+        }
+      },
+    );
+
+    it(
+      "locks all options after submission while keeping revision available",
+      () => {
+        render(
+          <BendingHeightPrediction
+            locale="tr"
+          />,
+        );
+
+        const activity =
+          screen.getByTestId(
+            "bending-height-prediction",
+          );
+
+        const optionButtons =
+          getPredictionOptionButtons();
+
+        fireEvent.click(
+          optionButtons[0],
+        );
+
+        expect(
+          activity,
+        ).toHaveAttribute(
+          "data-prediction-submitted",
+          "true",
+        );
+
+        expect(
+          activity,
+        ).toHaveAttribute(
+          "data-prediction-correct",
+          "false",
+        );
+
+        expect(
+          screen.getByText(
+            "Tahmini yeniden dÃ¼ÅŸÃ¼n",
+          ),
+        ).toBeInTheDocument();
+
+        for (
+          const button
+          of optionButtons
+        ) {
+          expect(
+            button,
+          ).toBeDisabled();
+        }
+
+        const reviseButton =
+          screen.getByRole(
+            "button",
+            {
+              name:
+                "Tahmini yeniden dene",
+            },
+          );
+
+        expect(
+          reviseButton,
+        ).toBeEnabled();
+      },
+    );
+  },
+);
+
+============================================================
+FILE: .\src\features\learning\bending\bending-problem-activity.test.tsx
+============================================================
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
+
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
+
+import { BendingProblemActivity } from "@/features/learning/bending/bending-problem-activity";
+
+afterEach(() => {
+  cleanup();
+});
+
+function fillCorrectNumericAnswers() {
+  fireEvent.change(
+    screen.getByRole(
+      "textbox",
+      {
+        name:
+          "Second moment of area I",
+      },
+    ),
+    {
+      target: {
+        value:
+          "2730.667",
+      },
+    },
+  );
+
+  fireEvent.change(
+    screen.getByRole(
+      "textbox",
+      {
+        name:
+          "Maximum bending moment",
+      },
+    ),
+    {
+      target: {
+        value:
+          "6",
+      },
+    },
+  );
+
+  fireEvent.change(
+    screen.getByRole(
+      "textbox",
+      {
+        name:
+          "Maximum bending stress",
+      },
+    ),
+    {
+      target: {
+        value:
+          "17.578",
+      },
+    },
+  );
+
+  fireEvent.change(
+    screen.getByRole(
+      "textbox",
+      {
+        name:
+          "Maximum deflection",
+      },
+    ),
+    {
+      target: {
+        value:
+          "2.354",
+      },
+    },
+  );
+}
+
+describe(
+  "BendingProblemActivity",
+  () => {
+    it(
+      "renders four numerical answers and two independent criteria",
+      () => {
+        render(
+          <BendingProblemActivity
+            locale="en"
+          />,
+        );
+
+        expect(
+          screen.getAllByRole(
+            "textbox",
+          ),
+        ).toHaveLength(4);
+
+        expect(
+          screen.getByText(
+            "20 MPa stress criterion",
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.getByText(
+            "2 mm deflection criterion",
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      "accepts the correct complete solution",
+      () => {
+        const {
+          container,
+        } = render(
+          <BendingProblemActivity
+            locale="en"
+          />,
+        );
+
+        fillCorrectNumericAnswers();
+
+        const satisfied =
+          screen.getAllByRole(
+            "radio",
+            {
+              name:
+                "Satisfied",
+            },
+          );
+
+        const notSatisfied =
+          screen.getAllByRole(
+            "radio",
+            {
+              name:
+                "Not satisfied",
+            },
+          );
+
+        fireEvent.click(
+          satisfied[0]!,
+        );
+
+        fireEvent.click(
+          notSatisfied[1]!,
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                "Check answers",
+            },
+          ),
+        );
+
+        expect(
+          container.querySelector(
+            '[data-attempt-correct="true"]',
+          ),
+        ).not.toBeNull();
+
+        expect(
+          screen.getByRole(
+            "status",
+          ),
+        ).toHaveTextContent(
+          /All calculations and both criteria are correct/i,
+        );
+      },
+    );
+
+    it(
+      "accepts Turkish decimal comma",
+      () => {
+        render(
+          <BendingProblemActivity
+            locale="tr"
+          />,
+        );
+
+        fireEvent.change(
+          screen.getByRole(
+            "textbox",
+            {
+              name:
+                "Maksimum sehim",
+            },
+          ),
+          {
+            target: {
+              value:
+                "2,354",
+            },
+          },
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                "CevaplarÄ± kontrol et",
+            },
+          ),
+        );
+
+        expect(
+          screen.getByRole(
+            "status",
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+  },
+);
+
+============================================================
+FILE: .\src\features\learning\bending\bending-assessment.integration.test.tsx
+============================================================
+import {
+  cleanup,
+  render,
+  screen,
+} from "@testing-library/react";
+
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
+
+import {
+  getActivitiesForModule,
+} from "@/content/registry";
+
+import { ResponseActivityRenderer } from "@/features/learning/renderers/response-activity-renderer";
+
+afterEach(() => {
+  cleanup();
+});
+
+function getActivity(
+  activityId:
+    string,
+) {
+  const activity =
+    getActivitiesForModule(
+      "module-bending",
+    ).find(
+      (candidate) =>
+        candidate.id ===
+        activityId,
+    );
+
+  if (!activity) {
+    throw new Error(
+      `Missing activity ${activityId}.`,
+    );
+  }
+
+  return activity;
+}
+
+describe(
+  "Bending assessment integration",
+  () => {
+    it(
+      "renders scientific content and the real prediction",
+      () => {
+        render(
+          <ResponseActivityRenderer
+            activity={
+              getActivity(
+                "activity-bending-03",
+              )
+            }
+            locale="tr"
+          />,
+        );
+
+        expect(
+          screen.getByRole(
+            "heading",
+            {
+              name:
+                "Ã–nce tahmin et",
+            },
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.getByTestId(
+            "bending-height-prediction",
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      "renders the new problem with Engineering-Core-derived grading",
+      () => {
+        render(
+          <ResponseActivityRenderer
+            activity={
+              getActivity(
+                "activity-bending-05",
+              )
+            }
+            locale="en"
+          />,
+        );
+
+        expect(
+          screen.getByRole(
+            "heading",
+            {
+              name:
+                "Evaluate a new beam case",
+            },
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.getByTestId(
+            "bending-problem-activity",
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+  },
+);
+
+============================================================
+FILE: .\src\features\learning\otto\otto-compression-ratio-prediction.test.tsx
+============================================================
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
+
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
+
+import { OttoCompressionRatioPrediction } from "@/features/learning/otto/otto-compression-ratio-prediction";
+
+afterEach(() => {
+  cleanup();
+});
+
+describe(
+  "OttoCompressionRatioPrediction",
+  () => {
+    it(
+      "does not reveal the answer before submission",
+      () => {
+        render(
+          <OttoCompressionRatioPrediction
+            locale="en"
+          />,
+        );
+
+        expect(
+          screen.getByTestId(
+            "otto-compression-ratio-prediction",
+          ),
+        ).toHaveAttribute(
+          "data-prediction-submitted",
+          "false",
+        );
+
+        expect(
+          screen.queryByRole(
+            "status",
+          ),
+        ).not.toBeInTheDocument();
+      },
+    );
+
+    it(
+      "accepts the correct compression-ratio prediction",
+      () => {
+        render(
+          <OttoCompressionRatioPrediction
+            locale="en"
+          />,
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                /Ideal efficiency increases; Tâ‚‚ and pâ‚‚ increase, while vâ‚‚ decreases/i,
+            },
+          ),
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                "Submit prediction",
+            },
+          ),
+        );
+
+        expect(
+          screen.getByTestId(
+            "otto-compression-ratio-prediction",
+          ),
+        ).toHaveAttribute(
+          "data-prediction-correct",
+          "true",
+        );
+
+        expect(
+          screen.getByRole(
+            "status",
+          ),
+        ).toHaveTextContent(
+          /Prediction correct/i,
+        );
+      },
+    );
+
+    it(
+      "locks all choices after submission",
+      () => {
+        render(
+          <OttoCompressionRatioPrediction
+            locale="tr"
+          />,
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                /Ä°deal verim artar; Tâ‚‚ ve pâ‚‚ artar, vâ‚‚ azalÄ±r/i,
+            },
+          ),
+        );
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                "Tahmini gÃ¶nder",
+            },
+          ),
+        );
+
+        const optionButtons =
+          screen
+            .getAllByRole(
+              "button",
+            )
+            .filter(
+              (
+                button,
+              ) =>
+                button.textContent?.startsWith(
+                  "A",
+                ) ||
+                button.textContent?.startsWith(
+                  "B",
+                ) ||
+                button.textContent?.startsWith(
+                  "C",
+                ),
+            );
+
+        expect(
+          optionButtons,
+        ).toHaveLength(3);
+
+        for (
+          const button
+          of optionButtons
+        ) {
+          expect(
+            button,
+          ).toBeDisabled();
+        }
+      },
+    );
+  },
+);
+
+============================================================
+FILE: .\src\features\learning\otto\otto-problem-activity.test.tsx
+============================================================
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
+
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
+
+import { OttoProblemActivity } from "@/features/learning/otto/otto-problem-activity";
+
+afterEach(() => {
+  cleanup();
+});
+
+describe(
+  "OttoProblemActivity",
+  () => {
+    it(
+      "renders ten engineering answer fields",
+      () => {
+        render(
+          <OttoProblemActivity
+            locale="en"
+          />,
+        );
+
+        expect(
+          screen.getAllByRole(
+            "textbox",
+          ),
+        ).toHaveLength(10);
+
+        expect(
+          screen.getByText(
+            /r = 6/i,
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.getByText(
+            /qin = 600 kJ\/kg/i,
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      "accepts the complete verified solution",
+      () => {
+        render(
+          <OttoProblemActivity
+            locale="en"
+          />,
+        );
+
+        const answers = [
+          [
+            "State-2 temperature Tâ‚‚",
+            "655.255",
+          ],
+
+          [
+            "State-2 pressure pâ‚‚",
+            "1474.324",
+          ],
+
+          [
+            "State-2 specific volume vâ‚‚",
+            "0.127556",
+          ],
+
+          [
+            "State-3 temperature Tâ‚ƒ",
+            "1491.492",
+          ],
+
+          [
+            "State-3 pressure pâ‚ƒ",
+            "3355.857",
+          ],
+
+          [
+            "State-4 temperature Tâ‚„",
+            "728.384",
+          ],
+
+          [
+            "State-4 pressure pâ‚„",
+            "273.144",
+          ],
+
+          [
+            "Specific heat rejected qout",
+            "293.016",
+          ],
+
+          [
+            "Net specific work wnet",
+            "306.984",
+          ],
+
+          [
+            "Ideal thermal efficiency Î·",
+            "51.164",
+          ],
+        ] as const;
+
+        for (
+          const [
+            label,
+            value,
+          ]
+          of answers
+        ) {
+          fireEvent.change(
+            screen.getByRole(
+              "textbox",
+              {
+                name:
+                  label,
+              },
+            ),
+            {
+              target: {
+                value,
+              },
+            },
+          );
+        }
+
+        fireEvent.click(
+          screen.getByRole(
+            "button",
+            {
+              name:
+                "Check answers",
+            },
+          ),
+        );
+
+        expect(
+          screen.getByTestId(
+            "otto-problem-activity",
+          ),
+        ).toHaveAttribute(
+          "data-attempt-correct",
+          "true",
+        );
+
+        expect(
+          screen.getByRole(
+            "status",
+          ),
+        ).toHaveTextContent(
+          /All results are correct within tolerance/i,
+        );
+      },
+    );
+
+    it(
+      "accepts Turkish decimal commas",
+      () => {
+        render(
+          <OttoProblemActivity
+            locale="tr"
+          />,
+        );
+
+        fireEvent.change(
+          screen.getByRole(
+            "textbox",
+            {
+              name:
+                "Ä°deal Ä±sÄ±l verim Î·",
+            },
+          ),
+          {
+            target: {
+              value:
+                "51,164",
+            },
+          },
+        );
+
+        expect(
+          screen.getByRole(
+            "textbox",
+            {
+              name:
+                "Ä°deal Ä±sÄ±l verim Î·",
+            },
+          ),
+        ).toHaveValue(
+          "51,164",
+        );
+      },
+    );
+  },
+);
+
+============================================================
+FILE: .\src\features\learning\otto\otto-assessment.integration.test.tsx
+============================================================
+import {
+  cleanup,
+  render,
+  screen,
+} from "@testing-library/react";
+
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+} from "vitest";
+
+import {
+  getActivitiesForModule,
+} from "@/content/registry";
+
+import { NarrativeActivityRenderer } from "@/features/learning/renderers/narrative-activity-renderer";
+
+import { ResponseActivityRenderer } from "@/features/learning/renderers/response-activity-renderer";
+
+afterEach(() => {
+  cleanup();
+});
+
+function getOttoActivity(
+  activityId:
+    string,
+) {
+  const activity =
+    getActivitiesForModule(
+      "module-ideal-otto-cycle",
+    ).find(
+      (
+        candidate,
+      ) =>
+        candidate.id ===
+        activityId,
+    );
+
+  if (
+    !activity
+  ) {
+    throw new Error(
+      `Missing Otto activity ${activityId}.`,
+    );
+  }
+
+  return activity;
+}
+
+describe(
+  "Otto assessment learning integration",
+  () => {
+    it(
+      "renders prediction activity with the custom Otto predictor",
+      () => {
+        render(
+          <ResponseActivityRenderer
+            activity={
+              getOttoActivity(
+                "activity-otto-03",
+              )
+            }
+            locale="tr"
+          />,
+        );
+
+        expect(
+          screen.getByTestId(
+            "otto-compression-ratio-prediction",
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      "renders the worked example in the Otto concept activity",
+      () => {
+        render(
+          <NarrativeActivityRenderer
+            activity={
+              getOttoActivity(
+                "activity-otto-02",
+              )
+            }
+            locale="en"
+          />,
+        );
+
+        expect(
+          screen.getByTestId(
+            "otto-worked-example",
+          ),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it(
+      "renders the new Otto numeric problem",
+      () => {
+        render(
+          <ResponseActivityRenderer
+            activity={
+              getOttoActivity(
+                "activity-otto-05",
+              )
+            }
+            locale="tr"
+          />,
+        );
+
+        expect(
+          screen.getByTestId(
+            "otto-problem-activity",
+          ),
+        ).toBeInTheDocument();
+
+        expect(
+          screen.getAllByRole(
+            "textbox",
+          ),
+        ).toHaveLength(10);
+      },
+    );
+  },
+);

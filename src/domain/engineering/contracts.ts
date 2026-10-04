@@ -8,20 +8,59 @@ export type EngineeringExecutionStatus =
   | "valid_with_warning"
   | "invalid";
 
-export type EngineeringWarningSeverity =
-  | "info"
-  | "warning"
-  | "error";
+export type EngineeringIssueParameter =
+  | string
+  | number
+  | boolean;
 
 export interface EngineeringWarning {
   readonly code: string;
-  readonly severity: EngineeringWarningSeverity;
+
+  /**
+   * Optional canonical input/output field related to the warning.
+   */
+  readonly field?: string;
+
+  /**
+   * Translation key.
+   * Engineering Core does not own user-facing TR/EN text.
+   */
   readonly messageKey: string;
+
+  readonly parameters?: Readonly<
+    Record<
+      string,
+      EngineeringIssueParameter
+    >
+  >;
+}
+
+export interface EngineeringValidityIssue {
+  readonly code: string;
+
+  /**
+   * Optional canonical input field related to the issue.
+   */
+  readonly field?: string;
+
+  /**
+   * Translation key.
+   * The domain layer must not contain localized UI text.
+   */
+  readonly messageKey: string;
+
+  readonly parameters?: Readonly<
+    Record<
+      string,
+      EngineeringIssueParameter
+    >
+  >;
 }
 
 export interface EngineeringValidity {
   readonly withinDomain: boolean;
-  readonly reasons: readonly string[];
+
+  readonly issues: readonly EngineeringValidityIssue[];
 }
 
 export interface EngineeringResult<TValues> {
@@ -30,16 +69,30 @@ export interface EngineeringResult<TValues> {
   readonly modelId: EntityId;
   readonly modelVersion: VersionString;
 
-  readonly values: TValues;
+  /**
+   * Invalid engineering states never expose calculated values.
+   */
+  readonly values: TValues | null;
 
+  /**
+   * Stable assumption identifiers.
+   * They are not user-facing localized sentences.
+   */
   readonly assumptions: readonly string[];
+
   readonly warnings: readonly EngineeringWarning[];
+
   readonly validity: EngineeringValidity;
 }
 
-export interface EngineeringModel<TInput, TOutput> {
+export interface EngineeringModel<
+  TInput,
+  TOutput
+> {
   readonly id: EntityId;
   readonly version: VersionString;
 
-  evaluate(input: TInput): EngineeringResult<TOutput>;
+  evaluate(
+    input: TInput,
+  ): EngineeringResult<TOutput>;
 }

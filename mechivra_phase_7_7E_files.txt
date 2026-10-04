@@ -1,0 +1,2933 @@
+﻿
+
+============================================================
+FILE: .\src\domain\assessment\numeric-problem.ts
+============================================================
+import type {
+  EntityId,
+  LocalizedText,
+} from "@/domain/shared/types";
+
+export interface NumericProblemTolerance {
+  readonly absolute: number;
+  readonly relative: number;
+}
+
+export type BeamStaticsAnswerRole =
+  | "left_reaction"
+  | "right_reaction"
+  | "left_shear"
+  | "right_shear"
+  | "maximum_moment"
+  | "maximum_moment_position";
+
+export interface NumericProblemFieldDefinition {
+  readonly id:
+    EntityId;
+
+  readonly answerRole:
+    BeamStaticsAnswerRole;
+
+  readonly label:
+    LocalizedText;
+
+  readonly unitSymbol:
+    string;
+
+  readonly tolerance:
+    NumericProblemTolerance;
+
+  readonly hint:
+    LocalizedText;
+}
+
+export interface BeamStaticsNumericProblemDefinition {
+  readonly id:
+    EntityId;
+
+  readonly activityId:
+    EntityId;
+
+  readonly kind:
+    "beam_statics_numeric_problem";
+
+  readonly title:
+    LocalizedText;
+
+  readonly instructions:
+    LocalizedText;
+
+  readonly input: {
+    readonly spanM:
+      number;
+
+    readonly pointLoadKN:
+      number;
+
+    readonly loadPositionM:
+      number;
+  };
+
+  readonly fields:
+    readonly NumericProblemFieldDefinition[];
+
+  readonly ui: {
+    readonly answersHeading:
+      LocalizedText;
+
+    readonly submitLabel:
+      LocalizedText;
+
+    readonly retryLabel:
+      LocalizedText;
+
+    readonly correctLabel:
+      LocalizedText;
+
+    readonly missingLabel:
+      LocalizedText;
+
+    readonly invalidLabel:
+      LocalizedText;
+
+    readonly successMessage:
+      LocalizedText;
+
+    readonly incorrectMessage:
+      LocalizedText;
+  };
+}
+
+export type NumericProblemDefinition =
+  BeamStaticsNumericProblemDefinition;
+
+export interface NumericProblemAnswerKeyItem {
+  readonly fieldId:
+    EntityId;
+
+  readonly expectedValue:
+    number;
+}
+
+export type NumericProblemAnswerKey =
+  readonly NumericProblemAnswerKeyItem[];
+
+export type NumericProblemSubmittedValues =
+  Readonly<
+    Record<
+      string,
+      number | null | undefined
+    >
+  >;
+
+export type NumericFieldEvaluationStatus =
+  | "missing"
+  | "invalid"
+  | "correct"
+  | "incorrect";
+
+export interface NumericFieldEvaluation {
+  readonly fieldId:
+    EntityId;
+
+  readonly submittedValue:
+    number | null;
+
+  readonly status:
+    NumericFieldEvaluationStatus;
+}
+
+export interface NumericProblemEvaluation {
+  readonly fields:
+    readonly NumericFieldEvaluation[];
+
+  readonly allAnswered:
+    boolean;
+
+  readonly allCorrect:
+    boolean;
+}
+
+export class NumericProblemEvaluationError extends Error {
+  constructor(
+    message: string,
+  ) {
+    super(message);
+
+    this.name =
+      "NumericProblemEvaluationError";
+  }
+}
+
+export function isWithinNumericTolerance(
+  actual: number,
+  expected: number,
+  tolerance:
+    NumericProblemTolerance,
+): boolean {
+  if (
+    !Number.isFinite(
+      actual,
+    ) ||
+    !Number.isFinite(
+      expected,
+    )
+  ) {
+    return false;
+  }
+
+  if (
+    !Number.isFinite(
+      tolerance.absolute,
+    ) ||
+    tolerance.absolute < 0 ||
+    !Number.isFinite(
+      tolerance.relative,
+    ) ||
+    tolerance.relative < 0
+  ) {
+    return false;
+  }
+
+  const absoluteError =
+    Math.abs(
+      actual -
+      expected,
+    );
+
+  const relativeScale =
+    Math.max(
+      Math.abs(actual),
+      Math.abs(expected),
+    );
+
+  const allowedError =
+    Math.max(
+      tolerance.absolute,
+      tolerance.relative *
+        relativeScale,
+    );
+
+  return (
+    absoluteError <=
+    allowedError
+  );
+}
+
+export function evaluateNumericProblemAttempt(
+  fields:
+    readonly NumericProblemFieldDefinition[],
+
+  answerKey:
+    NumericProblemAnswerKey,
+
+  submittedValues:
+    NumericProblemSubmittedValues,
+): NumericProblemEvaluation {
+  const keyByFieldId =
+    new Map(
+      answerKey.map(
+        (item) => [
+          item.fieldId,
+          item.expectedValue,
+        ],
+      ),
+    );
+
+  const evaluations =
+    fields.map(
+      (
+        field,
+      ): NumericFieldEvaluation => {
+        if (
+          !keyByFieldId.has(
+            field.id,
+          )
+        ) {
+          throw new NumericProblemEvaluationError(
+            `Missing answer key for field "${field.id}".`,
+          );
+        }
+
+        const expectedValue =
+          keyByFieldId.get(
+            field.id,
+          );
+
+        if (
+          expectedValue ===
+            undefined ||
+          !Number.isFinite(
+            expectedValue,
+          )
+        ) {
+          throw new NumericProblemEvaluationError(
+            `Invalid answer key for field "${field.id}".`,
+          );
+        }
+
+        const submittedValue =
+          submittedValues[
+            field.id
+          ];
+
+        if (
+          submittedValue ===
+            null ||
+          submittedValue ===
+            undefined
+        ) {
+          return {
+            fieldId:
+              field.id,
+
+            submittedValue:
+              null,
+
+            status:
+              "missing",
+          };
+        }
+
+        if (
+          !Number.isFinite(
+            submittedValue,
+          )
+        ) {
+          return {
+            fieldId:
+              field.id,
+
+            submittedValue,
+
+            status:
+              "invalid",
+          };
+        }
+
+        return {
+          fieldId:
+            field.id,
+
+          submittedValue,
+
+          status:
+            isWithinNumericTolerance(
+              submittedValue,
+              expectedValue,
+              field.tolerance,
+            )
+              ? "correct"
+              : "incorrect",
+        };
+      },
+    );
+
+  return {
+    fields:
+      evaluations,
+
+    allAnswered:
+      evaluations.every(
+        (evaluation) =>
+          evaluation.status !==
+            "missing" &&
+          evaluation.status !==
+            "invalid",
+      ),
+
+    allCorrect:
+      evaluations.every(
+        (evaluation) =>
+          evaluation.status ===
+          "correct",
+      ),
+  };
+}
+
+============================================================
+FILE: .\src\domain\assessment\numeric-evaluation.ts
+============================================================
+import {
+  createAssessmentResult,
+} from "@/domain/assessment/result";
+
+import type {
+  AssessmentItemResult,
+  AssessmentResult,
+} from "@/domain/assessment/result";
+
+import {
+  evaluateNumericTolerance,
+  validateNumericTolerance,
+} from "@/domain/assessment/numeric-tolerance";
+
+import type {
+  NumericTolerance,
+  NumericToleranceEvaluation,
+} from "@/domain/assessment/numeric-tolerance";
+
+export const NUMERIC_ASSESSMENT_VERSION =
+  "1.0.0" as const;
+
+export interface NumericAssessmentItemDefinition {
+  readonly id:
+    string;
+
+  readonly expectedValue:
+    number;
+
+  /*
+   * Metadata only at this layer.
+   * Unit conversion must happen before evaluation.
+   */
+  readonly quantityId:
+    string;
+
+  readonly expectedUnitId:
+    string;
+
+  readonly tolerance:
+    NumericTolerance;
+
+  readonly maxScore:
+    number;
+
+  readonly correctFeedbackCode?:
+    string;
+
+  readonly incorrectFeedbackCode?:
+    string;
+
+  readonly invalidFeedbackCode?:
+    string;
+}
+
+export interface NumericAssessmentResponse {
+  readonly itemId:
+    string;
+
+  /*
+   * Value must already be expressed in expectedUnitId.
+   */
+  readonly value:
+    number;
+}
+
+export interface NumericAssessmentItemEvaluation {
+  readonly definition:
+    NumericAssessmentItemDefinition;
+
+  readonly response:
+    NumericAssessmentResponse | null;
+
+  readonly toleranceEvaluation:
+    NumericToleranceEvaluation | null;
+
+  readonly result:
+    AssessmentItemResult;
+}
+
+export interface NumericAssessmentEvaluation {
+  readonly version:
+    typeof NUMERIC_ASSESSMENT_VERSION;
+
+  readonly items:
+    readonly NumericAssessmentItemEvaluation[];
+
+  readonly result:
+    AssessmentResult;
+}
+
+export class NumericAssessmentError extends Error {
+  constructor(
+    message: string,
+  ) {
+    super(message);
+
+    this.name =
+      "NumericAssessmentError";
+  }
+}
+
+function assertDefinition(
+  definition:
+    NumericAssessmentItemDefinition,
+): void {
+  if (
+    definition.id.trim().length ===
+    0
+  ) {
+    throw new NumericAssessmentError(
+      "Numeric assessment item ID must not be empty.",
+    );
+  }
+
+  if (
+    definition.quantityId.trim().length ===
+    0
+  ) {
+    throw new NumericAssessmentError(
+      `Quantity ID for "${definition.id}" must not be empty.`,
+    );
+  }
+
+  if (
+    definition.expectedUnitId.trim().length ===
+    0
+  ) {
+    throw new NumericAssessmentError(
+      `Expected unit ID for "${definition.id}" must not be empty.`,
+    );
+  }
+
+  if (
+    !Number.isFinite(
+      definition.expectedValue,
+    )
+  ) {
+    throw new NumericAssessmentError(
+      `Expected value for "${definition.id}" must be finite.`,
+    );
+  }
+
+  if (
+    !Number.isFinite(
+      definition.maxScore,
+    ) ||
+    definition.maxScore <=
+      0
+  ) {
+    throw new NumericAssessmentError(
+      `Maximum score for "${definition.id}" must be finite and greater than zero.`,
+    );
+  }
+
+  validateNumericTolerance(
+    definition.tolerance,
+  );
+}
+
+function assertUniqueIds(
+  definitions:
+    readonly NumericAssessmentItemDefinition[],
+
+  responses:
+    readonly NumericAssessmentResponse[],
+): void {
+  const definitionIds =
+    definitions.map(
+      (
+        definition,
+      ) =>
+        definition.id,
+    );
+
+  if (
+    new Set(
+      definitionIds,
+    ).size !==
+    definitionIds.length
+  ) {
+    throw new NumericAssessmentError(
+      "Numeric assessment definition IDs must be unique.",
+    );
+  }
+
+  const responseIds =
+    responses.map(
+      (
+        response,
+      ) =>
+        response.itemId,
+    );
+
+  if (
+    new Set(
+      responseIds,
+    ).size !==
+    responseIds.length
+  ) {
+    throw new NumericAssessmentError(
+      "Numeric assessment response IDs must be unique.",
+    );
+  }
+}
+
+function evaluateItem(
+  definition:
+    NumericAssessmentItemDefinition,
+
+  response:
+    NumericAssessmentResponse |
+    null,
+): NumericAssessmentItemEvaluation {
+  /*
+   * Missing or non-finite response means that the submitted
+   * item cannot be numerically evaluated. This is distinct
+   * from a finite but incorrect engineering value.
+   */
+  if (
+    response ===
+      null ||
+    !Number.isFinite(
+      response.value,
+    )
+  ) {
+    return {
+      definition,
+
+      response,
+
+      toleranceEvaluation:
+        null,
+
+      result: {
+        id:
+          definition.id,
+
+        status:
+          "invalid",
+
+        score:
+          0,
+
+        maxScore:
+          definition.maxScore,
+
+        feedbackCode:
+          definition
+            .invalidFeedbackCode,
+      },
+    };
+  }
+
+  const toleranceEvaluation =
+    evaluateNumericTolerance(
+      response.value,
+      definition.expectedValue,
+      definition.tolerance,
+    );
+
+  const correct =
+    toleranceEvaluation
+      .withinTolerance;
+
+  return {
+    definition,
+
+    response,
+
+    toleranceEvaluation,
+
+    result: {
+      id:
+        definition.id,
+
+      status:
+        correct
+          ? "correct"
+          : "incorrect",
+
+      score:
+        correct
+          ? definition.maxScore
+          : 0,
+
+      maxScore:
+        definition.maxScore,
+
+      feedbackCode:
+        correct
+          ? definition
+              .correctFeedbackCode
+          : definition
+              .incorrectFeedbackCode,
+    },
+  };
+}
+
+export function evaluateNumericAssessment(
+  definitions:
+    readonly NumericAssessmentItemDefinition[],
+
+  responses:
+    readonly NumericAssessmentResponse[],
+): NumericAssessmentEvaluation {
+  if (
+    definitions.length ===
+    0
+  ) {
+    throw new NumericAssessmentError(
+      "Numeric assessment requires at least one item definition.",
+    );
+  }
+
+  assertUniqueIds(
+    definitions,
+    responses,
+  );
+
+  for (
+    const definition
+    of definitions
+  ) {
+    assertDefinition(
+      definition,
+    );
+  }
+
+  const knownIds =
+    new Set(
+      definitions.map(
+        (
+          definition,
+        ) =>
+          definition.id,
+      ),
+    );
+
+  for (
+    const response
+    of responses
+  ) {
+    if (
+      !knownIds.has(
+        response.itemId,
+      )
+    ) {
+      throw new NumericAssessmentError(
+        `Unknown numeric assessment response item "${response.itemId}".`,
+      );
+    }
+  }
+
+  const responseById =
+    new Map(
+      responses.map(
+        (
+          response,
+        ) => [
+          response.itemId,
+          response,
+        ] as const,
+      ),
+    );
+
+  const items =
+    definitions.map(
+      (
+        definition,
+      ) =>
+        evaluateItem(
+          definition,
+
+          responseById.get(
+            definition.id,
+          ) ??
+            null,
+        ),
+    );
+
+  return {
+    version:
+      NUMERIC_ASSESSMENT_VERSION,
+
+    items,
+
+    result:
+      createAssessmentResult(
+        items.map(
+          (
+            item,
+          ) =>
+            item.result,
+        ),
+      ),
+  };
+}
+
+============================================================
+FILE: .\src\domain\assessment\choice-evaluation.ts
+============================================================
+import {
+  createAssessmentResult,
+} from "@/domain/assessment/result";
+
+import type {
+  AssessmentResult,
+} from "@/domain/assessment/result";
+
+export const CHOICE_ASSESSMENT_VERSION =
+  "1.0.0" as const;
+
+export type ChoiceAssessmentKind =
+  | "choice"
+  | "prediction";
+
+export interface ChoiceAssessmentOptionDefinition {
+  readonly id:
+    string;
+
+  readonly feedbackCode?:
+    string;
+}
+
+export interface ChoiceAssessmentDefinition {
+  readonly id:
+    string;
+
+  readonly kind:
+    ChoiceAssessmentKind;
+
+  readonly options:
+    readonly ChoiceAssessmentOptionDefinition[];
+
+  readonly correctOptionId:
+    string;
+
+  readonly maxScore:
+    number;
+
+  readonly correctFeedbackCode?:
+    string;
+
+  readonly invalidFeedbackCode?:
+    string;
+}
+
+export interface ChoiceAssessmentResponse {
+  readonly selectedOptionId:
+    string | null;
+}
+
+export interface ChoiceAssessmentEvaluation {
+  readonly version:
+    typeof CHOICE_ASSESSMENT_VERSION;
+
+  readonly definition:
+    ChoiceAssessmentDefinition;
+
+  readonly response:
+    ChoiceAssessmentResponse;
+
+  readonly selectedOption:
+    ChoiceAssessmentOptionDefinition | null;
+
+  readonly result:
+    AssessmentResult;
+}
+
+export class ChoiceAssessmentError extends Error {
+  constructor(
+    message: string,
+  ) {
+    super(message);
+
+    this.name =
+      "ChoiceAssessmentError";
+  }
+}
+
+function assertNonEmpty(
+  value:
+    string,
+
+  name:
+    string,
+): void {
+  if (
+    value.trim().length ===
+    0
+  ) {
+    throw new ChoiceAssessmentError(
+      `${name} must not be empty.`,
+    );
+  }
+}
+
+function validateDefinition(
+  definition:
+    ChoiceAssessmentDefinition,
+): void {
+  assertNonEmpty(
+    definition.id,
+    "Choice assessment ID",
+  );
+
+  if (
+    definition.options.length <
+    2
+  ) {
+    throw new ChoiceAssessmentError(
+      "Choice assessment must contain at least two options.",
+    );
+  }
+
+  const optionIds =
+    definition.options.map(
+      (
+        option,
+      ) =>
+        option.id,
+    );
+
+  for (
+    const option
+    of definition.options
+  ) {
+    assertNonEmpty(
+      option.id,
+      "Choice option ID",
+    );
+  }
+
+  if (
+    new Set(
+      optionIds,
+    ).size !==
+    optionIds.length
+  ) {
+    throw new ChoiceAssessmentError(
+      "Choice option IDs must be unique.",
+    );
+  }
+
+  if (
+    !optionIds.includes(
+      definition.correctOptionId,
+    )
+  ) {
+    throw new ChoiceAssessmentError(
+      "Correct option ID must refer to one of the defined options.",
+    );
+  }
+
+  if (
+    !Number.isFinite(
+      definition.maxScore,
+    ) ||
+    definition.maxScore <=
+      0
+  ) {
+    throw new ChoiceAssessmentError(
+      "Choice assessment maximum score must be finite and greater than zero.",
+    );
+  }
+}
+
+export function evaluateChoiceAssessment(
+  definition:
+    ChoiceAssessmentDefinition,
+
+  response:
+    ChoiceAssessmentResponse,
+): ChoiceAssessmentEvaluation {
+  validateDefinition(
+    definition,
+  );
+
+  const selectedOption =
+    response.selectedOptionId ===
+    null
+      ? null
+      : definition.options.find(
+          (
+            option,
+          ) =>
+            option.id ===
+            response.selectedOptionId,
+        ) ??
+        null;
+
+  /*
+   * No answer or an unknown option is an invalid submitted
+   * response, not a finite-but-wrong conceptual answer.
+   */
+  if (
+    response.selectedOptionId ===
+      null ||
+    selectedOption ===
+      null
+  ) {
+    return {
+      version:
+        CHOICE_ASSESSMENT_VERSION,
+
+      definition,
+
+      response,
+
+      selectedOption,
+
+      result:
+        createAssessmentResult(
+          [
+            {
+              id:
+                definition.id,
+
+              status:
+                "invalid",
+
+              score:
+                0,
+
+              maxScore:
+                definition.maxScore,
+
+              feedbackCode:
+                definition
+                  .invalidFeedbackCode,
+            },
+          ],
+        ),
+    };
+  }
+
+  const correct =
+    selectedOption.id ===
+    definition.correctOptionId;
+
+  return {
+    version:
+      CHOICE_ASSESSMENT_VERSION,
+
+    definition,
+
+    response,
+
+    selectedOption,
+
+    result:
+      createAssessmentResult(
+        [
+          {
+            id:
+              definition.id,
+
+            status:
+              correct
+                ? "correct"
+                : "incorrect",
+
+            score:
+              correct
+                ? definition.maxScore
+                : 0,
+
+            maxScore:
+              definition.maxScore,
+
+            feedbackCode:
+              correct
+                ? definition
+                    .correctFeedbackCode
+                : selectedOption
+                    .feedbackCode,
+          },
+        ],
+      ),
+  };
+}
+
+============================================================
+FILE: .\src\domain\assessment\criterion.ts
+============================================================
+import type {
+  ChoiceAssessmentOptionDefinition,
+} from "@/domain/assessment/choice-evaluation";
+
+export type EngineeringCriterionStatus =
+  | "pass"
+  | "fail"
+  | "unknown"
+  | "not_evaluated";
+
+export const ENGINEERING_CRITERION_OPTION_IDS:
+  readonly EngineeringCriterionStatus[] =
+  [
+    "pass",
+    "fail",
+    "unknown",
+    "not_evaluated",
+  ];
+
+export function createEngineeringCriterionOptions():
+  readonly ChoiceAssessmentOptionDefinition[] {
+  return ENGINEERING_CRITERION_OPTION_IDS.map(
+    (
+      status,
+    ) => ({
+      id:
+        status,
+    }),
+  );
+}
+
+export function isEngineeringCriterionStatus(
+  value:
+    string,
+): value is EngineeringCriterionStatus {
+  return ENGINEERING_CRITERION_OPTION_IDS.includes(
+    value as EngineeringCriterionStatus,
+  );
+}
+
+============================================================
+FILE: .\src\domain\assessment\bending-problem.ts
+============================================================
+export type BendingProblemNumericFieldId =
+  | "second_moment_area"
+  | "maximum_moment"
+  | "maximum_stress"
+  | "maximum_deflection";
+
+export type BendingProblemDecisionFieldId =
+  | "stress_criterion"
+  | "deflection_criterion";
+
+export type BendingProblemCriterionAnswer =
+  | "satisfied"
+  | "not_satisfied";
+
+export interface BendingProblemNumericField {
+  readonly id:
+    BendingProblemNumericFieldId;
+
+  readonly unit:
+    string;
+
+  readonly absoluteTolerance:
+    number;
+
+  readonly relativeTolerance:
+    number;
+}
+
+export interface BendingProblemAnswerKey {
+  readonly numeric:
+    Readonly<
+      Record<
+        BendingProblemNumericFieldId,
+        number
+      >
+    >;
+
+  readonly decisions:
+    Readonly<
+      Record<
+        BendingProblemDecisionFieldId,
+        BendingProblemCriterionAnswer
+      >
+    >;
+}
+
+export interface BendingProblemSubmission {
+  readonly numeric:
+    Readonly<
+      Partial<
+        Record<
+          BendingProblemNumericFieldId,
+          number
+        >
+      >
+    >;
+
+  readonly decisions:
+    Readonly<
+      Partial<
+        Record<
+          BendingProblemDecisionFieldId,
+          BendingProblemCriterionAnswer
+        >
+      >
+    >;
+}
+
+export interface BendingProblemEvaluation {
+  readonly allAnswered:
+    boolean;
+
+  readonly allCorrect:
+    boolean;
+
+  readonly numeric:
+    Readonly<
+      Record<
+        BendingProblemNumericFieldId,
+        boolean
+      >
+    >;
+
+  readonly decisions:
+    Readonly<
+      Record<
+        BendingProblemDecisionFieldId,
+        boolean
+      >
+    >;
+}
+
+const numericFields:
+  readonly BendingProblemNumericField[] =
+  [
+    {
+      id:
+        "second_moment_area",
+
+      unit:
+        "cmâ´",
+
+      absoluteTolerance:
+        0.5,
+
+      relativeTolerance:
+        0.001,
+    },
+
+    {
+      id:
+        "maximum_moment",
+
+      unit:
+        "kNÂ·m",
+
+      absoluteTolerance:
+        0.01,
+
+      relativeTolerance:
+        0.001,
+    },
+
+    {
+      id:
+        "maximum_stress",
+
+      unit:
+        "MPa",
+
+      absoluteTolerance:
+        0.02,
+
+      relativeTolerance:
+        0.001,
+    },
+
+    {
+      id:
+        "maximum_deflection",
+
+      unit:
+        "mm",
+
+      absoluteTolerance:
+        0.005,
+
+      relativeTolerance:
+        0.001,
+    },
+  ];
+
+function isWithinTolerance(
+  actual:
+    number,
+
+  expected:
+    number,
+
+  absoluteTolerance:
+    number,
+
+  relativeTolerance:
+    number,
+): boolean {
+  if (
+    !Number.isFinite(
+      actual,
+    ) ||
+    !Number.isFinite(
+      expected,
+    )
+  ) {
+    return false;
+  }
+
+  const allowed =
+    Math.max(
+      absoluteTolerance,
+
+      relativeTolerance *
+        Math.max(
+          Math.abs(
+            actual,
+          ),
+
+          Math.abs(
+            expected,
+          ),
+        ),
+    );
+
+  return (
+    Math.abs(
+      actual -
+      expected,
+    ) <=
+    allowed
+  );
+}
+
+export function getBendingProblemNumericFields():
+  readonly BendingProblemNumericField[] {
+  return numericFields;
+}
+
+export function evaluateBendingProblemSubmission(
+  answerKey:
+    BendingProblemAnswerKey,
+
+  submission:
+    BendingProblemSubmission,
+): BendingProblemEvaluation {
+  const numericEvaluation =
+    Object.fromEntries(
+      numericFields.map(
+        (
+          field,
+        ) => {
+          const actual =
+            submission.numeric[
+              field.id
+            ];
+
+          return [
+            field.id,
+
+            typeof actual ===
+              "number" &&
+            isWithinTolerance(
+              actual,
+              answerKey.numeric[
+                field.id
+              ],
+              field.absoluteTolerance,
+              field.relativeTolerance,
+            ),
+          ];
+        },
+      ),
+    ) as Record<
+      BendingProblemNumericFieldId,
+      boolean
+    >;
+
+  const decisionEvaluation = {
+    stress_criterion:
+      submission.decisions
+        .stress_criterion ===
+      answerKey.decisions
+        .stress_criterion,
+
+    deflection_criterion:
+      submission.decisions
+        .deflection_criterion ===
+      answerKey.decisions
+        .deflection_criterion,
+  };
+
+  const allAnswered =
+    numericFields.every(
+      (field) =>
+        typeof submission.numeric[
+          field.id
+        ] ===
+        "number",
+    ) &&
+    submission.decisions
+      .stress_criterion !==
+      undefined &&
+    submission.decisions
+      .deflection_criterion !==
+      undefined;
+
+  const allCorrect =
+    allAnswered &&
+    Object.values(
+      numericEvaluation,
+    ).every(
+      Boolean,
+    ) &&
+    Object.values(
+      decisionEvaluation,
+    ).every(
+      Boolean,
+    );
+
+  return {
+    allAnswered,
+
+    allCorrect,
+
+    numeric:
+      numericEvaluation,
+
+    decisions:
+      decisionEvaluation,
+  };
+}
+
+============================================================
+FILE: .\src\domain\assessment\otto-problem.ts
+============================================================
+export interface OttoProblemAnswer {
+  readonly state2TemperatureK:
+    number;
+
+  readonly state2PressureKPa:
+    number;
+
+  readonly state2SpecificVolumeM3PerKg:
+    number;
+
+  readonly state3TemperatureK:
+    number;
+
+  readonly state3PressureKPa:
+    number;
+
+  readonly state4TemperatureK:
+    number;
+
+  readonly state4PressureKPa:
+    number;
+
+  readonly heatRejectedKJPerKg:
+    number;
+
+  readonly netWorkKJPerKg:
+    number;
+
+  readonly thermalEfficiencyPercent:
+    number;
+}
+
+export interface OttoProblemTolerance {
+  readonly absolute:
+    number;
+
+  readonly relative:
+    number;
+}
+
+export interface OttoProblemTolerances {
+  readonly temperatureK:
+    OttoProblemTolerance;
+
+  readonly pressureKPa:
+    OttoProblemTolerance;
+
+  readonly specificVolumeM3PerKg:
+    OttoProblemTolerance;
+
+  readonly specificEnergyKJPerKg:
+    OttoProblemTolerance;
+
+  readonly efficiencyPercent:
+    OttoProblemTolerance;
+}
+
+export interface OttoProblemGradingResult {
+  readonly correct:
+    boolean;
+
+  readonly fields: {
+    readonly state2TemperatureK:
+      boolean;
+
+    readonly state2PressureKPa:
+      boolean;
+
+    readonly state2SpecificVolumeM3PerKg:
+      boolean;
+
+    readonly state3TemperatureK:
+      boolean;
+
+    readonly state3PressureKPa:
+      boolean;
+
+    readonly state4TemperatureK:
+      boolean;
+
+    readonly state4PressureKPa:
+      boolean;
+
+    readonly heatRejectedKJPerKg:
+      boolean;
+
+    readonly netWorkKJPerKg:
+      boolean;
+
+    readonly thermalEfficiencyPercent:
+      boolean;
+  };
+}
+
+export const DEFAULT_OTTO_PROBLEM_TOLERANCES:
+  OttoProblemTolerances =
+  {
+    temperatureK: {
+      absolute:
+        0.5,
+
+      relative:
+        0.001,
+    },
+
+    pressureKPa: {
+      absolute:
+        1,
+
+      relative:
+        0.001,
+    },
+
+    specificVolumeM3PerKg: {
+      absolute:
+        0.0005,
+
+      relative:
+        0.002,
+    },
+
+    specificEnergyKJPerKg: {
+      absolute:
+        0.5,
+
+      relative:
+        0.001,
+    },
+
+    efficiencyPercent: {
+      absolute:
+        0.05,
+
+      relative:
+        0.001,
+    },
+  };
+
+function isWithinTolerance(
+  actual:
+    number,
+
+  expected:
+    number,
+
+  tolerance:
+    OttoProblemTolerance,
+): boolean {
+  if (
+    !Number.isFinite(
+      actual,
+    ) ||
+    !Number.isFinite(
+      expected,
+    )
+  ) {
+    return false;
+  }
+
+  const difference =
+    Math.abs(
+      actual -
+      expected,
+    );
+
+  const allowed =
+    Math.max(
+      tolerance.absolute,
+
+      tolerance.relative *
+        Math.max(
+          Math.abs(
+            actual,
+          ),
+
+          Math.abs(
+            expected,
+          ),
+        ),
+    );
+
+  return (
+    difference <=
+    allowed
+  );
+}
+
+export function gradeOttoProblem(
+  answer:
+    OttoProblemAnswer,
+
+  expected:
+    OttoProblemAnswer,
+
+  tolerances:
+    OttoProblemTolerances =
+      DEFAULT_OTTO_PROBLEM_TOLERANCES,
+): OttoProblemGradingResult {
+  const fields = {
+    state2TemperatureK:
+      isWithinTolerance(
+        answer
+          .state2TemperatureK,
+
+        expected
+          .state2TemperatureK,
+
+        tolerances
+          .temperatureK,
+      ),
+
+    state2PressureKPa:
+      isWithinTolerance(
+        answer
+          .state2PressureKPa,
+
+        expected
+          .state2PressureKPa,
+
+        tolerances
+          .pressureKPa,
+      ),
+
+    state2SpecificVolumeM3PerKg:
+      isWithinTolerance(
+        answer
+          .state2SpecificVolumeM3PerKg,
+
+        expected
+          .state2SpecificVolumeM3PerKg,
+
+        tolerances
+          .specificVolumeM3PerKg,
+      ),
+
+    state3TemperatureK:
+      isWithinTolerance(
+        answer
+          .state3TemperatureK,
+
+        expected
+          .state3TemperatureK,
+
+        tolerances
+          .temperatureK,
+      ),
+
+    state3PressureKPa:
+      isWithinTolerance(
+        answer
+          .state3PressureKPa,
+
+        expected
+          .state3PressureKPa,
+
+        tolerances
+          .pressureKPa,
+      ),
+
+    state4TemperatureK:
+      isWithinTolerance(
+        answer
+          .state4TemperatureK,
+
+        expected
+          .state4TemperatureK,
+
+        tolerances
+          .temperatureK,
+      ),
+
+    state4PressureKPa:
+      isWithinTolerance(
+        answer
+          .state4PressureKPa,
+
+        expected
+          .state4PressureKPa,
+
+        tolerances
+          .pressureKPa,
+      ),
+
+    heatRejectedKJPerKg:
+      isWithinTolerance(
+        answer
+          .heatRejectedKJPerKg,
+
+        expected
+          .heatRejectedKJPerKg,
+
+        tolerances
+          .specificEnergyKJPerKg,
+      ),
+
+    netWorkKJPerKg:
+      isWithinTolerance(
+        answer
+          .netWorkKJPerKg,
+
+        expected
+          .netWorkKJPerKg,
+
+        tolerances
+          .specificEnergyKJPerKg,
+      ),
+
+    thermalEfficiencyPercent:
+      isWithinTolerance(
+        answer
+          .thermalEfficiencyPercent,
+
+        expected
+          .thermalEfficiencyPercent,
+
+        tolerances
+          .efficiencyPercent,
+      ),
+  };
+
+  return {
+    correct:
+      Object.values(
+        fields,
+      ).every(
+        Boolean,
+      ),
+
+    fields,
+  };
+}
+
+============================================================
+FILE: .\src\domain\assessment\engineering-problem-evaluation.ts
+============================================================
+import {
+  evaluateChoiceAssessment,
+} from "@/domain/assessment/choice-evaluation";
+
+import type {
+  ChoiceAssessmentDefinition,
+  ChoiceAssessmentEvaluation,
+} from "@/domain/assessment/choice-evaluation";
+
+import {
+  evaluateNumericAssessment,
+} from "@/domain/assessment/numeric-evaluation";
+
+import type {
+  NumericAssessmentEvaluation,
+  NumericAssessmentItemDefinition,
+  NumericAssessmentResponse,
+} from "@/domain/assessment/numeric-evaluation";
+
+import {
+  createAssessmentResult,
+} from "@/domain/assessment/result";
+
+import type {
+  AssessmentResult,
+} from "@/domain/assessment/result";
+
+export const ENGINEERING_PROBLEM_EVALUATION_VERSION =
+  "1.0.0" as const;
+
+export type EngineeringChoiceRole =
+  | "criterion"
+  | "decision"
+  | "interpretation";
+
+export interface EngineeringProblemChoiceItemDefinition {
+  readonly role:
+    EngineeringChoiceRole;
+
+  readonly definition:
+    ChoiceAssessmentDefinition;
+}
+
+export interface EngineeringProblemDefinition {
+  readonly id:
+    string;
+
+  readonly version:
+    string;
+
+  readonly numericItems:
+    readonly NumericAssessmentItemDefinition[];
+
+  readonly choiceItems:
+    readonly EngineeringProblemChoiceItemDefinition[];
+}
+
+export interface EngineeringProblemChoiceResponse {
+  readonly itemId:
+    string;
+
+  readonly selectedOptionId:
+    string | null;
+}
+
+export interface EngineeringProblemResponse {
+  readonly numeric:
+    readonly NumericAssessmentResponse[];
+
+  readonly choices:
+    readonly EngineeringProblemChoiceResponse[];
+}
+
+export interface EngineeringProblemChoiceEvaluation {
+  readonly role:
+    EngineeringChoiceRole;
+
+  readonly evaluation:
+    ChoiceAssessmentEvaluation;
+}
+
+export interface EngineeringProblemEvaluation {
+  readonly version:
+    typeof ENGINEERING_PROBLEM_EVALUATION_VERSION;
+
+  readonly problemId:
+    string;
+
+  readonly problemVersion:
+    string;
+
+  readonly numeric:
+    NumericAssessmentEvaluation | null;
+
+  readonly choices:
+    readonly EngineeringProblemChoiceEvaluation[];
+
+  readonly result:
+    AssessmentResult;
+}
+
+export class EngineeringProblemEvaluationError extends Error {
+  constructor(
+    message:
+      string,
+  ) {
+    super(
+      message,
+    );
+
+    this.name =
+      "EngineeringProblemEvaluationError";
+  }
+}
+
+function assertNonEmpty(
+  value:
+    string,
+
+  name:
+    string,
+): void {
+  if (
+    value.trim().length ===
+    0
+  ) {
+    throw new EngineeringProblemEvaluationError(
+      `${name} must not be empty.`,
+    );
+  }
+}
+
+function validateDefinition(
+  definition:
+    EngineeringProblemDefinition,
+): void {
+  assertNonEmpty(
+    definition.id,
+    "Engineering problem ID",
+  );
+
+  assertNonEmpty(
+    definition.version,
+    "Engineering problem version",
+  );
+
+  if (
+    definition.numericItems.length ===
+      0 &&
+    definition.choiceItems.length ===
+      0
+  ) {
+    throw new EngineeringProblemEvaluationError(
+      "Engineering problem requires at least one numeric or choice item.",
+    );
+  }
+
+  const numericIds =
+    definition.numericItems.map(
+      (
+        item,
+      ) =>
+        item.id,
+    );
+
+  const choiceIds =
+    definition.choiceItems.map(
+      (
+        item,
+      ) =>
+        item.definition.id,
+    );
+
+  const allIds = [
+    ...numericIds,
+    ...choiceIds,
+  ];
+
+  if (
+    new Set(
+      allIds,
+    ).size !==
+    allIds.length
+  ) {
+    throw new EngineeringProblemEvaluationError(
+      "Engineering problem item IDs must be unique across numeric and choice items.",
+    );
+  }
+
+  for (
+    const choiceItem
+    of definition.choiceItems
+  ) {
+    if (
+      choiceItem.definition.kind !==
+      "choice"
+    ) {
+      throw new EngineeringProblemEvaluationError(
+        `Engineering problem choice item "${choiceItem.definition.id}" must use kind "choice".`,
+      );
+    }
+  }
+}
+
+function validateChoiceResponses(
+  definition:
+    EngineeringProblemDefinition,
+
+  responses:
+    readonly EngineeringProblemChoiceResponse[],
+): void {
+  const responseIds =
+    responses.map(
+      (
+        response,
+      ) =>
+        response.itemId,
+    );
+
+  if (
+    new Set(
+      responseIds,
+    ).size !==
+    responseIds.length
+  ) {
+    throw new EngineeringProblemEvaluationError(
+      "Engineering problem choice response IDs must be unique.",
+    );
+  }
+
+  const knownIds =
+    new Set(
+      definition.choiceItems.map(
+        (
+          item,
+        ) =>
+          item.definition.id,
+      ),
+    );
+
+  for (
+    const response
+    of responses
+  ) {
+    if (
+      !knownIds.has(
+        response.itemId,
+      )
+    ) {
+      throw new EngineeringProblemEvaluationError(
+        `Unknown engineering problem choice response "${response.itemId}".`,
+      );
+    }
+  }
+}
+
+export function evaluateEngineeringProblem(
+  definition:
+    EngineeringProblemDefinition,
+
+  response:
+    EngineeringProblemResponse,
+): EngineeringProblemEvaluation {
+  validateDefinition(
+    definition,
+  );
+
+  validateChoiceResponses(
+    definition,
+    response.choices,
+  );
+
+  const numeric =
+    definition.numericItems.length >
+    0
+      ? evaluateNumericAssessment(
+          definition.numericItems,
+          response.numeric,
+        )
+      : null;
+
+  if (
+    definition.numericItems.length ===
+      0 &&
+    response.numeric.length >
+      0
+  ) {
+    throw new EngineeringProblemEvaluationError(
+      "Engineering problem does not define numeric items.",
+    );
+  }
+
+  const choiceResponseById =
+    new Map(
+      response.choices.map(
+        (
+          choiceResponse,
+        ) => [
+          choiceResponse.itemId,
+          choiceResponse,
+        ] as const,
+      ),
+    );
+
+  const choices =
+    definition.choiceItems.map(
+      (
+        choiceItem,
+      ): EngineeringProblemChoiceEvaluation => {
+        const choiceResponse =
+          choiceResponseById.get(
+            choiceItem.definition.id,
+          );
+
+        return {
+          role:
+            choiceItem.role,
+
+          evaluation:
+            evaluateChoiceAssessment(
+              choiceItem.definition,
+              {
+                selectedOptionId:
+                  choiceResponse
+                    ?.selectedOptionId ??
+                  null,
+              },
+            ),
+        };
+      },
+    );
+
+  const combinedItems = [
+    ...(
+      numeric?.result.items ??
+      []
+    ),
+    ...choices.flatMap(
+      (
+        choice,
+      ) =>
+        choice.evaluation
+          .result.items,
+    ),
+  ];
+
+  return {
+    version:
+      ENGINEERING_PROBLEM_EVALUATION_VERSION,
+
+    problemId:
+      definition.id,
+
+    problemVersion:
+      definition.version,
+
+    numeric,
+
+    choices,
+
+    result:
+      createAssessmentResult(
+        combinedItems,
+      ),
+  };
+}
+
+============================================================
+FILE: .\src\domain\assessment\types.ts
+============================================================
+import type {
+  EntityId,
+  LocalizedText,
+  VersionedEntity,
+} from "@/domain/shared/types";
+
+export type ProblemType =
+  | "numeric"
+  | "multiple_choice"
+  | "conceptual"
+  | "multi_step"
+  | "matching"
+  | "ordering"
+  | "design_decision"
+  | "explanation";
+
+export interface ProblemTemplate extends VersionedEntity {
+  readonly moduleId: EntityId;
+  readonly type: ProblemType;
+
+  readonly title: LocalizedText;
+  readonly prompt: LocalizedText;
+
+  readonly learningOutcomeIds: readonly EntityId[];
+  readonly conceptIds: readonly EntityId[];
+
+  readonly engineeringModelId?: EntityId;
+  readonly sourceIds: readonly EntityId[];
+}
+
+export interface ProblemAttempt {
+  readonly id: EntityId;
+
+  readonly problemTemplateId: EntityId;
+  readonly problemTemplateVersion: string;
+
+  readonly engineeringModelId?: EntityId;
+  readonly engineeringModelVersion?: string;
+
+  readonly attemptNumber: number;
+
+  readonly submittedAt: string;
+  readonly hintUsed: boolean;
+}
+
+export interface GradingResult {
+  readonly correct: boolean;
+  readonly feedbackKey: string;
+}
+
+============================================================
+FILE: .\src\features\learning\assessment\use-assessment-session.ts
+============================================================
+"use client";
+
+import {
+  useMemo,
+  useState,
+} from "react";
+
+import {
+  appendAssessmentAttempt,
+  createAssessmentAttempt,
+  createAssessmentAttemptHistory,
+  createAssessmentRevision,
+  evaluateAssessmentAttempt,
+  getLatestAssessmentAttempt,
+  replaceLatestAssessmentAttempt,
+  submitAssessmentAttempt,
+  summarizeAssessmentAttemptHistory,
+} from "@/domain/assessment";
+
+import type {
+  AssessmentAttemptHistory,
+  AssessmentAttemptHistorySummary,
+  AssessmentResult,
+} from "@/domain/assessment";
+
+export interface AssessmentSessionConfig<TResponse> {
+  readonly activityId:
+    string;
+
+  readonly activityVersion:
+    string;
+
+  readonly assessmentId:
+    string;
+
+  readonly assessmentVersion:
+    string;
+
+  readonly evaluate:
+    (
+      response:
+        TResponse,
+    ) =>
+      AssessmentResult;
+
+  readonly createAttemptId?:
+    (
+      attemptNumber:
+        number,
+    ) =>
+      string;
+}
+
+export interface AssessmentSessionState<TResponse> {
+  readonly history:
+    AssessmentAttemptHistory<TResponse>;
+
+  readonly summary:
+    AssessmentAttemptHistorySummary;
+
+  readonly latestAttempt:
+    AssessmentAttemptHistory<TResponse>[
+      "attempts"
+    ][number];
+
+  readonly canSubmit:
+    boolean;
+
+  readonly canRevise:
+    boolean;
+
+  readonly submit:
+    (
+      response:
+        TResponse,
+    ) =>
+      void;
+
+  readonly revise:
+    () =>
+      void;
+}
+
+function defaultAttemptId(
+  assessmentId:
+    string,
+
+  attemptNumber:
+    number,
+): string {
+  return `${assessmentId}-attempt-${attemptNumber}`;
+}
+
+export function useAssessmentSession<TResponse>(
+  config:
+    AssessmentSessionConfig<TResponse>,
+): AssessmentSessionState<TResponse> {
+  const createAttemptId =
+    config.createAttemptId ??
+    (
+      (
+        attemptNumber:
+          number,
+      ) =>
+        defaultAttemptId(
+          config.assessmentId,
+          attemptNumber,
+        )
+    );
+
+  const [
+    history,
+    setHistory,
+  ] =
+    useState<
+      AssessmentAttemptHistory<TResponse>
+    >(
+      () => {
+        const firstAttempt =
+          createAssessmentAttempt<TResponse>(
+            {
+              attemptId:
+                createAttemptId(
+                  1,
+                ),
+
+              activityId:
+                config.activityId,
+
+              activityVersion:
+                config.activityVersion,
+
+              assessmentId:
+                config.assessmentId,
+
+              assessmentVersion:
+                config.assessmentVersion,
+
+              attemptNumber:
+                1,
+            },
+          );
+
+        return createAssessmentAttemptHistory(
+          firstAttempt,
+        );
+      },
+    );
+
+  const latestAttempt =
+    getLatestAssessmentAttempt(
+      history,
+    );
+
+  const summary =
+    useMemo(
+      () =>
+        summarizeAssessmentAttemptHistory(
+          history,
+        ),
+      [
+        history,
+      ],
+    );
+
+  function submit(
+    response:
+      TResponse,
+  ): void {
+    setHistory(
+      (
+        currentHistory,
+      ) => {
+        const currentAttempt =
+          getLatestAssessmentAttempt(
+            currentHistory,
+          );
+
+        if (
+          currentAttempt.status !==
+          "draft"
+        ) {
+          return currentHistory;
+        }
+
+        const submitted =
+          submitAssessmentAttempt(
+            currentAttempt,
+            response,
+          );
+
+        const submittedHistory =
+          replaceLatestAssessmentAttempt(
+            currentHistory,
+            submitted,
+          );
+
+        const result =
+          config.evaluate(
+            response,
+          );
+
+        const evaluated =
+          evaluateAssessmentAttempt(
+            submitted,
+            result,
+          );
+
+        return replaceLatestAssessmentAttempt(
+          submittedHistory,
+          evaluated,
+        );
+      },
+    );
+  }
+
+  function revise(): void {
+    setHistory(
+      (
+        currentHistory,
+      ) => {
+        const currentAttempt =
+          getLatestAssessmentAttempt(
+            currentHistory,
+          );
+
+        if (
+          currentAttempt.status !==
+          "evaluated"
+        ) {
+          return currentHistory;
+        }
+
+        const nextAttemptNumber =
+          currentAttempt
+            .attemptNumber +
+          1;
+
+        const revision =
+          createAssessmentRevision(
+            currentAttempt,
+            {
+              attemptId:
+                createAttemptId(
+                  nextAttemptNumber,
+                ),
+            },
+          );
+
+        return appendAssessmentAttempt(
+          currentHistory,
+          revision,
+        );
+      },
+    );
+  }
+
+  return {
+    history,
+
+    summary,
+
+    latestAttempt,
+
+    canSubmit:
+      latestAttempt.status ===
+      "draft",
+
+    canRevise:
+      latestAttempt.status ===
+      "evaluated",
+
+    submit,
+
+    revise,
+  };
+}
+
+============================================================
+FILE: .\src\features\learning\problems\beam-statics-problem-adapter.ts
+============================================================
+import {
+  beamStaticsModel,
+  createSimplySupportedBeamStateFromDisplayInput,
+  fromSI,
+} from "@/domain/engineering";
+
+import type {
+  BeamStaticsNumericProblemDefinition,
+  NumericProblemAnswerKey,
+} from "@/domain/assessment/numeric-problem";
+
+export function createBeamStaticsProblemAnswerKey(
+  definition:
+    BeamStaticsNumericProblemDefinition,
+): NumericProblemAnswerKey {
+  const stateResult =
+    createSimplySupportedBeamStateFromDisplayInput(
+      {
+        span: {
+          value:
+            definition.input
+              .spanM,
+
+          unit: "m",
+        },
+
+        pointLoad: {
+          value:
+            definition.input
+              .pointLoadKN,
+
+          unit: "kN",
+        },
+
+        loadPosition: {
+          value:
+            definition.input
+              .loadPositionM,
+
+          unit: "m",
+        },
+      },
+    );
+
+  if (!stateResult.state) {
+    throw new Error(
+      `Problem "${definition.id}" contains an invalid beam state.`,
+    );
+  }
+
+  const result =
+    beamStaticsModel.evaluate(
+      stateResult.state,
+    );
+
+  if (!result.values) {
+    throw new Error(
+      `Problem "${definition.id}" did not produce valid Engineering Core values.`,
+    );
+  }
+
+  const values =
+    result.values;
+
+  const maximumMomentLocation =
+    values.moment.maximum
+      .location;
+
+  if (
+    maximumMomentLocation.type !==
+    "point"
+  ) {
+    throw new Error(
+      `Problem "${definition.id}" requires a unique maximum-moment location.`,
+    );
+  }
+
+  return definition.fields.map(
+    (field) => {
+      switch (
+        field.answerRole
+      ) {
+        case "left_reaction":
+          return {
+            fieldId:
+              field.id,
+
+            expectedValue:
+              fromSI(
+                "force",
+                values.leftReactionN,
+                "kN",
+              ),
+          };
+
+        case "right_reaction":
+          return {
+            fieldId:
+              field.id,
+
+            expectedValue:
+              fromSI(
+                "force",
+                values.rightReactionN,
+                "kN",
+              ),
+          };
+
+        case "left_shear":
+          return {
+            fieldId:
+              field.id,
+
+            expectedValue:
+              fromSI(
+                "force",
+                values.shear
+                  .leftOfLoadN,
+                "kN",
+              ),
+          };
+
+        case "right_shear":
+          return {
+            fieldId:
+              field.id,
+
+            expectedValue:
+              fromSI(
+                "force",
+                values.shear
+                  .rightOfLoadN,
+                "kN",
+              ),
+          };
+
+        case "maximum_moment":
+          return {
+            fieldId:
+              field.id,
+
+            expectedValue:
+              fromSI(
+                "moment",
+                values.moment
+                  .maximum
+                  .valueNm,
+                "kN_m",
+              ),
+          };
+
+        case "maximum_moment_position":
+          return {
+            fieldId:
+              field.id,
+
+            expectedValue:
+              maximumMomentLocation
+                .xM,
+          };
+
+        default:
+          return assertNever(
+            field.answerRole,
+          );
+      }
+    },
+  );
+}
+
+function assertNever(
+  value: never,
+): never {
+  throw new Error(
+    `Unsupported beam Statics answer role: ${String(
+      value,
+    )}`,
+  );
+}
+
+============================================================
+FILE: .\src\features\learning\bending\bending-problem-adapter.ts
+============================================================
+import {
+  createSimplySupportedBeamStateFromDisplayInput,
+  fromSI,
+} from "@/domain/engineering";
+
+import {
+  createBeamBendingConfiguration,
+  evaluateBeamBending,
+} from "@/domain/engineering/beam/bending";
+
+import type {
+  BendingProblemAnswerKey,
+} from "@/domain/assessment/bending-problem";
+
+export function createBendingProblemAnswerKey():
+  BendingProblemAnswerKey {
+  const beamStateResult =
+    createSimplySupportedBeamStateFromDisplayInput(
+      {
+        span: {
+          value:
+            3,
+
+          unit:
+            "m",
+        },
+
+        pointLoad: {
+          value:
+            8,
+
+          unit:
+            "kN",
+        },
+
+        loadPosition: {
+          value:
+            1.5,
+
+          unit:
+            "m",
+        },
+      },
+    );
+
+  if (
+    !beamStateResult.state
+  ) {
+    throw new Error(
+      "Bending problem beam state is invalid.",
+    );
+  }
+
+  const configurationResult =
+    createBeamBendingConfiguration(
+      {
+        sectionWidthM:
+          0.08,
+
+        sectionHeightM:
+          0.16,
+
+        elasticModulusPa:
+          70e9,
+
+        allowableBendingStressPa:
+          20e6,
+
+        allowableDeflectionM:
+          0.002,
+      },
+    );
+
+  if (
+    !configurationResult.configuration
+  ) {
+    throw new Error(
+      "Bending problem configuration is invalid.",
+    );
+  }
+
+  const result =
+    evaluateBeamBending(
+      beamStateResult.state,
+      configurationResult.configuration,
+    );
+
+  if (
+    !result.values
+  ) {
+    throw new Error(
+      "Bending problem Engineering Core result is invalid.",
+    );
+  }
+
+  const stressStatus =
+    result.values
+      .criteria
+      .bendingStress
+      .status;
+
+  const deflectionStatus =
+    result.values
+      .criteria
+      .deflection
+      .status;
+
+  if (
+    stressStatus ===
+      "undetermined" ||
+    deflectionStatus ===
+      "undetermined"
+  ) {
+    throw new Error(
+      "Bending problem requires determinate engineering criteria.",
+    );
+  }
+
+  return {
+    numeric: {
+      second_moment_area:
+        fromSI(
+          "second_moment_area",
+          result.values
+            .section
+            .secondMomentAreaM4,
+          "cm4",
+        ),
+
+      maximum_moment:
+        fromSI(
+          "moment",
+          result.values
+            .maximumMomentNm,
+          "kN_m",
+        ),
+
+      maximum_stress:
+        fromSI(
+          "stress",
+          result.values
+            .stress
+            .maximumAbsoluteStressPa,
+          "MPa",
+        ),
+
+      maximum_deflection:
+        fromSI(
+          "length",
+          result.values
+            .deflection
+            .maximumAbsoluteDeflectionM,
+          "mm",
+        ),
+    },
+
+    decisions: {
+      stress_criterion:
+        stressStatus,
+
+      deflection_criterion:
+        deflectionStatus,
+    },
+  };
+}
+
+============================================================
+FILE: .\src\features\learning\otto\otto-problem-adapter.ts
+============================================================
+import type {
+  OttoProblemAnswer,
+} from "@/domain/assessment/otto-problem";
+
+import {
+  createIdealOttoInputState,
+  evaluateIdealOttoCycle,
+} from "@/domain/engineering/thermodynamics/otto";
+
+export interface OttoProblemDefinition {
+  readonly compressionRatio:
+    number;
+
+  readonly initialTemperatureK:
+    number;
+
+  readonly initialPressureKPa:
+    number;
+
+  readonly heatInputKJPerKg:
+    number;
+
+  readonly gasConstantJPerKgK:
+    number;
+
+  readonly gamma:
+    number;
+
+  readonly expected:
+    OttoProblemAnswer;
+}
+
+export function createOttoProblemDefinition():
+  OttoProblemDefinition {
+  const inputResult =
+    createIdealOttoInputState(
+      {
+        compressionRatio:
+          6,
+
+        initialTemperatureK:
+          320,
+
+        initialPressurePa:
+          120_000,
+
+        heatInputJPerKg:
+          600_000,
+      },
+    );
+
+  if (
+    !inputResult.state
+  ) {
+    throw new Error(
+      "Expected valid Otto problem input.",
+    );
+  }
+
+  const result =
+    evaluateIdealOttoCycle(
+      inputResult.state,
+    );
+
+  if (
+    !result.values
+  ) {
+    throw new Error(
+      "Expected valid Otto problem analysis.",
+    );
+  }
+
+  const values =
+    result.values;
+
+  return {
+    compressionRatio:
+      inputResult.state
+        .compressionRatio,
+
+    initialTemperatureK:
+      inputResult.state
+        .initialTemperatureK,
+
+    initialPressureKPa:
+      inputResult.state
+        .initialPressurePa /
+      1000,
+
+    heatInputKJPerKg:
+      inputResult.state
+        .heatInputJPerKg /
+      1000,
+
+    gasConstantJPerKgK:
+      values
+        .gasProperties
+        .gasConstantJPerKgK,
+
+    gamma:
+      values
+        .gasProperties
+        .gamma,
+
+    expected: {
+      state2TemperatureK:
+        values.states
+          .state2
+          .temperatureK,
+
+      state2PressureKPa:
+        values.states
+          .state2
+          .pressurePa /
+        1000,
+
+      state2SpecificVolumeM3PerKg:
+        values.states
+          .state2
+          .specificVolumeM3PerKg,
+
+      state3TemperatureK:
+        values.states
+          .state3
+          .temperatureK,
+
+      state3PressureKPa:
+        values.states
+          .state3
+          .pressurePa /
+        1000,
+
+      state4TemperatureK:
+        values.states
+          .state4
+          .temperatureK,
+
+      state4PressureKPa:
+        values.states
+          .state4
+          .pressurePa /
+        1000,
+
+      heatRejectedKJPerKg:
+        values.energy
+          .heatRejectedJPerKg /
+        1000,
+
+      netWorkKJPerKg:
+        values.energy
+          .netWorkJPerKg /
+        1000,
+
+      thermalEfficiencyPercent:
+        values.energy
+          .thermalEfficiencyFromEnergyBalance *
+        100,
+    },
+  };
+}

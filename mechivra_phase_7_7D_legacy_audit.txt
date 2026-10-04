@@ -1,0 +1,219 @@
+﻿
+
+============================================================
+SEARCH: evaluatePrediction
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\choice-attempt.integration.test.ts:14: evaluatePredictionAssessment,
+C:\dev\projects\mechivra\src\domain\assessment\choice-attempt.integration.test.ts:73: evaluatePredictionAssessment(
+C:\dev\projects\mechivra\src\domain\assessment\choice-attempt.integration.test.ts:168: evaluatePredictionAssessment(
+C:\dev\projects\mechivra\src\domain\assessment\index.ts:114: evaluatePredictionAssessment,
+C:\dev\projects\mechivra\src\domain\assessment\prediction-evaluation.test.ts:8: evaluatePredictionAssessment,
+C:\dev\projects\mechivra\src\domain\assessment\prediction-evaluation.test.ts:18: evaluatePredictionAssessment(
+C:\dev\projects\mechivra\src\domain\assessment\prediction-evaluation.test.ts:82: evaluatePredictionAssessment(
+C:\dev\projects\mechivra\src\domain\assessment\prediction-evaluation.ts:27: export function evaluatePredictionAssessment(
+C:\dev\projects\mechivra\src\domain\learning\prediction-completion.test.ts:18: evaluatePrediction,
+C:\dev\projects\mechivra\src\domain\learning\prediction-completion.test.ts:52: evaluatePrediction(
+C:\dev\projects\mechivra\src\domain\learning\prediction-completion.test.ts:97: evaluatePrediction(
+C:\dev\projects\mechivra\src\domain\learning\prediction.test.ts:8: evaluatePrediction,
+C:\dev\projects\mechivra\src\domain\learning\prediction.test.ts:79: evaluatePrediction(
+C:\dev\projects\mechivra\src\domain\learning\prediction.test.ts:100: evaluatePrediction(
+C:\dev\projects\mechivra\src\domain\learning\prediction.test.ts:128: evaluatePrediction(
+C:\dev\projects\mechivra\src\domain\learning\prediction.ts:55: export function evaluatePrediction(
+C:\dev\projects\mechivra\src\features\learning\prediction-activity.tsx:9: evaluatePredictionAssessment,
+C:\dev\projects\mechivra\src\features\learning\prediction-activity.tsx:115: evaluatePredictionAssessment(
+
+============================================================
+SEARCH: @/domain/learning/prediction
+============================================================
+C:\dev\projects\mechivra\src\content\predictions.ts:7: } from "@/domain/learning/prediction";
+C:\dev\projects\mechivra\src\domain\learning\prediction-completion.test.ts:19: } from "@/domain/learning/prediction";
+C:\dev\projects\mechivra\src\domain\learning\prediction.test.ts:10: } from "@/domain/learning/prediction";
+C:\dev\projects\mechivra\src\domain\learning\prediction.test.ts:14: } from "@/domain/learning/prediction";
+C:\dev\projects\mechivra\src\features\learning\prediction-activity.tsx:19: } from "@/domain/learning/prediction";
+
+============================================================
+SEARCH: evaluateNumericProblemAttempt
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.test.ts:8: evaluateNumericProblemAttempt,
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.test.ts:80: evaluateNumericProblemAttempt(
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.test.ts:130: evaluateNumericProblemAttempt(
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.test.ts:170: evaluateNumericProblemAttempt(
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.test.ts:216: evaluateNumericProblemAttempt(
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.ts:212: export function evaluateNumericProblemAttempt(
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-activity.tsx:13: evaluateNumericProblemAttempt,
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-activity.tsx:200: evaluateNumericProblemAttempt(
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-activity.tsx:323: evaluateNumericProblemAttempt(
+
+============================================================
+SEARCH: @/domain/assessment/numeric-problem
+============================================================
+C:\dev\projects\mechivra\src\content\statics-problems.ts:3: } from "@/domain/assessment/numeric-problem";
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.test.ts:11: } from "@/domain/assessment/numeric-problem";
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.test.ts:15: } from "@/domain/assessment/numeric-problem";
+C:\dev\projects\mechivra\src\features\learning\problem-activity-host.tsx:3: } from "@/domain/assessment/numeric-problem";
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-activity.tsx:14: } from "@/domain/assessment/numeric-problem";
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-activity.tsx:20: } from "@/domain/assessment/numeric-problem";
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-adapter.ts:10: } from "@/domain/assessment/numeric-problem";
+
+============================================================
+SEARCH: evaluateBendingProblemSubmission
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.test.ts:8: evaluateBendingProblemSubmission,
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.test.ts:23: evaluateBendingProblemSubmission(
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.test.ts:67: evaluateBendingProblemSubmission(
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.ts:207: export function evaluateBendingProblemSubmission(
+C:\dev\projects\mechivra\src\features\learning\bending\bending-problem-activity.tsx:20: evaluateBendingProblemSubmission,
+C:\dev\projects\mechivra\src\features\learning\bending\bending-problem-activity.tsx:238: typeof evaluateBendingProblemSubmission
+C:\dev\projects\mechivra\src\features\learning\bending\bending-problem-activity.tsx:266: evaluateBendingProblemSubmission(
+C:\dev\projects\mechivra\src\features\learning\bending\bending-problem-activity.tsx:454: evaluateBendingProblemSubmission(
+
+============================================================
+SEARCH: @/domain/assessment/bending-problem
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.test.ts:9: } from "@/domain/assessment/bending-problem";
+C:\dev\projects\mechivra\src\features\learning\bending\bending-problem-activity.tsx:17: } from "@/domain/assessment/bending-problem";
+C:\dev\projects\mechivra\src\features\learning\bending\bending-problem-activity.tsx:21: } from "@/domain/assessment/bending-problem";
+C:\dev\projects\mechivra\src\features\learning\bending\bending-problem-adapter.ts:13: } from "@/domain/assessment/bending-problem";
+
+============================================================
+SEARCH: gradeOttoProblem
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.test.ts:8: gradeOttoProblem,
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.test.ts:50: gradeOttoProblem(
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.test.ts:73: gradeOttoProblem(
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.ts:188: export function gradeOttoProblem(
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-activity.tsx:17: gradeOttoProblem,
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-activity.tsx:252: typeof gradeOttoProblem
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-activity.tsx:280: gradeOttoProblem(
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-activity.tsx:401: gradeOttoProblem(
+
+============================================================
+SEARCH: @/domain/assessment/otto-problem
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.test.ts:9: } from "@/domain/assessment/otto-problem";
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-activity.tsx:18: } from "@/domain/assessment/otto-problem";
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-activity.tsx:22: } from "@/domain/assessment/otto-problem";
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-adapter.ts:3: } from "@/domain/assessment/otto-problem";
+
+============================================================
+SEARCH: evaluatePredictionAssessment
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\choice-attempt.integration.test.ts:14: evaluatePredictionAssessment,
+C:\dev\projects\mechivra\src\domain\assessment\choice-attempt.integration.test.ts:73: evaluatePredictionAssessment(
+C:\dev\projects\mechivra\src\domain\assessment\choice-attempt.integration.test.ts:168: evaluatePredictionAssessment(
+C:\dev\projects\mechivra\src\domain\assessment\index.ts:114: evaluatePredictionAssessment,
+C:\dev\projects\mechivra\src\domain\assessment\prediction-evaluation.test.ts:8: evaluatePredictionAssessment,
+C:\dev\projects\mechivra\src\domain\assessment\prediction-evaluation.test.ts:18: evaluatePredictionAssessment(
+C:\dev\projects\mechivra\src\domain\assessment\prediction-evaluation.test.ts:82: evaluatePredictionAssessment(
+C:\dev\projects\mechivra\src\domain\assessment\prediction-evaluation.ts:27: export function evaluatePredictionAssessment(
+C:\dev\projects\mechivra\src\features\learning\prediction-activity.tsx:9: evaluatePredictionAssessment,
+C:\dev\projects\mechivra\src\features\learning\prediction-activity.tsx:115: evaluatePredictionAssessment(
+
+============================================================
+SEARCH: evaluateEngineeringProblem
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-attempt.integration.test.ts:18: evaluateEngineeringProblem,
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-attempt.integration.test.ts:148: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts:9: evaluateEngineeringProblem,
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts:209: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts:288: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts:370: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts:473: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts:541: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts:602: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts:672: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts:750: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts:834: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts:894: evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.ts:257: export function evaluateEngineeringProblem(
+C:\dev\projects\mechivra\src\domain\assessment\index.ts:126: evaluateEngineeringProblem,
+
+============================================================
+SEARCH: useAssessmentSession
+============================================================
+C:\dev\projects\mechivra\src\features\learning\prediction-activity.tsx:28: useAssessmentSession,
+C:\dev\projects\mechivra\src\features\learning\prediction-activity.tsx:96: useAssessmentSession<
+C:\dev\projects\mechivra\src\features\learning\assessment\index.ts:2: useAssessmentSession,
+C:\dev\projects\mechivra\src\features\learning\assessment\use-assessment-session.test.tsx:18: import { useAssessmentSession } from "@/features/learning/assessment/use-assessment-session";
+C:\dev\projects\mechivra\src\features\learning\assessment\use-assessment-session.test.tsx:61: "useAssessmentSession",
+C:\dev\projects\mechivra\src\features\learning\assessment\use-assessment-session.test.tsx:71: useAssessmentSession<TestResponse>(
+C:\dev\projects\mechivra\src\features\learning\assessment\use-assessment-session.test.tsx:130: useAssessmentSession<TestResponse>(
+C:\dev\projects\mechivra\src\features\learning\assessment\use-assessment-session.test.tsx:204: useAssessmentSession<TestResponse>(
+C:\dev\projects\mechivra\src\features\learning\assessment\use-assessment-session.test.tsx:285: useAssessmentSession<TestResponse>(
+C:\dev\projects\mechivra\src\features\learning\assessment\use-assessment-session.test.tsx:374: useAssessmentSession<TestResponse>(
+C:\dev\projects\mechivra\src\features\learning\assessment\use-assessment-session.test.tsx:442: useAssessmentSession<TestResponse>(
+C:\dev\projects\mechivra\src\features\learning\assessment\use-assessment-session.test.tsx:498: useAssessmentSession<TestResponse>(
+C:\dev\projects\mechivra\src\features\learning\assessment\use-assessment-session.ts:94: export function useAssessmentSession<TResponse>(
+C:\dev\projects\mechivra\src\features\learning\bending\bending-problem-activity.tsx:30: useAssessmentSession,
+C:\dev\projects\mechivra\src\features\learning\bending\bending-problem-activity.tsx:246: useAssessmentSession<
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-activity.tsx:31: useAssessmentSession,
+C:\dev\projects\mechivra\src\features\learning\otto\otto-problem-activity.tsx:260: useAssessmentSession<
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-activity.tsx:29: useAssessmentSession,
+C:\dev\projects\mechivra\src\features\learning\problems\beam-statics-problem-activity.tsx:180: useAssessmentSession<
+
+============================================================
+SEARCH: replaceLatestAssessmentAttempt
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\attempt-history.test.ts:18: replaceLatestAssessmentAttempt,
+C:\dev\projects\mechivra\src\domain\assessment\attempt-history.test.ts:151: replaceLatestAssessmentAttempt(
+C:\dev\projects\mechivra\src\domain\assessment\attempt-history.test.ts:193: replaceLatestAssessmentAttempt(
+C:\dev\projects\mechivra\src\domain\assessment\attempt-history.ts:177: export function replaceLatestAssessmentAttempt<TResponse>(
+C:\dev\projects\mechivra\src\domain\assessment\index.ts:43: replaceLatestAssessmentAttempt,
+C:\dev\projects\mechivra\src\features\learning\assessment\use-assessment-session.ts:15: replaceLatestAssessmentAttempt,
+C:\dev\projects\mechivra\src\features\learning\assessment\use-assessment-session.ts:193: replaceLatestAssessmentAttempt(
+C:\dev\projects\mechivra\src\features\learning\assessment\use-assessment-session.ts:209: return replaceLatestAssessmentAttempt(
+
+============================================================
+ASSESSMENT DIRECTORY
+============================================================
+C:\dev\projects\mechivra\src\domain\assessment\architecture.test.ts
+C:\dev\projects\mechivra\src\domain\assessment\attempt-history-summary.test.ts
+C:\dev\projects\mechivra\src\domain\assessment\attempt-history-summary.ts
+C:\dev\projects\mechivra\src\domain\assessment\attempt-history.test.ts
+C:\dev\projects\mechivra\src\domain\assessment\attempt-history.ts
+C:\dev\projects\mechivra\src\domain\assessment\attempt.test.ts
+C:\dev\projects\mechivra\src\domain\assessment\attempt.ts
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.test.ts
+C:\dev\projects\mechivra\src\domain\assessment\bending-problem.ts
+C:\dev\projects\mechivra\src\domain\assessment\choice-attempt.integration.test.ts
+C:\dev\projects\mechivra\src\domain\assessment\choice-evaluation.test.ts
+C:\dev\projects\mechivra\src\domain\assessment\choice-evaluation.ts
+C:\dev\projects\mechivra\src\domain\assessment\completion.test.ts
+C:\dev\projects\mechivra\src\domain\assessment\completion.ts
+C:\dev\projects\mechivra\src\domain\assessment\criterion.test.ts
+C:\dev\projects\mechivra\src\domain\assessment\criterion.ts
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-attempt.integration.test.ts
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.test.ts
+C:\dev\projects\mechivra\src\domain\assessment\engineering-problem-evaluation.ts
+C:\dev\projects\mechivra\src\domain\assessment\feedback.test.ts
+C:\dev\projects\mechivra\src\domain\assessment\feedback.ts
+C:\dev\projects\mechivra\src\domain\assessment\index.ts
+C:\dev\projects\mechivra\src\domain\assessment\numeric-evaluation.test.ts
+C:\dev\projects\mechivra\src\domain\assessment\numeric-evaluation.ts
+C:\dev\projects\mechivra\src\domain\assessment\numeric-input.test.ts
+C:\dev\projects\mechivra\src\domain\assessment\numeric-input.ts
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.test.ts
+C:\dev\projects\mechivra\src\domain\assessment\numeric-problem.ts
+C:\dev\projects\mechivra\src\domain\assessment\numeric-tolerance.test.ts
+C:\dev\projects\mechivra\src\domain\assessment\numeric-tolerance.ts
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.test.ts
+C:\dev\projects\mechivra\src\domain\assessment\otto-problem.ts
+C:\dev\projects\mechivra\src\domain\assessment\prediction-evaluation.test.ts
+C:\dev\projects\mechivra\src\domain\assessment\prediction-evaluation.ts
+C:\dev\projects\mechivra\src\domain\assessment\result.test.ts
+C:\dev\projects\mechivra\src\domain\assessment\result.ts
+C:\dev\projects\mechivra\src\domain\assessment\revision.test.ts
+C:\dev\projects\mechivra\src\domain\assessment\revision.ts
+C:\dev\projects\mechivra\src\domain\assessment\types.ts
+
+============================================================
+LEARNING ASSESSMENT DIRECTORY
+============================================================
+C:\dev\projects\mechivra\src\features\learning\assessment\assessment-attempt-summary.test.tsx
+C:\dev\projects\mechivra\src\features\learning\assessment\assessment-attempt-summary.tsx
+C:\dev\projects\mechivra\src\features\learning\assessment\assessment-feedback-panel.test.tsx
+C:\dev\projects\mechivra\src\features\learning\assessment\assessment-feedback-panel.tsx
+C:\dev\projects\mechivra\src\features\learning\assessment\assessment-migration-regression.test.tsx
+C:\dev\projects\mechivra\src\features\learning\assessment\index.ts
+C:\dev\projects\mechivra\src\features\learning\assessment\use-assessment-session.test.tsx
+C:\dev\projects\mechivra\src\features\learning\assessment\use-assessment-session.ts

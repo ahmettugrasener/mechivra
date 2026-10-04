@@ -20,6 +20,8 @@
     "verify:full": "pnpm verify && pnpm test:e2e"
   },
   "dependencies": {
+    "dexie": "^4.4.6",
+    "katex": "^0.19.0",
     "next": "16.3.8",
     "next-intl": "^4.14.8",
     "react": "19.2.8",
@@ -32,12 +34,14 @@
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",
+    "@types/katex": "^0.16.8",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitest/coverage-v8": "^5.0.3",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
+    "fake-indexeddb": "^6.2.5",
     "jsdom": "^30.1.1",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
